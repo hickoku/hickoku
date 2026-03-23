@@ -6,21 +6,24 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Header } from "../components/Header";
 
+interface ProductVariant {
+  id: string;
+  sku: string;
+  size: string;
+  price: number;
+  stock: number;
+  inventoryStatus: string;
+}
+
 interface Product {
-  productId: string;
+  id: string; // Changed from productId to id to match API
   name: string;
   description: string;
   highlight: string;
   category: string;
   badge: string | null;
   images: string[];
-  variant: {
-    sku: string;
-    size: string;
-    price: number;
-    stockQuantity: number;
-    stockStatus: string;
-  };
+  variants: ProductVariant[]; // Changed to array
 }
 
 // Color schemes for products (based on category and index)
@@ -71,21 +74,6 @@ export default function CollectionPage() {
                   <span className="text-sm">Back</span>
                 </motion.button>
               </Link>
-              {/* <div className="flex gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-full text-sm hover:border-gray-900 transition-colors"
-                >
-                  <span>Filters</span>
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-full text-sm hover:border-gray-900 transition-colors"
-                >
-                  <SlidersHorizontal className="w-4 h-4" />
-                  <span>Sort By</span>
-                </motion.button>
-              </div> */}
             </div>
 
             <div className="flex items-start justify-between">
@@ -131,22 +119,26 @@ export default function CollectionPage() {
             >
               {products.map((product, index) => {
                 const colorScheme = colorSchemes[index % colorSchemes.length];
-                const priceInRupees = (product.variant.price / 100).toFixed(0);
+                const variant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
+                const originalPrice = variant ? variant.price : 0;
+                const discountedPrice = Math.round(originalPrice * 0.5);
+                const priceInRupees = variant ? discountedPrice.toFixed(0) : "N/A";
+                const originalPriceStr = variant ? originalPrice.toFixed(0) : "N/A";
 
                 return (
-                  <Link key={product.productId} href={`/product/${product.productId}`}>
+                  <Link key={product.id} href={`/product/${product.id}`}>
                     <motion.div
                       variants={{
                         hidden: { opacity: 0, y: 30 },
                         visible: { opacity: 1, y: 0 },
                       }}
                       whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                      className="group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer"
+                      className="group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer h-full flex flex-col"
                     >
-                      {/* Split layout: Image on left, Color on right */}
-                      <div className="flex h-72">
-                        {/* Left - Background Image */}
-                        <div className="w-1/2 relative overflow-hidden">
+                      {/* Flex layout: Column on mobile, keeping image on top/left */}
+                      <div className="flex flex-col h-full"> 
+                        {/* Image Section */}
+                        <div className="w-full h-64 sm:h-72 relative overflow-hidden">
                           <motion.img
                             src={product.images[0]}
                             alt={product.name}
@@ -155,19 +147,28 @@ export default function CollectionPage() {
                             transition={{ duration: 0.6 }}
                           />
                           <div className="absolute inset-0 bg-black/20" />
+                          
+                          {/* Price Tag Overlay for mobile/desktop unified look or keep separate? 
+                              Let's keep the split style but vertical on mobile. 
+                              Actually, user wants "alignment" fixed. 
+                              The previous design was side-by-side. 
+                              Let's try a standard card layout: Image top, Details bottom.
+                              But the design system seems to rely on the "Color on right" background.
+                              Let's adapt: Image top, Colored Details bottom.
+                          */}
                         </div>
 
-                        {/* Right - Solid Color with Text */}
+                        {/* Details Section */}
                         <div
-                          className="w-1/2 p-6 flex flex-col justify-between"
+                          className="w-full p-4 sm:p-6 flex flex-col justify-between flex-grow"
                           style={{ backgroundColor: colorScheme.bgColor }}
                         >
-                          <div className="space-y-2">
+                          <div className="space-y-2 text-center sm:text-left">
                             <motion.h3
                               initial={{ opacity: 0, y: -10 }}
                               whileInView={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.4 }}
-                              className="text-2xl tracking-wide"
+                              className="text-xl sm:text-2xl tracking-wide font-medium"
                               style={{ color: colorScheme.textColor }}
                             >
                               {product.name}
@@ -177,22 +178,37 @@ export default function CollectionPage() {
                               initial={{ opacity: 0, y: 20 }}
                               whileInView={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.5, delay: 0.1 }}
-                              className="text-base font-semibold line-clamp-4 leading-relaxed italic"
+                              className="text-sm sm:text-base font-medium line-clamp-3 leading-relaxed italic opacity-90"
                               style={{ color: colorScheme.textColor }}
                             >
                               {product.highlight}
                             </motion.p>
                           </div>
 
-                          <motion.p
+                          <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.15 }}
-                            className="text-2xl font-bold whitespace-nowrap"
-                            style={{ color: colorScheme.textColor }}
+                            className="mt-4 flex justify-center sm:justify-between items-center"
                           >
-                            Rs. {priceInRupees}
-                          </motion.p>
+                             <div className="flex flex-col items-center sm:items-start">
+                               <div className="flex items-center gap-2">
+                                 <p className="text-lg sm:text-xl font-bold whitespace-nowrap text-red-600">
+                                    Rs. {priceInRupees}
+                                 </p>
+                                 <p className="text-sm line-through opacity-70" style={{ color: colorScheme.textColor }}>
+                                    Rs. {originalPriceStr}
+                                 </p>
+                               </div>
+                               <span className="text-xs font-bold mt-1 text-red-600 bg-red-50 px-2 py-0.5 rounded">50% OFF</span>
+                             </div>
+                             <span 
+                                className="hidden sm:inline-block text-xs uppercase tracking-widest border border-current px-3 py-1 rounded-full"
+                                style={{ color: colorScheme.textColor, opacity: 0.8 }}
+                             >
+                                Shop Now
+                             </span>
+                          </motion.div>
                         </div>
                       </div>
                     </motion.div>

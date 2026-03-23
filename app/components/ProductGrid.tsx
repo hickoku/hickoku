@@ -9,7 +9,7 @@ import { useProducts } from "../context/ProductContext";
 
 export function ProductGrid() {
   const { products } = useProducts();
-
+  console.log("products", products);
   // if (isLoading) return <p>Loading products...</p>;
   // if (error) return <p>Error: {error}</p>;
 

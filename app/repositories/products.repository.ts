@@ -25,6 +25,8 @@ export interface ProductVariant {
     inventoryStatus: string;
     weight?: number;
     isAvailable?: boolean;
+    shortDesc?: string;
+    desc?: string;
 }
 
 export interface Product {
@@ -70,7 +72,9 @@ export async function getAllProductsWithVariants(category?: string): Promise<Pro
                 stock: v.stock,
                 inventoryStatus: v.inventoryStatus,
                 weight: v.weight,
-                isAvailable: v.stock > 0 // Simple logic
+                isAvailable: v.stock > 0, // Simple logic
+                shortDesc: v.shortDesc,
+                desc: v.desc
             };
             if (!variantsMap.has(v.productId)) {
                 variantsMap.set(v.productId, []);
@@ -149,7 +153,9 @@ export async function getProductWithVariant(productId: string): Promise<Product 
             stock: v.stock,
             inventoryStatus: v.inventoryStatus,
             weight: v.weight,
-            isAvailable: v.stock > 0
+            isAvailable: v.stock > 0,
+            shortDesc: v.shortDesc,
+            desc: v.desc
         }));
 
         return {

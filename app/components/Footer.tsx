@@ -10,7 +10,7 @@ export function Footer() {
   return (
     <footer className="bg-gray-50 border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Brand */}
           <div className="sm:col-span-2 lg:col-span-1">
             <h3 className="text-2xl mb-4 tracking-wider">
@@ -45,7 +45,7 @@ export function Footer() {
           </div>
 
           {/* Shop */}
-          <div>
+          {/* <div>
             <h4 className="mb-4 tracking-wider uppercase text-sm">
               {t("footer.shop")}
             </h4>
@@ -83,7 +83,7 @@ export function Footer() {
                 </a>
               </li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Support */}
           <div>
@@ -93,7 +93,7 @@ export function Footer() {
             <ul className="space-y-2">
               <li>
                 <a
-                  href="#"
+                  href="/contact-us"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   {t("footer.contactUs")}
@@ -134,23 +134,23 @@ export function Footer() {
             <ul className="space-y-2">
               <li>
                 <a
-                  href="#"
+                  href="/about-us"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   About Us
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a
                   href="#"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   Careers
                 </a>
-              </li>
+              </li> */}
               <li>
                 <a
-                  href="#"
+                  href="/privacy-policy"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   {t("footer.privacy")}
@@ -158,7 +158,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/privacy-policy"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   {t("footer.terms")}
@@ -179,7 +179,7 @@ export function Footer() {
               onSubmit={(e) => {
                 e.preventDefault();
                 const formData = new FormData(e.currentTarget);
-                const orderId = formData.get('orderId') as string;
+                const orderId = formData.get("orderId") as string;
                 if (orderId.trim()) {
                   window.location.href = `/order-tracking/${orderId.trim()}`;
                 }
@@ -211,7 +211,10 @@ export function Footer() {
             © 2024 HK Perfumes. All rights reserved.
           </p>
           <div className="flex gap-6 mt-4 sm:mt-0">
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+            <a
+              href="/privacy-policy"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
               {t("footer.privacy")}
             </a>
             <a href="#" className="text-sm text-gray-600 hover:text-gray-900">

@@ -42,7 +42,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
         const response = await fetch("/api/products-enhanced"); // Fetch from new API
         if (!response.ok) throw new Error("Failed to fetch");
         const data: any[] = await response.json();
-        
+        console.log("Fetched products from API:", data);
         // Map Enhanced Product to Simple Product for Context
         const mappedProducts: Product[] = data.map((p) => ({
           id: p.id,
@@ -53,9 +53,9 @@ export function ProductProvider({ children }: { children: ReactNode }) {
           price: String(p.basePrice || p.variants?.[0]?.price || 0),
           image: p.images?.[0] || "",
           badge: p.badge,
-          defaultVariantId: p.variants?.[0]?.id || `${p.id}01`
+          defaultVariantId: p.variants?.[0]?.id || `${p.id}01`,
         }));
-        
+
         setProducts(mappedProducts);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");

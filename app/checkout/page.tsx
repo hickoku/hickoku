@@ -71,7 +71,10 @@ function CartSummary({ defaultExpanded = true }: { defaultExpanded?: boolean }) 
                   <p className="text-sm font-semibold text-gray-900 truncate">
                     {item.productName}
                   </p>
-                  <p className="text-xs text-gray-600 mt-1">₹{(item.price / 100).toFixed(2)}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-sm font-semibold text-red-600">₹{(item.price / 100).toFixed(2)}</p>
+                    <p className="text-xs text-gray-400 line-through">₹{((item.price * 2) / 100).toFixed(2)}</p>
+                  </div>
 
                   {/* Quantity Controls */}
                   <div className="flex items-center gap-2 mt-2 w-fit bg-white rounded border border-gray-300">

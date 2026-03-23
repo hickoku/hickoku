@@ -30,6 +30,8 @@ interface Product {
     price: number;
     stock: number;
     inventoryStatus: string;
+    shortDesc?: string;
+    desc?: string;
   }[];
 }
 
@@ -186,19 +188,28 @@ export default function ProductDetailPage() {
             >
               {loading && <p className="text-gray-600">Loading...</p>}
               {error && <p className="text-red-600">Error: {error}</p>}
-              
               {product && (
                 <>
                   {/* Title & Price */}
                   <div>
                     <h1 className="text-3xl mb-2">{product.name}</h1>
-                    <p className="text-sm text-gray-600 mb-2">{product.highlight}</p>
-                    <p className="text-2xl text-gray-900">
-                      Rs. {(product.variants[0].price / 100).toFixed(0)}
+                    <p className="text-sm text-gray-600 mb-2 whitespace-pre-line">
+                      {product.variants[0].shortDesc || product.highlight}
                     </p>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <div className="flex items-center gap-3">
+                      <p className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-orange-600">
+                        ₹ {Math.round(product.variants[0].price * 0.5)}
+                      </p>
+                      <p className="text-xl text-gray-400 line-through">
+                        ₹ {product.variants[0].price}
+                      </p>
+                      <span className="px-3 py-1 text-sm font-bold text-red-600 bg-red-100 rounded-full shadow-sm">
+                        50% OFF
+                      </span>
+                    </div>
+                    {/* <p className="text-sm text-gray-500 mt-1">
                       Size: {product.variants[0].size}
-                    </p>
+                    </p> */}
                   </div>
 
               {/* Size Selection */}
@@ -216,7 +227,7 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Stock Status */}
-              <div>
+              {/* <div>
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${
                     product.variants[0].inventoryStatus === 'IN_STOCK' ? 'bg-green-500' : 'bg-red-500'
@@ -228,15 +239,23 @@ export default function ProductDetailPage() {
                     }
                   </p>
                 </div>
-              </div>
+              </div> */}
 
               {/* Product Info */}
               <div className="space-y-2 text-sm text-gray-600">
-                <p>Tax Included</p>
                 <p>100% Authentic Products</p>
                 <p>Free Delivery or 7 to 8 Days</p>
-                <p>Earn reward points on every purchase</p>
               </div>
+
+              {/* Variant Description */}
+              {product.variants[0].desc && (
+                <div className="pt-4 pb-2">
+                  <h3 className="text-sm font-semibold mb-2">Description</h3>
+                  <div className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">
+                    {product.variants[0].desc}
+                  </div>
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="space-y-3">
@@ -251,19 +270,20 @@ export default function ProductDetailPage() {
                     }
 
                     try {
+                      const discountedPrice = Math.round(variant.price * 0.5);
                       await addToCart({
                         sku: variant.sku,
                         productId: product.id,
                         variantId: variant.id, 
                         productName: product.name,
                         size: variant.size,
-                        price: variant.price,
+                        price: discountedPrice,
                         quantity: 1,
                         image: product.images[0],
                       });
 
                       toast.success("Added to cart!", {
-                        description: `${variant.size} - Rs. ${(variant.price / 100).toFixed(0)}`,
+                        description: `${variant.size} - ₹ ${(discountedPrice / 100).toFixed(0)}`,
                       });
                     } catch (error: any) {
                       toast.error(error.message || 'Failed to add to cart');
@@ -278,10 +298,20 @@ export default function ProductDetailPage() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => {
+                    const phoneNumber = "9028765715"; // Adjust the WhatsApp number as needed
+                    let imageUrl = product.images?.[0] || productImages[0];
+                    if (imageUrl && imageUrl.startsWith('/')) {
+                      imageUrl = `${window.location.origin}${imageUrl}`;
+                    }
+                    const discountedPrice = Math.round(product.variants[0].price * 0.5);
+                    const message = `Hi, I'm interested in the following product:\n\n*${product.name}*\nPrice: ₹ ${discountedPrice} (50% OFF)\nSize: ${product.variants[0].size}\n\nImage: ${imageUrl}\nLink: ${window.location.href}`;
+                    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                    
                     toast.success("Opening WhatsApp...", {
-                      description:
-                        "Connect with us for personalized assistance",
+                      description: "Redirecting to WhatsApp with product details",
                     });
+                    
+                    window.open(whatsappUrl, '_blank');
                   }}
                   className="w-full py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                 >
@@ -291,7 +321,7 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Tabs */}
-              <div className="pt-6">
+              {/* <div className="pt-6">
                 <div className="flex gap-8 border-b border-gray-200 mb-6">
                   {["DESCRIPTION", "DELIVERY & RETURNS", "CONTACTS"].map(
                     (tab) => (
@@ -379,7 +409,7 @@ export default function ProductDetailPage() {
                     </motion.div>
                   )}
                 </div>
-              </div>
+              </div> */}
                 </>
               )}
             </motion.div>

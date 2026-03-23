@@ -111,9 +111,15 @@ export function CartDrawer() {
                         <p className="text-xs text-gray-500 mt-1">
                           {t("cart.sku")}: {item.sku}
                         </p>
-                        <p className="text-lg font-bold text-gray-900 mt-1">
-                          ₹{(item.price / 100).toFixed(2)}
-                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-lg font-bold text-red-600">
+                            ₹{(item.price / 100).toFixed(2)}
+                          </p>
+                          <p className="text-sm text-gray-400 line-through">
+                            ₹{((item.price * 2) / 100).toFixed(2)}
+                          </p>
+                          <span className="text-xs font-bold text-red-600">50% OFF</span>
+                        </div>
                       </div>
 
                       {/* Quantity Controls */}
@@ -170,9 +176,14 @@ export function CartDrawer() {
                   <span className="text-lg font-semibold text-gray-900">
                     {t("cart.total")}:
                   </span>
-                  <span className="text-2xl font-bold text-gray-900">
-                    ₹{(getTotalPrice() / 100).toFixed(2)}
-                  </span>
+                  <div className="flex flex-col items-end">
+                    <span className="text-2xl font-bold text-red-600">
+                      ₹{(getTotalPrice() / 100).toFixed(2)}
+                    </span>
+                    <span className="text-sm text-gray-400 line-through">
+                      ₹{((getTotalPrice() * 2) / 100).toFixed(2)}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Checkout Button */}

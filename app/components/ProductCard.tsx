@@ -126,7 +126,7 @@ export function ProductCard({
                 productId: id,
                 variantId: defaultVariantId || `${id}01`,
                 productName: name,
-                price: Number(price.replace(/[^0-9.]/g, "")),
+                price: Math.round(Number(price.replace(/[^0-9.]/g, "")) * 0.5),
                 image,
                 sku: `HICK-${id}`,
                 size: "Standard",
@@ -146,7 +146,15 @@ export function ProductCard({
         <p className="text-sm text-gray-600 mb-4 line-clamp-2">{description}</p>
 
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <p className="text-2xl font-bold text-gray-900">₹{price}</p>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <p className="text-xl font-bold text-red-600">
+                ₹{Math.round(Number(price.replace(/[^0-9.]/g, "")) * 0.5)}
+              </p>
+              <p className="text-sm text-gray-400 line-through">₹{price}</p>
+            </div>
+            <span className="text-xs font-bold text-red-600 block mt-1">50% OFF</span>
+          </div>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
