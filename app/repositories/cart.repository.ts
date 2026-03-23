@@ -136,8 +136,8 @@ export async function addToCart(
             throw new Error('Maximum 10 items per product');
         }
 
-        // Use current product price (not the price from request)
-        const currentPrice = variant.price;
+        // Use current product price (not the price from request), applying the global 50% discount
+        const currentPrice = Math.round(variant.price * 0.5);
 
         const putCommand = new PutCommand({
             TableName: 'cart',

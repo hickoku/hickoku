@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { Heart, ShoppingBag, Eye } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "../hooks/useCart";
+import { formatPrice } from "../utils/currency";
 
 interface ProductCardProps {
   id: string; // Changed to string
@@ -149,9 +150,9 @@ export function ProductCard({
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <p className="text-xl font-bold text-red-600">
-                ₹{Math.round(Number(price.replace(/[^0-9.]/g, "")) * 0.5)}
+                ₹{formatPrice(Math.round(Number(price.replace(/[^0-9.]/g, "")) * 0.5))}
               </p>
-              <p className="text-sm text-gray-400 line-through">₹{price}</p>
+              <p className="text-sm text-gray-400 line-through">₹{formatPrice(price)}</p>
             </div>
             <span className="text-xs font-bold text-red-600 block mt-1">50% OFF</span>
           </div>

@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Header } from "../../components/Header";
 import { useCart } from "../../hooks/useCart";
+import { formatPrice } from "../../utils/currency";
 
 interface Product {
   id: string; // Changed from productId
@@ -198,10 +199,10 @@ export default function ProductDetailPage() {
                     </p>
                     <div className="flex items-center gap-3">
                       <p className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-orange-600">
-                        ₹ {Math.round(product.variants[0].price * 0.5)}
+                        ₹ {formatPrice(Math.round(product.variants[0].price * 0.5))}
                       </p>
                       <p className="text-xl text-gray-400 line-through">
-                        ₹ {product.variants[0].price}
+                        ₹ {formatPrice(product.variants[0].price)}
                       </p>
                       <span className="px-3 py-1 text-sm font-bold text-red-600 bg-red-100 rounded-full shadow-sm">
                         50% OFF
@@ -283,7 +284,7 @@ export default function ProductDetailPage() {
                       });
 
                       toast.success("Added to cart!", {
-                        description: `${variant.size} - ₹ ${(discountedPrice / 100).toFixed(0)}`,
+                        description: `${variant.size} - ₹ ${formatPrice(discountedPrice)}`,
                       });
                     } catch (error: any) {
                       toast.error(error.message || 'Failed to add to cart');
