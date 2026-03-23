@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { CheckCircle, Package, MapPin, Mail, Phone, Loader } from "lucide-react";
 import Link from "next/link";
 import { Order } from "@/lib/repositories/orderRepository";
+import { formatPrice } from "@/app/utils/currency";
 
 export default function OrderConfirmationPage() {
   const searchParams = useSearchParams();
@@ -153,7 +154,7 @@ export default function OrderConfirmationPage() {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-gray-900">
-                      ₹{(item.total / 100).toFixed(2)}
+                      ₹{formatPrice(item.total)}
                     </p>
                   </div>
                 </div>
@@ -196,19 +197,19 @@ export default function OrderConfirmationPage() {
             <div className="space-y-2">
               <div className="flex justify-between text-gray-600">
                 <span>Subtotal</span>
-                <span>₹{(order.subtotal / 100).toFixed(2)}</span>
+                <span>₹{formatPrice(order.subtotal)}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Tax (10%)</span>
-                <span>₹{(order.tax / 100).toFixed(2)}</span>
+                <span>₹{formatPrice(order.tax)}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Shipping</span>
-                <span>₹{(order.shippingCost / 100).toFixed(2)}</span>
+                <span>₹{formatPrice(order.shippingCost)}</span>
               </div>
               <div className="flex justify-between text-xl font-bold text-gray-900 pt-2 border-t border-gray-200">
                 <span>Total</span>
-                <span>₹{(order.total / 100).toFixed(2)}</span>
+                <span>₹{formatPrice(order.total)}</span>
               </div>
             </div>
           </div>

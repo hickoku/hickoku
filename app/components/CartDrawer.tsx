@@ -5,6 +5,7 @@ import { X, Plus, Minus, Trash2 } from "lucide-react";
 import { useCart } from "../hooks/useCart";
 import Link from "next/link";
 import { useLocale } from "../context/LocaleContext";
+import { formatPrice } from "../utils/currency";
 
 export function CartDrawer() {
   const {
@@ -113,10 +114,10 @@ export function CartDrawer() {
                         </p>
                         <div className="flex items-center gap-2 mt-1">
                           <p className="text-lg font-bold text-red-600">
-                            ₹{(item.price / 100).toFixed(2)}
+                            ₹{formatPrice(item.price)}
                           </p>
                           <p className="text-sm text-gray-400 line-through">
-                            ₹{((item.price * 2) / 100).toFixed(2)}
+                            ₹{formatPrice(item.price * 2)}
                           </p>
                           <span className="text-xs font-bold text-red-600">50% OFF</span>
                         </div>
@@ -178,10 +179,10 @@ export function CartDrawer() {
                   </span>
                   <div className="flex flex-col items-end">
                     <span className="text-2xl font-bold text-red-600">
-                      ₹{(getTotalPrice() / 100).toFixed(2)}
+                      ₹{formatPrice(getTotalPrice())}
                     </span>
                     <span className="text-sm text-gray-400 line-through">
-                      ₹{((getTotalPrice() * 2) / 100).toFixed(2)}
+                      ₹{formatPrice(getTotalPrice() * 2)}
                     </span>
                   </div>
                 </div>

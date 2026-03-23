@@ -7,6 +7,7 @@ import { CheckoutContext } from "../../context/CheckoutContext";
 import { useCart } from "../../hooks/useCart";
 import { CreditCard, Loader } from "lucide-react";
 import { toast } from "sonner";
+import { formatPrice, convertToPaiseForRazorpay, getDeliveryCharge } from "../../utils/currency";
 
 declare global {
   interface Window {
@@ -25,8 +26,8 @@ export function RazorpayPayment() {
   const { state, dispatch } = context;
 
   const subtotal = getTotalPrice();
-  const tax = Math.round(subtotal * 0.1); // 10% tax in paise
-  const shippingCost = state.shippingCost || 5000; // ₹50 in paise
+  const tax = Math.round(subtotal * 0.1); 
+  const shippingCost = state.shippingCost || getDeliveryCharge();
   const total = subtotal + tax + shippingCost;
 
   const handlePayment = async () => {
@@ -72,7 +73,7 @@ export function RazorpayPayment() {
       // Step 2: Open Razorpay checkout
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: total,
+        amount: convertToPaiseForRazorpay(total),
         currency: "INR",
         name: "Hickoku Perfumes",
         description: `Order ${orderData.orderNumber}`,
@@ -180,7 +181,7 @@ export function RazorpayPayment() {
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-600">Click to pay</p>
-            <p className="font-semibold">₹{(total / 100).toFixed(2)}</p>
+            <p className="font-semibold">₹{formatPrice(total)}</p>
           </div>
         </div>
       </motion.button>
@@ -218,7 +219,7 @@ export function RazorpayPayment() {
           ) : (
             <>
               <CreditCard className="w-4 h-4" />
-              Pay ₹{(total / 100).toFixed(2)}
+              Pay ₹{formatPrice(total)}
             </>
           )}
         </motion.button>

@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Header } from "../components/Header";
+import { formatPrice } from "../utils/currency";
 
 interface ProductVariant {
   id: string;
@@ -122,8 +123,8 @@ export default function CollectionPage() {
                 const variant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
                 const originalPrice = variant ? variant.price : 0;
                 const discountedPrice = Math.round(originalPrice * 0.5);
-                const priceInRupees = variant ? discountedPrice.toFixed(0) : "N/A";
-                const originalPriceStr = variant ? originalPrice.toFixed(0) : "N/A";
+                const priceInRupees = variant ? formatPrice(discountedPrice) : "N/A";
+                const originalPriceStr = variant ? formatPrice(originalPrice) : "N/A";
 
                 return (
                   <Link key={product.id} href={`/product/${product.id}`}>

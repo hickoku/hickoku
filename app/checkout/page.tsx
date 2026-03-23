@@ -8,6 +8,7 @@ import { CheckoutFlow } from "../components/checkout/CheckoutFlow";
 import { Header } from "../components/Header";
 import { useCart } from "../hooks/useCart";
 import { ShoppingBag, Trash2, Plus, Minus } from "lucide-react";
+import { formatPrice, getDeliveryCharge } from "../utils/currency";
 
 function CartSummary({ defaultExpanded = true }: { defaultExpanded?: boolean }) {
   const { items, getTotalPrice, removeFromCart, updateQuantity } = useCart();
@@ -15,9 +16,9 @@ function CartSummary({ defaultExpanded = true }: { defaultExpanded?: boolean }) 
 
   if (items.length === 0) return null;
 
-  const subtotal = getTotalPrice(); // in paise
-  const tax = Math.round(subtotal * 0.1); // 10% tax in paise
-  const deliveryCharge = 5000; // ₹50 in paise
+  const subtotal = getTotalPrice(); 
+  const tax = Math.round(subtotal * 0.1); // 10% tax
+  const deliveryCharge = getDeliveryCharge();
   const total = subtotal + tax + deliveryCharge;
 
   return (
@@ -72,8 +73,8 @@ function CartSummary({ defaultExpanded = true }: { defaultExpanded?: boolean }) 
                     {item.productName}
                   </p>
                   <div className="flex items-center gap-2 mt-1">
-                    <p className="text-sm font-semibold text-red-600">₹{(item.price / 100).toFixed(2)}</p>
-                    <p className="text-xs text-gray-400 line-through">₹{((item.price * 2) / 100).toFixed(2)}</p>
+                    <p className="text-sm font-semibold text-red-600">₹{formatPrice(item.price)}</p>
+                    <p className="text-xs text-gray-400 line-through">₹{formatPrice(item.price * 2)}</p>
                   </div>
 
                   {/* Quantity Controls */}
@@ -123,20 +124,20 @@ function CartSummary({ defaultExpanded = true }: { defaultExpanded?: boolean }) 
           <div className="space-y-2 pb-3 border-b border-gray-200">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Subtotal</span>
-              <span className="font-medium">₹{(subtotal / 100).toFixed(2)}</span>
+              <span className="font-medium">₹{formatPrice(subtotal)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Tax (10%)</span>
-              <span className="font-medium">₹{(tax / 100).toFixed(2)}</span>
+              <span className="font-medium">₹{formatPrice(tax)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Delivery Charges</span>
-              <span className="font-medium">₹{(deliveryCharge / 100).toFixed(2)}</span>
+              <span className="font-medium">₹{formatPrice(deliveryCharge)}</span>
             </div>
           </div>
           <div className="flex justify-between text-lg font-bold">
             <span>Total</span>
-            <span className="text-blue-600">₹{(total / 100).toFixed(2)}</span>
+            <span className="text-blue-600">₹{formatPrice(total)}</span>
           </div>
         </div>
 
