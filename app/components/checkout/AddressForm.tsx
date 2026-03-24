@@ -219,12 +219,12 @@ export function AddressForm() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-4 pt-6 border-t">
+        <div className="flex flex-col-reverse sm:flex-row gap-4 pt-6 border-t">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => window.history.back()}
-            className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            className="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-center"
           >
             Back
           </motion.button>
@@ -232,7 +232,7 @@ export function AddressForm() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleContinue}
-            className="ml-auto px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+            className="w-full sm:w-auto sm:ml-auto px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2"
           >
             Continue to Payment <ArrowRight className="w-4 h-4" />
           </motion.button>

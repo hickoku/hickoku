@@ -137,7 +137,7 @@ export async function addToCart(
         }
 
         // Use current product price (not the price from request), applying the global 50% discount
-        const currentPrice = Math.round(variant.price * 0.5);
+        const currentPrice = variant.price * 0.5;
 
         const putCommand = new PutCommand({
             TableName: 'cart',

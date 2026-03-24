@@ -122,7 +122,7 @@ export default function CollectionPage() {
                 const colorScheme = colorSchemes[index % colorSchemes.length];
                 const variant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
                 const originalPrice = variant ? variant.price : 0;
-                const discountedPrice = Math.round(originalPrice * 0.5);
+                const discountedPrice = originalPrice * 0.5;
                 const priceInRupees = variant ? formatPrice(discountedPrice) : "N/A";
                 const originalPriceStr = variant ? formatPrice(originalPrice) : "N/A";
 
