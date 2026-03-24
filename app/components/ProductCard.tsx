@@ -127,7 +127,7 @@ export function ProductCard({
                 productId: id,
                 variantId: defaultVariantId || `${id}01`,
                 productName: name,
-                price: Math.round(Number(price.replace(/[^0-9.]/g, "")) * 0.5),
+                price: Number(price.replace(/[^0-9.]/g, "")) * 0.5,
                 image,
                 sku: `HICK-${id}`,
                 size: "Standard",
@@ -150,7 +150,7 @@ export function ProductCard({
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <p className="text-xl font-bold text-red-600">
-                ₹{formatPrice(Math.round(Number(price.replace(/[^0-9.]/g, "")) * 0.5))}
+                ₹{formatPrice(Number(price.replace(/[^0-9.]/g, "")) * 0.5)}
               </p>
               <p className="text-sm text-gray-400 line-through">₹{formatPrice(price)}</p>
             </div>

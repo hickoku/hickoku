@@ -199,7 +199,7 @@ export default function ProductDetailPage() {
                     </p>
                     <div className="flex items-center gap-3">
                       <p className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-orange-600">
-                        ₹ {formatPrice(Math.round(product.variants[0].price * 0.5))}
+                        ₹ {formatPrice(product.variants[0].price * 0.5)}
                       </p>
                       <p className="text-xl text-gray-400 line-through">
                         ₹ {formatPrice(product.variants[0].price)}
@@ -271,7 +271,7 @@ export default function ProductDetailPage() {
                     }
 
                     try {
-                      const discountedPrice = Math.round(variant.price * 0.5);
+                      const discountedPrice = variant.price * 0.5;
                       await addToCart({
                         sku: variant.sku,
                         productId: product.id,
@@ -304,7 +304,7 @@ export default function ProductDetailPage() {
                     if (imageUrl && imageUrl.startsWith('/')) {
                       imageUrl = `${window.location.origin}${imageUrl}`;
                     }
-                    const discountedPrice = Math.round(product.variants[0].price * 0.5);
+                    const discountedPrice = product.variants[0].price * 0.5;
                     const message = `Hi, I'm interested in the following product:\n\n*${product.name}*\nPrice: ₹ ${discountedPrice} (50% OFF)\nSize: ${product.variants[0].size}\n\nImage: ${imageUrl}\nLink: ${window.location.href}`;
                     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
                     

@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { X, Plus, Minus, Trash2 } from "lucide-react";
 import { useCart } from "../hooks/useCart";
 import Link from "next/link";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useLocale } from "../context/LocaleContext";
 import { formatPrice } from "../utils/currency";
 
@@ -18,6 +20,22 @@ export function CartDrawer() {
     stockWarnings,
   } = useCart();
   const { t } = useLocale();
+  const router = useRouter();
+
+  // Explicit device background locking for Safari resolving phantom click re-rendering
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+    } else {
+      document.body.style.overflow = "unset";
+      document.body.style.touchAction = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+      document.body.style.touchAction = "auto";
+    };
+  }, [isOpen]);
 
   return (
     <AnimatePresence>
@@ -188,16 +206,17 @@ export function CartDrawer() {
                 </div>
 
                 {/* Checkout Button */}
-                <Link href="/checkout">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={closeCart}
-                    className="w-full py-3 bg-gray-900 text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors"
-                  >
-                    {t("cart.checkout")}
-                  </motion.button>
-                </Link>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    closeCart();
+                    router.push("/checkout");
+                  }}
+                  className="w-full py-3 bg-gray-900 text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+                >
+                  {t("cart.checkout")}
+                </motion.button>
 
                 <motion.button
                   whileHover={{ scale: 1.02 }}
