@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocale } from "../context/LocaleContext";
 
 const getHeroSlides = (t: any) => [
@@ -31,6 +31,13 @@ export function HeroSection() {
   const { t } = useLocale();
   const heroSlides = getHeroSlides(t);
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [heroSlides.length]);
+
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
   };
@@ -51,7 +58,7 @@ export function HeroSection() {
           initial={{ opacity: 0, scale: 1.1 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ duration: 0.7 }}
+          transition={{ duration: 0.6 }}
           className={`absolute inset-0 ${slide.bgColor}`}
         >
           <div className="absolute inset-0">

@@ -99,14 +99,14 @@ export function Footer() {
                   {t("footer.contactUs")}
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a
                   href="#"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   {t("footer.shippingInfo")}
                 </a>
-              </li>
+              </li> 
               <li>
                 <a
                   href="#"
@@ -114,7 +114,7 @@ export function Footer() {
                 >
                   {t("footer.returns")}
                 </a>
-              </li>
+              </li> 
               <li>
                 <a
                   href="#"
@@ -122,7 +122,7 @@ export function Footer() {
                 >
                   {t("footer.faq")}
                 </a>
-              </li>
+              </li>*/}
             </ul>
           </div>
 

@@ -77,14 +77,14 @@ export default function CollectionPage() {
               </Link>
             </div>
 
-            <div className="flex items-start justify-between">
+            <div className="flex items-center justify-center">
               <div>
                 <motion.h1
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="text-4xl mb-2"
                 >
-                  COLLECTION
+                  COLLECTIONS
                 </motion.h1>
               </div>
             </div>
@@ -160,17 +160,13 @@ export default function CollectionPage() {
                         </div>
 
                         {/* Details Section */}
-                        <div
-                          className="w-full p-4 sm:p-6 flex flex-col justify-between flex-grow"
-                          style={{ backgroundColor: colorScheme.bgColor }}
-                        >
-                          <div className="space-y-2 text-center sm:text-left">
+                        <div className="w-full p-4 sm:p-6 flex flex-col justify-between flex-grow bg-white">
+                          <div className="space-y-2 text-center">
                             <motion.h3
                               initial={{ opacity: 0, y: -10 }}
                               whileInView={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.4 }}
-                              className="text-xl sm:text-2xl tracking-wide font-medium"
-                              style={{ color: colorScheme.textColor }}
+                              className="text-xl sm:text-2xl tracking-wide font-medium text-gray-900"
                             >
                               {product.name}
                             </motion.h3>
@@ -179,8 +175,7 @@ export default function CollectionPage() {
                               initial={{ opacity: 0, y: 20 }}
                               whileInView={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.5, delay: 0.1 }}
-                              className="text-sm sm:text-base font-medium line-clamp-3 leading-relaxed italic opacity-90"
-                              style={{ color: colorScheme.textColor }}
+                              className="text-sm sm:text-base font-medium line-clamp-3 leading-relaxed italic text-gray-600"
                             >
                               {product.highlight}
                             </motion.p>
@@ -190,23 +185,20 @@ export default function CollectionPage() {
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.15 }}
-                            className="mt-4 flex justify-center sm:justify-between items-center"
+                            className="mt-6 flex flex-col items-center gap-4"
                           >
-                             <div className="flex flex-col items-center sm:items-start">
-                               <div className="flex items-center gap-2">
-                                 <p className="text-lg sm:text-xl font-bold whitespace-nowrap text-red-600">
-                                    Rs. {priceInRupees}
-                                 </p>
-                                 <p className="text-sm line-through opacity-70" style={{ color: colorScheme.textColor }}>
+                             <div className="flex flex-col items-center gap-1">
+                               <div className="flex items-center justify-center gap-2">
+                                 <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">50% OFF</span>
+                                 <p className="text-sm text-gray-400 line-through">
                                     Rs. {originalPriceStr}
                                  </p>
                                </div>
-                               <span className="text-xs font-bold mt-1 text-red-600 bg-red-50 px-2 py-0.5 rounded">50% OFF</span>
+                               <p className="text-lg sm:text-xl font-bold text-red-600">
+                                  Rs. {priceInRupees}
+                               </p>
                              </div>
-                             <span 
-                                className="hidden sm:inline-block text-xs uppercase tracking-widest border border-current px-3 py-1 rounded-full"
-                                style={{ color: colorScheme.textColor, opacity: 0.8 }}
-                             >
+                             <span className="inline-block text-xs font-bold uppercase tracking-widest border-2 border-gray-900 text-gray-900 px-8 py-2.5 rounded-full hover:bg-gray-900 hover:text-white transition-colors w-full text-center sm:w-auto mt-2">
                                 Shop Now
                              </span>
                           </motion.div>

@@ -67,7 +67,7 @@ export function ProductCard({
         )}
 
         {/* Category Badge */}
-        <div className="absolute top-4 right-4 z-10">
+        {/* <div className="absolute top-4 right-4 z-10">
           <motion.span
             initial={{ opacity: 0, x: 10 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -79,7 +79,7 @@ export function ProductCard({
           >
             {category}
           </motion.span>
-        </div>
+        </div> */}
 
         {/* Highlight - Overlay on Image */}
         <motion.div
@@ -95,7 +95,7 @@ export function ProductCard({
         </motion.div>
 
         {/* Hover Actions */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: isHovered ? 1 : 0 }}
           className="absolute inset-0 bg-black/10 flex items-center justify-center gap-3 z-20"
@@ -138,7 +138,7 @@ export function ProductCard({
           >
             <ShoppingBag className="w-5 h-5" />
           </motion.button>
-        </motion.div>
+        </motion.div> */}
       </div>
 
       {/* Product Info */}
@@ -147,19 +147,19 @@ export function ProductCard({
         <p className="text-sm text-gray-600 mb-4 line-clamp-2">{description}</p>
 
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <div className="flex flex-col">
+          <div className="flex flex-col items-start gap-1">
             <div className="flex items-center gap-2">
-              <p className="text-xl font-bold text-red-600">
-                ₹{formatPrice(Number(price.replace(/[^0-9.]/g, "")) * 0.5)}
-              </p>
+              <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">50% OFF</span>
               <p className="text-sm text-gray-400 line-through">₹{formatPrice(price)}</p>
             </div>
-            <span className="text-xs font-bold text-red-600 block mt-1">50% OFF</span>
+            <p className="text-xl font-bold text-red-600">
+              ₹{formatPrice(Number(price.replace(/[^0-9.]/g, "")) * 0.5)}
+            </p>
           </div>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-gray-800 transition-colors"
+            className="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-gray-800 transition-colors cursor-pointer"
           >
             Add to Cart
           </motion.button>

@@ -26,13 +26,13 @@ export function Header() {
           <div className="flex items-center justify-between h-full">
             {/* Left - Menu */}
             <div className="flex items-center gap-2 sm:gap-6 flex-1">
-              <button 
+              {/* <button 
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="lg:hidden p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <Menu className="w-5 h-5" />
-              </button>
-              <nav className="hidden lg:flex items-center gap-8">
+              </button> */}
+              {/* <nav className="hidden lg:flex items-center gap-8">
                 <Link
                   href="/"
                   className="text-sm font-medium hover:text-gray-600 transition-colors"
@@ -57,14 +57,14 @@ export function Header() {
                 >
                   {t("navigation.collections")}
                 </Link>
-              </nav>
+              </nav> */}
             </div>
 
             {/* Center - Logo */}
             <Link href="/" className="flex-shrink-0 absolute left-1/2 transform -translate-x-1/2">
               <motion.div
                 // whileHover={{ scale: 1.08 }}
-                className="flex items-center justify-center px-2 sm:px-4 lg:px-6 rounded-lg bg-white/60 backdrop-blur-sm hover:bg-white/80 transition-colors"
+                className="flex items-center justify-center px-2 sm:px-4 lg:px-6 bg-white/60 backdrop-blur-sm hover:bg-white/80 transition-colors"
               >
                 <img
                   src={"/images/logo.png"}
@@ -76,6 +76,12 @@ export function Header() {
 
             {/* Right - Actions */}
             <div className="flex items-center justify-end gap-1 sm:gap-2 lg:gap-4 flex-1">
+                <Link
+                  href="/collection"
+                  className="text-sm font-medium hover:text-gray-600 transition-colors"
+                >
+                  {t("navigation.collections")}
+                </Link>
               {/* Search - Hidden */}
               {/* Heart - Hidden */}
               {/* Language Switcher - Hidden */}
