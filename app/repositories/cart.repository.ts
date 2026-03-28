@@ -28,6 +28,8 @@ export interface CartItem {
 export interface Cart {
     items: CartItem[];
     totalItems: number;
+    subtotal: number;
+    surpriseDiscount: number;
     totalPrice: number;
     sessionId: string;
 }
@@ -59,11 +61,15 @@ export async function getCart(sessionId: string): Promise<Cart> {
         }));
 
         const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-        const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const surpriseDiscount = totalItems * 50; // ₹50 surprise discount per item
+        const totalPrice = Math.max(0, subtotal - surpriseDiscount);
 
         return {
             items,
             totalItems,
+            subtotal,
+            surpriseDiscount,
             totalPrice,
             sessionId,
         };

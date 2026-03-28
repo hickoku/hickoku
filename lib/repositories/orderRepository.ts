@@ -76,6 +76,7 @@ export interface Order {
 
     // Pricing
     subtotal: number; // in paise
+    surpriseDiscount?: number; // in paise
     tax: number; // in paise
     shippingCost: number; // in paise
     total: number; // in paise

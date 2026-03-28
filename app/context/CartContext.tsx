@@ -18,6 +18,8 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   totalItems: number;
+  subtotal: number;
+  surpriseDiscount: number;
   totalPrice: number;
   isOpen: boolean;
   loading: boolean;
@@ -44,6 +46,8 @@ interface CartContextType {
 const initialState: CartState = {
   items: [],
   totalItems: 0,
+  subtotal: 0,
+  surpriseDiscount: 0,
   totalPrice: 0,
   isOpen: false,
   loading: false,
@@ -106,6 +110,8 @@ export function CartProvider({ children }: CartProviderProps) {
         ...prev,
         items: data.items || [],
         totalItems: data.totalItems || 0,
+        subtotal: data.subtotal || 0,
+        surpriseDiscount: data.surpriseDiscount || 0,
         totalPrice: data.totalPrice || 0,
         sessionId: data.sessionId,
         stockWarnings,
@@ -164,6 +170,8 @@ export function CartProvider({ children }: CartProviderProps) {
         ...prev,
         items: data.cart.items,
         totalItems: data.cart.totalItems,
+        subtotal: data.cart.subtotal,
+        surpriseDiscount: data.cart.surpriseDiscount,
         totalPrice: data.cart.totalPrice,
         sessionId: data.cart.sessionId,
         loading: false,
@@ -203,6 +211,8 @@ export function CartProvider({ children }: CartProviderProps) {
         ...prev,
         items: data.cart.items,
         totalItems: data.cart.totalItems,
+        subtotal: data.cart.subtotal,
+        surpriseDiscount: data.cart.surpriseDiscount,
         totalPrice: data.cart.totalPrice,
         loading: false,
       }));
@@ -246,6 +256,8 @@ export function CartProvider({ children }: CartProviderProps) {
         ...prev,
         items: data.cart.items,
         totalItems: data.cart.totalItems,
+        subtotal: data.cart.subtotal,
+        surpriseDiscount: data.cart.surpriseDiscount,
         totalPrice: data.cart.totalPrice,
         loading: false,
       }));
@@ -277,6 +289,8 @@ export function CartProvider({ children }: CartProviderProps) {
         ...prev,
         items: [],
         totalItems: 0,
+        subtotal: 0,
+        surpriseDiscount: 0,
         totalPrice: 0,
         loading: false,
       }));

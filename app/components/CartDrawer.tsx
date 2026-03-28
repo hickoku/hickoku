@@ -17,6 +17,8 @@ export function CartDrawer() {
     removeFromCart,
     updateQuantity,
     getTotalPrice,
+    getSubtotal,
+    getSurpriseDiscount,
     stockWarnings,
   } = useCart();
   const { t } = useLocale();
@@ -190,17 +192,28 @@ export function CartDrawer() {
                 animate={{ opacity: 1, y: 0 }}
                 className="border-t border-gray-200 p-6 space-y-4"
               >
+                {/* Order Summary Breakdown */}
+                <div className="space-y-2 mb-2">
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>Subtotal</span>
+                    <span>₹{formatPrice(getSubtotal())}</span>
+                  </div>
+                  {getSurpriseDiscount() > 0 && (
+                    <div className="flex justify-between text-sm font-semibold text-green-600 bg-green-50 p-2 rounded-lg -mx-2">
+                      <span>🎉 Surprise Discount ({items.length} x ₹50)</span>
+                      <span>-₹{formatPrice(getSurpriseDiscount())}</span>
+                    </div>
+                  )}
+                </div>
+
                 {/* Total */}
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-semibold text-gray-900">
+                <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+                  <span className="text-lg font-bold text-gray-900">
                     {t("cart.total")}:
                   </span>
                   <div className="flex flex-col items-end">
                     <span className="text-2xl font-bold text-red-600">
                       ₹{formatPrice(getTotalPrice())}
-                    </span>
-                    <span className="text-sm text-gray-400 line-through">
-                      ₹{formatPrice(getTotalPrice() * 2)}
                     </span>
                   </div>
                 </div>

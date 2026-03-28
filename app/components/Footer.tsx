@@ -99,6 +99,14 @@ export function Footer() {
                   {t("footer.contactUs")}
                 </a>
               </li>
+              <li>
+                <a
+                  href="/why-choose-us"
+                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  {t("footer.whyChooseUs")}
+                </a>
+              </li>
               {/* <li>
                 <a
                   href="#"
@@ -158,7 +166,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="/privacy-policy"
+                  href="/tnc"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   {t("footer.terms")}
@@ -217,12 +225,12 @@ export function Footer() {
             >
               {t("footer.privacy")}
             </a>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+            <a href="/tnc" className="text-sm text-gray-600 hover:text-gray-900">
               {t("footer.terms")}
             </a>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+            {/* <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
               Cookies
-            </a>
+            </a> */}
           </div>
         </div>
       </div>

@@ -12,6 +12,7 @@ interface CreateOrderRequest {
     shippingAddress: ShippingAddress;
     items: OrderItem[];
     subtotal: number;
+    surpriseDiscount?: number;
     tax: number;
     shippingCost: number;
     total: number;
@@ -74,6 +75,7 @@ export async function POST(request: NextRequest) {
             shippingAddress: body.shippingAddress,
             items: body.items,
             subtotal: body.subtotal,
+            surpriseDiscount: body.surpriseDiscount,
             tax: body.tax,
             shippingCost: body.shippingCost,
             total: body.total,
@@ -94,7 +96,7 @@ export async function POST(request: NextRequest) {
         });
 
         const razorpayOrder = await razorpay.orders.create({
-            amount: body.total, // amount in paise
+            amount: Math.round(body.total * 100), // convert rupees to paise for Razorpay API
             currency: "INR",
             receipt: orderId,
             notes: {

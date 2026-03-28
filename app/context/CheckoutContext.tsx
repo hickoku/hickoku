@@ -44,7 +44,7 @@ const initialState: CheckoutState = {
   userEmail: "",
   address: {},
   shippingMethod: "standard", // Default to standard
-  shippingCost: 5000, // ₹50 in paise
+  shippingCost: 50, // ₹50
   paymentMethod: null,
   completedSteps: [],
 };
@@ -114,11 +114,11 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
       try {
         const parsedState = JSON.parse(savedState);
         
-        // Migration: Fix old shippingCost values (convert from rupees to paise)
-        if (parsedState.shippingCost && parsedState.shippingCost < 100) {
-          // If shippingCost is less than 100, it's likely in rupees, convert to paise
-          parsedState.shippingCost = parsedState.shippingCost * 100;
-          console.log("Migrated shippingCost from rupees to paise:", parsedState.shippingCost);
+        // Migration: Fix old shippingCost values (convert from paise to rupees)
+        if (parsedState.shippingCost && parsedState.shippingCost >= 1000) {
+          // If shippingCost is >= 1000, it's likely in paise, convert to rupees
+          parsedState.shippingCost = parsedState.shippingCost / 100;
+          console.log("Migrated shippingCost from paise to rupees:", parsedState.shippingCost);
         }
         
         return parsedState;

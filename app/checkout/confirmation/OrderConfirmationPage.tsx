@@ -199,6 +199,12 @@ export default function OrderConfirmationPage() {
                 <span>Subtotal</span>
                 <span>₹{formatPrice(order.subtotal)}</span>
               </div>
+              {order.surpriseDiscount ? (
+                <div className="flex justify-between text-sm font-semibold text-green-600 bg-green-50 p-2 rounded-lg -mx-2">
+                  <span>🎉 Surprise Discount</span>
+                  <span>-₹{formatPrice(order.surpriseDiscount)}</span>
+                </div>
+              ) : null}
               <div className="flex justify-between text-gray-600">
                 <span>Tax (10%)</span>
                 <span>₹{formatPrice(order.tax)}</span>

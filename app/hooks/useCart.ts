@@ -25,6 +25,14 @@ export function useCart() {
     return state.totalPrice; // Return in paise for calculations
   };
 
+  const getSubtotal = () => {
+    return state.subtotal;
+  };
+
+  const getSurpriseDiscount = () => {
+    return state.surpriseDiscount;
+  };
+
   const getCartItemCount = () => {
     return state.totalItems;
   };
@@ -44,6 +52,8 @@ export function useCart() {
     clearCart,
     refreshCart,
     getTotalPrice,
+    getSubtotal,
+    getSurpriseDiscount,
     getCartItemCount,
   };
 }

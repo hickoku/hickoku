@@ -18,17 +18,19 @@ declare global {
 export function RazorpayPayment() {
   const context = useContext(CheckoutContext);
   const router = useRouter();
-  const { items, getTotalPrice, clearCart } = useCart();
+  const { items, getTotalPrice, getSubtotal, getSurpriseDiscount, clearCart } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
 
   if (!context) return null;
 
   const { state, dispatch } = context;
 
-  const subtotal = getTotalPrice();
-  const tax = Math.round(subtotal * 0.1); 
+  const subtotal = getSubtotal();
+  const surpriseDiscount = getSurpriseDiscount();
+  const discountedSubtotal = getTotalPrice();
+  const tax = Math.round(discountedSubtotal * 0.1); 
   const shippingCost = state.shippingCost || getDeliveryCharge();
-  const total = subtotal + tax + shippingCost;
+  const total = discountedSubtotal + tax + shippingCost;
 
   const handlePayment = async () => {
     if (typeof window === "undefined") return;
@@ -58,6 +60,7 @@ export function RazorpayPayment() {
             total: item.price * item.quantity,
           })),
           subtotal,
+          surpriseDiscount,
           tax,
           shippingCost,
           total,

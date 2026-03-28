@@ -11,15 +11,18 @@ import { ShoppingBag, Trash2, Plus, Minus } from "lucide-react";
 import { formatPrice, getDeliveryCharge } from "../utils/currency";
 
 function CartSummary({ defaultExpanded = true }: { defaultExpanded?: boolean }) {
-  const { items, getTotalPrice, removeFromCart, updateQuantity } = useCart();
+  const { items, getTotalPrice, getSubtotal, getSurpriseDiscount, removeFromCart, updateQuantity } = useCart();
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   if (items.length === 0) return null;
 
-  const subtotal = getTotalPrice(); 
-  const tax = Math.round(subtotal * 0.1); // 10% tax
+  const originalSubtotal = getSubtotal();
+  const surpriseDiscount = getSurpriseDiscount();
+  const discountedSubtotal = getTotalPrice(); 
+  
+  const tax = Math.round(discountedSubtotal * 0.1); // 10% tax on discounted price
   const deliveryCharge = getDeliveryCharge();
-  const total = subtotal + tax + deliveryCharge;
+  const total = discountedSubtotal + tax + deliveryCharge;
 
   return (
     <motion.div
@@ -124,8 +127,14 @@ function CartSummary({ defaultExpanded = true }: { defaultExpanded?: boolean }) 
           <div className="space-y-2 pb-3 border-b border-gray-200">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Subtotal</span>
-              <span className="font-medium">₹{formatPrice(subtotal)}</span>
+              <span className="font-medium">₹{formatPrice(originalSubtotal)}</span>
             </div>
+            {surpriseDiscount > 0 && (
+              <div className="flex justify-between text-sm font-semibold text-green-600 bg-green-50 p-2 rounded-lg -mx-2">
+                <span>🎉 Surprise Discount</span>
+                <span>-₹{formatPrice(surpriseDiscount)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Tax (10%)</span>
               <span className="font-medium">₹{formatPrice(tax)}</span>
