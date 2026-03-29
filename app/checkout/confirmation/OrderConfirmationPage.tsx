@@ -206,7 +206,7 @@ export default function OrderConfirmationPage() {
                 </div>
               ) : null}
               <div className="flex justify-between text-gray-600">
-                <span>Tax (10%)</span>
+                <span>GST (18%)</span>
                 <span>₹{formatPrice(order.tax)}</span>
               </div>
               <div className="flex justify-between text-gray-600">

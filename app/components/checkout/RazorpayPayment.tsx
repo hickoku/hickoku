@@ -28,7 +28,7 @@ export function RazorpayPayment() {
   const subtotal = getSubtotal();
   const surpriseDiscount = getSurpriseDiscount();
   const discountedSubtotal = getTotalPrice();
-  const tax = Math.round(discountedSubtotal * 0.1); 
+  const tax = Number((discountedSubtotal * 0.18).toFixed(2)); 
   const shippingCost = state.shippingCost || getDeliveryCharge();
   const total = discountedSubtotal + tax + shippingCost;
 

@@ -20,7 +20,7 @@ function CartSummary({ defaultExpanded = true }: { defaultExpanded?: boolean }) 
   const surpriseDiscount = getSurpriseDiscount();
   const discountedSubtotal = getTotalPrice(); 
   
-  const tax = Math.round(discountedSubtotal * 0.1); // 10% tax on discounted price
+  const tax = Number((discountedSubtotal * 0.18).toFixed(2)); //  18% tax exactly as evaluated (2 decimals)
   const deliveryCharge = getDeliveryCharge();
   const total = discountedSubtotal + tax + deliveryCharge;
 
@@ -136,13 +136,15 @@ function CartSummary({ defaultExpanded = true }: { defaultExpanded?: boolean }) 
               </div>
             )}
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Tax (10%)</span>
+              <span className="text-gray-600">GST (18%)</span>
               <span className="font-medium">₹{formatPrice(tax)}</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Delivery Charges</span>
-              <span className="font-medium">₹{formatPrice(deliveryCharge)}</span>
-            </div>
+            {deliveryCharge > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Delivery Charges</span>
+                <span className="font-medium">₹{formatPrice(deliveryCharge)}</span>
+              </div>
+            )}
           </div>
           <div className="flex justify-between text-lg font-bold">
             <span>Total</span>
