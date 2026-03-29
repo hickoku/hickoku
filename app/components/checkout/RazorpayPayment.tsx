@@ -118,11 +118,16 @@ export function RazorpayPayment() {
               // Mark payment step as completed
               dispatch({ type: "MARK_STEP_COMPLETED", payload: "payment" });
 
-              // Clear cart
-              await clearCart();
+              // Detached background email dispatch (0ms latency proxy)
+              fetch("/api/orders/send-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId: orderData.orderId })
+              }).catch(e => console.error("Detached email fetch failed", e));
 
-              // Redirect to confirmation page
+              // Clear cart IN THE BACKGROUND after executing redirect instantly to prevent flash empty
               router.push(`/checkout/confirmation?orderId=${orderData.orderId}`);
+              setTimeout(() => clearCart(), 1500);
             } else {
               throw new Error("Payment verification failed");
             }
@@ -135,11 +140,21 @@ export function RazorpayPayment() {
           }
         },
         modal: {
-          ondismiss: function () {
+          ondismiss: async function () {
             setIsProcessing(false);
             toast.error("Payment cancelled", {
               description: "You can try again when ready",
             });
+            // Fire API to log explicit closure and dispatch cart recovery email
+            try {
+              await fetch("/api/orders/fail-payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId: orderData.orderId })
+              });
+            } catch (e) {
+              console.error("Failed to notify payment failure API");
+            }
           },
         },
       };
@@ -156,13 +171,24 @@ export function RazorpayPayment() {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-2">Complete Payment</h2>
-        <p className="text-gray-600">
-          Click below to securely complete your purchase
-        </p>
-      </div>
+    <>
+      {isProcessing && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/95 backdrop-blur-md">
+          <div className="flex flex-col items-center">
+            <Loader className="w-12 h-12 text-blue-600 animate-spin mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Processing Payment</h2>
+            <p className="text-gray-500">Please wait while we secure your transaction...</p>
+          </div>
+        </div>
+      )}
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-2">Complete Payment</h2>
+          <p className="text-gray-600">
+            Click below to securely complete your purchase
+          </p>
+        </div>
 
       {/* Payment Method Button */}
       <motion.button
@@ -228,5 +254,6 @@ export function RazorpayPayment() {
         </motion.button>
       </div>
     </motion.div>
+    </>
   );
 }
