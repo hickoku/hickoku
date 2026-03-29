@@ -4,7 +4,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocale } from "../context/LocaleContext";
-import sliderImage from "../../public/hickoku-assets/HICKOKU-slider_Image.jpeg";
+import sliderImage from "../../public/hickoku-assets/Slider-images/HICKOKU-slider_Image.jpeg";
+import slider2 from "../../public/hickoku-assets/Slider-images/slider-2.jpeg";
+import slider3 from "../../public/hickoku-assets/Slider-images/slider-3.jpeg";
+import slider4 from "../../public/hickoku-assets/Slider-images/slider-4.jpeg";
 
 const getHeroSlides = (t: any) => [
   // {
@@ -21,7 +24,7 @@ const getHeroSlides = (t: any) => [
     title: t("hero.silkMusk.title"),
     subtitle: t("hero.silkMusk.subtitle"),
     description: t("hero.silkMusk.description"),
-    image: { sliderImage },
+    image: sliderImage,
     bgColor: "bg-[#dfe5db]",
   },
   {
@@ -29,8 +32,32 @@ const getHeroSlides = (t: any) => [
     title: t("hero.midnightAgar.title"),
     subtitle: t("hero.midnightAgar.subtitle"),
     description: t("hero.midnightAgar.description"),
-    image:
-      "https://images.unsplash.com/photo-1759793500110-e3cb1f0fe6ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxibGFjayUyMGx1eHVyeSUyMHBlcmZ1bWUlMjBtYXNjdWxpbmV8ZW58MXx8fHwxNzcwNTQxNTI4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    image: slider2,
+    bgColor: "bg-gray-900",
+  },
+  // {
+  //   id: 2,
+  //   title: t("hero.midnightAgar.title"),
+  //   subtitle: t("hero.midnightAgar.subtitle"),
+  //   description: t("hero.midnightAgar.description"),
+  //   image:
+  //     "https://images.unsplash.com/photo-1759793500110-e3cb1f0fe6ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxibGFjayUyMGx1eHVyeSUyMHBlcmZ1bWUlMjBtYXNjdWxpbmV8ZW58MXx8fHwxNzcwNTQxNTI4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+  //   bgColor: "bg-gray-900",
+  // },
+  {
+    id: 3,
+    title: t("hero.midnightAgar.title"),
+    subtitle: t("hero.midnightAgar.subtitle"),
+    description: t("hero.midnightAgar.description"),
+    image: slider3,
+    bgColor: "bg-gray-900",
+  },
+  {
+    id: 4,
+    title: t("hero.midnightAgar.title"),
+    subtitle: t("hero.midnightAgar.subtitle"),
+    description: t("hero.midnightAgar.description"),
+    image: slider4,
     bgColor: "bg-gray-900",
   },
 ];
@@ -71,15 +98,11 @@ export function HeroSection() {
           className={`absolute inset-0 ${slide.bgColor}`}
         >
           <div className="absolute inset-0">
-            <img
-              src={
-                typeof slide.image === "string"
-                  ? slide.image
-                  : slide.image.sliderImage.src
-              }
-              alt={slide.title}
-              className="w-full h-full object-cover"
-            />
+          <img
+          src={slide.image.src}
+          alt={slide.title}
+          className="w-full h-full object-cover"
+          />
           </div>
 
           <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
