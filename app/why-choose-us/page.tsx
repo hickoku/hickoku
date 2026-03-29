@@ -2,10 +2,12 @@
 
 import { motion, Variants } from "framer-motion";
 import { Sparkles, Globe, Gem, Star, Crown } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 const fadeUpVariant: Variants = {
   hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
 };
 
 export default function WhyChooseUsPage() {
@@ -13,33 +15,38 @@ export default function WhyChooseUsPage() {
     {
       icon: <Sparkles className="w-8 h-8 text-amber-600" />,
       title: "Unparalleled Craftsmanship",
-      description: "Each Hickoku perfume is a masterpiece, carefully curated by expert perfumers who understand the delicate balance between elegance and intensity. Every drop is a testament to our commitment to sophistication and excellence.",
-      delay: 0.1
+      description:
+        "Each Hickoku perfume is a masterpiece, carefully curated by expert perfumers who understand the delicate balance between elegance and intensity. Every drop is a testament to our commitment to sophistication and excellence.",
+      delay: 0.1,
     },
     {
       icon: <Globe className="w-8 h-8 text-amber-600" />,
       title: "The Finest Ingredients",
-      description: "We search the world for the purest and most luxurious essences—from hand-picked jasmine in Grasse to rare oud from the Middle East. Our fragrances are a blend of tradition and innovation, ensuring both quality and sustainability.",
-      delay: 0.2
+      description:
+        "We search the world for the purest and most luxurious essences—from hand-picked jasmine in Grasse to rare oud from the Middle East. Our fragrances are a blend of tradition and innovation, ensuring both quality and sustainability.",
+      delay: 0.2,
     },
     {
       icon: <Gem className="w-8 h-8 text-amber-600" />,
       title: "Timeless Elegance",
-      description: "Our perfumes are more than just scents—they are an expression of identity. Whether bold and daring or soft and romantic, each fragrance is designed to complement your unique personality and style.",
-      delay: 0.3
+      description:
+        "Our perfumes are more than just scents—they are an expression of identity. Whether bold and daring or soft and romantic, each fragrance is designed to complement your unique personality and style.",
+      delay: 0.3,
     },
     {
       icon: <Star className="w-8 h-8 text-amber-600" />,
       title: "Long-Lasting & Exquisite",
-      description: "Hickoku perfumes are formulated with the highest concentration of pure oils, ensuring a fragrance that lasts from day to night, leaving a trail of luxury wherever you go.",
-      delay: 0.4
+      description:
+        "Hickoku perfumes are formulated with the highest concentration of pure oils, ensuring a fragrance that lasts from day to night, leaving a trail of luxury wherever you go.",
+      delay: 0.4,
     },
     {
       icon: <Crown className="w-8 h-8 text-amber-600" />,
       title: "A Symbol of Prestige",
-      description: "Choosing Hickoku means choosing exclusivity. Our limited-edition fragrances and bespoke creations are designed for those who appreciate the finer things in life—where luxury isn’t just a choice, but a way of being.",
-      delay: 0.5
-    }
+      description:
+        "Choosing Hickoku means choosing exclusivity. Our limited-edition fragrances and bespoke creations are designed for those who appreciate the finer things in life—where luxury isn’t just a choice, but a way of being.",
+      delay: 0.5,
+    },
   ];
 
   return (
@@ -53,32 +60,55 @@ export default function WhyChooseUsPage() {
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none mix-blend-overlay" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-24 relative z-10">
-        <motion.div 
+        <motion.div
           initial="hidden"
           animate="visible"
           variants={{
             hidden: { opacity: 0 },
-            visible: { opacity: 1, transition: { staggerChildren: 0.2 } }
+            visible: { opacity: 1, transition: { staggerChildren: 0.2 } },
           }}
           className="text-center max-w-4xl mx-auto mb-20"
         >
-          <motion.div variants={fadeUpVariant} className="flex justify-center mb-6">
+          {/* Back Button */}
+
+          <div className="flex items-center justify-between mb-4">
+            <Link href="/">
+              <motion.button
+                whileHover={{ x: -5 }}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                <span className="text-sm cursor-pointer">Back</span>
+              </motion.button>
+            </Link>
+          </div>
+          <motion.div
+            variants={fadeUpVariant}
+            className="flex justify-center mb-6"
+          >
             <span className="px-5 py-2 rounded-full border border-amber-200 bg-amber-50 text-amber-700 text-sm font-semibold tracking-widest uppercase shadow-sm">
               Our Philosophy
             </span>
           </motion.div>
-          <motion.h1 
+          <motion.h1
             variants={fadeUpVariant}
             className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 text-gray-900 drop-shadow-sm"
           >
-            Crafting Experiences,<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-amber-800">Transcending Time.</span>
+            Crafting Experiences,
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-amber-800">
+              Transcending Time.
+            </span>
           </motion.h1>
-          <motion.p 
+          <motion.p
             variants={fadeUpVariant}
             className="text-lg md:text-xl text-gray-600 leading-relaxed font-normal max-w-3xl mx-auto"
           >
-            At Hickoku Perfumes, we don’t just create fragrances—we craft experiences, blending artistry with the rarest ingredients to bring you scents that transcend time. Every bottle tells a story, every note awakens an emotion, and every fragrance is designed to leave an unforgettable impression.
+            At Hickoku Perfumes, we don’t just create fragrances—we craft
+            experiences, blending artistry with the rarest ingredients to bring
+            you scents that transcend time. Every bottle tells a story, every
+            note awakens an emotion, and every fragrance is designed to leave an
+            unforgettable impression.
           </motion.p>
         </motion.div>
 
@@ -87,11 +117,16 @@ export default function WhyChooseUsPage() {
           {features.map((feature, index) => {
             // Adjust layout for a purely aesthetic asymmetrical grid
             let spanClass = "col-span-1 md:col-span-1 lg:col-span-2"; // default (3 cols)
-            if (index === 0) spanClass = "col-span-1 md:col-span-2 lg:col-span-4"; 
-            if (index === 1) spanClass = "col-span-1 md:col-span-1 lg:col-span-2"; 
-            if (index === 2) spanClass = "col-span-1 md:col-span-1 lg:col-span-2"; 
-            if (index === 3) spanClass = "col-span-1 md:col-span-1 lg:col-span-2"; 
-            if (index === 4) spanClass = "col-span-1 md:col-span-2 lg:col-span-2"; 
+            if (index === 0)
+              spanClass = "col-span-1 md:col-span-2 lg:col-span-4";
+            if (index === 1)
+              spanClass = "col-span-1 md:col-span-1 lg:col-span-2";
+            if (index === 2)
+              spanClass = "col-span-1 md:col-span-1 lg:col-span-2";
+            if (index === 3)
+              spanClass = "col-span-1 md:col-span-1 lg:col-span-2";
+            if (index === 4)
+              spanClass = "col-span-1 md:col-span-2 lg:col-span-2";
 
             return (
               <motion.div
@@ -101,19 +136,23 @@ export default function WhyChooseUsPage() {
                 viewport={{ once: true, margin: "-50px" }}
                 variants={{
                   hidden: { opacity: 0, y: 40, scale: 0.95 },
-                  visible: { 
-                    opacity: 1, 
-                    y: 0, 
+                  visible: {
+                    opacity: 1,
+                    y: 0,
                     scale: 1,
-                    transition: { duration: 0.7, delay: feature.delay, ease: [0.22, 1, 0.36, 1] } 
-                  }
+                    transition: {
+                      duration: 0.7,
+                      delay: feature.delay,
+                      ease: [0.22, 1, 0.36, 1],
+                    },
+                  },
                 }}
                 whileHover={{ y: -5 }}
                 className={`relative p-8 md:p-10 rounded-[2rem] bg-white border border-gray-100/80 backdrop-blur-xl group transition-all duration-500 overflow-hidden ${spanClass} shadow-xl shadow-gray-200/50 hover:shadow-2xl hover:shadow-amber-500/10 hover:border-amber-200`}
               >
                 {/* Hover Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-[2rem]" />
-                
+
                 <div className="relative z-10 h-full flex flex-col">
                   <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-amber-100 transition-all duration-500 shadow-sm">
                     {feature.icon}
@@ -140,12 +179,19 @@ export default function WhyChooseUsPage() {
           viewport={{ once: true }}
           variants={{
             hidden: { opacity: 0, y: 30 },
-            visible: { opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.6 } }
+            visible: {
+              opacity: 1,
+              y: 0,
+              transition: { duration: 0.8, delay: 0.6 },
+            },
           }}
           className="mt-24 text-center"
         >
           <div className="inline-block p-[1.5px] rounded-full bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 shadow-sm hover:shadow-md transition-shadow">
-            <a href="/collection" className="block px-10 py-4 rounded-full bg-white text-gray-900 font-bold hover:bg-gray-50 transition-colors duration-300">
+            <a
+              href="/collection"
+              className="block px-10 py-4 rounded-full bg-white text-gray-900 font-bold hover:bg-gray-50 transition-colors duration-300"
+            >
               Discover Our Collections
             </a>
           </div>

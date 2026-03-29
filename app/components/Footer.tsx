@@ -99,14 +99,14 @@ export function Footer() {
                   {t("footer.contactUs")}
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a
                   href="/why-choose-us"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   {t("footer.whyChooseUs")}
                 </a>
-              </li>
+              </li> */}
               {/* <li>
                 <a
                   href="#"
@@ -136,8 +136,11 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="mb-4 tracking-wider uppercase text-sm">
+            {/* <h4 className="mb-4 tracking-wider uppercase text-sm">
               {t("footer.legal")}
+            </h4> */}
+            <h4 className="mb-4 tracking-wider uppercase text-sm">
+              Know Us Better
             </h4>
             <ul className="space-y-2">
               <li>
@@ -216,17 +219,31 @@ export function Footer() {
         {/* Bottom */}
         <div className="border-t border-gray-200 pt-8 flex flex-col sm:flex-row justify-between items-center">
           <p className="text-sm text-gray-600">
-            © 2024 HK Perfumes. All rights reserved.
+            {/* © 2024 HK Perfumes. All rights reserved. */}© 2024 HICKOKU. All
+            rights reserved.
           </p>
           <div className="flex gap-6 mt-4 sm:mt-0">
-            <a
+            {/* <a
               href="/privacy-policy"
               className="text-sm text-gray-600 hover:text-gray-900"
+            > */}
+            <a
+              href="/why-choose-us"
+              className="text-sm text-gray-600 hover:text-gray-900"
             >
-              {t("footer.privacy")}
+              {t("footer.whyChooseUs")}
             </a>
-            <a href="/tnc" className="text-sm text-gray-600 hover:text-gray-900">
+            {/* <a
+              href="/tnc"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
               {t("footer.terms")}
+            </a> */}
+            <a
+              href="/about-us"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              About Us
             </a>
             {/* <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
               Cookies

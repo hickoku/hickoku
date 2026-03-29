@@ -4,15 +4,24 @@ import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocale } from "../context/LocaleContext";
+import sliderImage from "../../public/hickoku-assets/HICKOKU-slider_Image.jpeg";
 
 const getHeroSlides = (t: any) => [
+  // {
+  //   id: 1,
+  //   title: t("hero.silkMusk.title"),
+  //   subtitle: t("hero.silkMusk.subtitle"),
+  //   description: t("hero.silkMusk.description"),
+  //   image:
+  //     "https://images.unsplash.com/photo-1619007556336-4d99b008471e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJmdW1lJTIwaGVybyUyMGJhbm5lciUyMGVsZWdhbnR8ZW58MXx8fHwxNzcwNTQxNTI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+  //   bgColor: "bg-[#dfe5db]",
+  // },
   {
     id: 1,
     title: t("hero.silkMusk.title"),
     subtitle: t("hero.silkMusk.subtitle"),
     description: t("hero.silkMusk.description"),
-    image:
-      "https://images.unsplash.com/photo-1619007556336-4d99b008471e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJmdW1lJTIwaGVybyUyMGJhbm5lciUyMGVsZWdhbnR8ZW58MXx8fHwxNzcwNTQxNTI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    image: { sliderImage },
     bgColor: "bg-[#dfe5db]",
   },
   {
@@ -63,9 +72,13 @@ export function HeroSection() {
         >
           <div className="absolute inset-0">
             <img
-              src={slide.image}
+              src={
+                typeof slide.image === "string"
+                  ? slide.image
+                  : slide.image.sliderImage.src
+              }
               alt={slide.title}
-              className="w-full h-full object-cover mix-blend-overlay opacity-40"
+              className="w-full h-full object-cover"
             />
           </div>
 
