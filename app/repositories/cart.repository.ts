@@ -62,7 +62,7 @@ export async function getCart(sessionId: string): Promise<Cart> {
 
         const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
         const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        const surpriseDiscount = totalItems * 50; // ₹50 surprise discount per item
+        const surpriseDiscount = totalItems > 1 ? totalItems * 25 : 0; // ₹25 surprise discount per item if multi-item cart
         const totalPrice = Math.max(0, subtotal - surpriseDiscount);
 
         return {

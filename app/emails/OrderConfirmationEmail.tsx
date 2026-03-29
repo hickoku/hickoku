@@ -120,12 +120,14 @@ export const OrderConfirmationEmail = ({
                 <Column><Text style={discountValue}>-{formatPrice(surpriseDiscount)}</Text></Column>
               </Row>
             )}
+            {shippingCost > 0 && (
+              <Row style={totalRow}>
+                <Column><Text style={totalLabel}>Shipping</Text></Column>
+                <Column><Text style={totalValue}>{formatPrice(shippingCost)}</Text></Column>
+              </Row>
+            )}
             <Row style={totalRow}>
-              <Column><Text style={totalLabel}>Shipping</Text></Column>
-              <Column><Text style={totalValue}>{formatPrice(shippingCost)}</Text></Column>
-            </Row>
-            <Row style={totalRow}>
-              <Column><Text style={totalLabel}>Tax</Text></Column>
+              <Column><Text style={totalLabel}>GST (18%)</Text></Column>
               <Column><Text style={totalValue}>{formatPrice(tax)}</Text></Column>
             </Row>
             <Hr style={dottedHr} />

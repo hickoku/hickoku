@@ -200,7 +200,7 @@ export function CartDrawer() {
                   </div>
                   {getSurpriseDiscount() > 0 && (
                     <div className="flex justify-between text-sm font-semibold text-green-600 bg-green-50 p-2 rounded-lg -mx-2">
-                      <span>🎉 Surprise Discount ({items.length} x ₹50)</span>
+                      <span>🎉 Surprise Discount ({items.reduce((sum, item) => sum + item.quantity, 0)} x ₹25)</span>
                       <span>-₹{formatPrice(getSurpriseDiscount())}</span>
                     </div>
                   )}

@@ -44,7 +44,7 @@ const initialState: CheckoutState = {
   userEmail: "",
   address: {},
   shippingMethod: "standard", // Default to standard
-  shippingCost: 50, // ₹50
+  shippingCost: 0, // Defaults to 0 to safely defer to getDeliveryCharge() dynamically
   paymentMethod: null,
   completedSteps: [],
 };
