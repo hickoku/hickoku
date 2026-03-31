@@ -125,6 +125,13 @@ export function RazorpayPayment() {
                 body: JSON.stringify({ orderId: orderData.orderId })
               }).catch(e => console.error("Detached email fetch failed", e));
 
+              // Detached background Delhivery manifest sync (0ms latency proxy)
+              fetch("/api/orders/delhivery-sync", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId: orderData.orderId })
+              }).catch(e => console.error("Detached delhivery sync failed", e));
+
               // Clear cart IN THE BACKGROUND after executing redirect instantly to prevent flash empty
               router.push(`/checkout/confirmation?orderId=${orderData.orderId}`);
               setTimeout(() => clearCart(), 1500);
