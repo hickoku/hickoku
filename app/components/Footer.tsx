@@ -99,7 +99,7 @@ export function Footer() {
                   {t("footer.contactUs")}
                 </a>
               </li>
-              
+
               {/* <li>
                 <a
                   href="#"
@@ -133,7 +133,7 @@ export function Footer() {
               {t("footer.legal")}
             </h4>
             <ul className="space-y-2">
-               <li>
+              <li>
                 <a
                   href="/why-choose-us"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
@@ -217,7 +217,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="border-t border-gray-200 pt-8 flex flex-col sm:flex-row justify-between items-center">
           <p className="text-sm text-gray-600">
-            © 2024 HICKOKU. All rights reserved.
+            © 2026 HICKOKU. All rights reserved.
           </p>
           <div className="flex gap-6 mt-4 sm:mt-0">
             <a
@@ -226,7 +226,10 @@ export function Footer() {
             >
               {t("footer.privacy")}
             </a>
-            <a href="/tnc" className="text-sm text-gray-600 hover:text-gray-900">
+            <a
+              href="/tnc"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
               {t("footer.terms")}
             </a>
             {/* <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
