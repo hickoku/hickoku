@@ -452,7 +452,7 @@ return (
     "addProducts": "Add some products to get started",
     "sku": "SKU",
     "total": "Total",
-    "subtotal": "Subtotal",
+    "subtotal": "Price",
     "checkout": "Checkout",
     "continueShopping": "Continue Shopping",
     "removeItem": "Remove"

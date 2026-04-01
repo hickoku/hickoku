@@ -83,7 +83,8 @@ export function CartDrawer() {
                     </p>
                     {stockWarnings.map((warning, idx) => (
                       <p key={idx} className="text-xs text-amber-700">
-                        <strong>{warning.productName}:</strong> {warning.message}
+                        <strong>{warning.productName}:</strong>{" "}
+                        {warning.message}
                       </p>
                     ))}
                   </div>
@@ -139,7 +140,9 @@ export function CartDrawer() {
                           <p className="text-sm text-gray-400 line-through">
                             ₹{formatPrice(item.price * 2)}
                           </p>
-                          <span className="text-xs font-bold text-red-600">50% OFF</span>
+                          <span className="text-xs font-bold text-red-600">
+                            50% OFF
+                          </span>
                         </div>
                       </div>
 
@@ -195,12 +198,16 @@ export function CartDrawer() {
                 {/* Order Summary Breakdown */}
                 <div className="space-y-2 mb-2">
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span>Subtotal</span>
+                    <span>Price</span>
                     <span>₹{formatPrice(getSubtotal())}</span>
                   </div>
                   {getSurpriseDiscount() > 0 && (
                     <div className="flex justify-between text-sm font-semibold text-green-600 bg-green-50 p-2 rounded-lg -mx-2">
-                      <span>🎉 Surprise Discount ({items.reduce((sum, item) => sum + item.quantity, 0)} x ₹25)</span>
+                      <span>
+                        🎉 Surprise Discount (
+                        {items.reduce((sum, item) => sum + item.quantity, 0)} x
+                        ₹25)
+                      </span>
                       <span>-₹{formatPrice(getSurpriseDiscount())}</span>
                     </div>
                   )}

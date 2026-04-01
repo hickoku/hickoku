@@ -146,7 +146,7 @@ export function ProductCard({
         <h3 className="text-xl font-bold mb-2">{name}</h3>
         <p className="text-sm text-gray-600 mb-4 line-clamp-2">{description}</p>
 
-        <div className="flex flex-col gap-4 pt-4 border-t border-gray-100">
+        <div className="flex items-center justify-between gap-4 pt-4 border-t border-gray-100">
           <div className="flex flex-col items-start gap-1">
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">50% OFF</span>
@@ -172,7 +172,7 @@ export function ProductCard({
                 quantity: 1,
               });
             }}
-            className="w-full py-2.5 bg-gray-900 text-white rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-gray-800 transition-colors cursor-pointer text-center flex items-center justify-center gap-2"
+            className="py-2.5 px-4 bg-gray-900 text-white rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-gray-800 transition-colors cursor-pointer text-center flex items-center justify-center gap-2 whitespace-nowrap"
           >
             <ShoppingBag className="w-4 h-4" />
             Add to Cart

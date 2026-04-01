@@ -28,9 +28,8 @@ export function RazorpayPayment() {
   const subtotal = getSubtotal();
   const surpriseDiscount = getSurpriseDiscount();
   const discountedSubtotal = getTotalPrice();
-  const tax = Number((discountedSubtotal * 0.18).toFixed(2)); 
-  const shippingCost = state.shippingCost || getDeliveryCharge();
-  const total = discountedSubtotal + tax + shippingCost;
+  // GST-inclusive: total = discounted subtotal (GST already included in price)
+  const total = discountedSubtotal;
 
   const handlePayment = async () => {
     if (typeof window === "undefined") return;
@@ -61,8 +60,8 @@ export function RazorpayPayment() {
           })),
           subtotal,
           surpriseDiscount,
-          tax,
-          shippingCost,
+          tax: Number((discountedSubtotal - discountedSubtotal / 1.18).toFixed(2)),
+          shippingCost: 0,
           total,
         }),
       });

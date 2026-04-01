@@ -3,10 +3,18 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import { CheckCircle, Package, MapPin, Mail, Phone, Loader } from "lucide-react";
+import {
+  CheckCircle,
+  Package,
+  MapPin,
+  Mail,
+  Phone,
+  Loader,
+} from "lucide-react";
 import Link from "next/link";
 import { Order } from "@/lib/repositories/orderRepository";
 import { formatPrice } from "@/app/utils/currency";
+import { Header } from "@/app/components/Header";
 
 export default function OrderConfirmationPage() {
   const searchParams = useSearchParams();
@@ -62,10 +70,7 @@ export default function OrderConfirmationPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error || "Order not found"}</p>
-          <Link
-            href="/"
-            className="text-blue-600 hover:underline"
-          >
+          <Link href="/" className="text-blue-600 hover:underline">
             Return to Home
           </Link>
         </div>
@@ -74,7 +79,10 @@ export default function OrderConfirmationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <>
+      <Header />
+      <div className="min-h-screen bg-gray-50 py-12 mt-12">
+     
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Success Header */}
         <motion.div
@@ -196,7 +204,7 @@ export default function OrderConfirmationPage() {
             <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
             <div className="space-y-2">
               <div className="flex justify-between text-gray-600">
-                <span>Subtotal</span>
+                <span>Price</span>
                 <span>₹{formatPrice(order.subtotal)}</span>
               </div>
               {order.surpriseDiscount ? (
@@ -206,12 +214,24 @@ export default function OrderConfirmationPage() {
                 </div>
               ) : null}
               <div className="flex justify-between text-gray-600">
-                <span>GST (18%)</span>
-                <span>₹{formatPrice(order.tax)}</span>
+                <span>Actual Cost</span>
+                <span>₹{formatPrice(Number((order.total / 1.18).toFixed(2)))}</span>
               </div>
               <div className="flex justify-between text-gray-600">
-                <span>Shipping</span>
-                <span>₹{formatPrice(order.shippingCost)}</span>
+                <span>GST (18%)</span>
+                <span>₹{formatPrice(Number((order.total - order.total / 1.18).toFixed(2)))}</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span>Handling Fee</span>
+                <span className="text-green-600 font-medium">
+                  <span className="line-through text-gray-400 mr-1">₹20</span> FREE
+                </span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span>Delivery Fee</span>
+                <span className="text-green-600 font-medium">
+                  <span className="line-through text-gray-400 mr-1">₹50</span> FREE
+                </span>
               </div>
               <div className="flex justify-between text-xl font-bold text-gray-900 pt-2 border-t border-gray-200">
                 <span>Total</span>
@@ -255,6 +275,7 @@ export default function OrderConfirmationPage() {
           </p>
         </motion.div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

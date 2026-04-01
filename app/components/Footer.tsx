@@ -21,14 +21,14 @@ export function Footer() {
             </p>
             <div className="flex gap-4">
               <motion.a
-                href="#"
+                href="https://www.instagram.com/hickokuperfume"
                 whileHover={{ scale: 1.1 }}
                 className="p-2 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-colors"
               >
                 <Instagram className="w-4 h-4" />
               </motion.a>
               <motion.a
-                href="#"
+                href="https://www.facebook.com/hickoku/"
                 whileHover={{ scale: 1.1 }}
                 className="p-2 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-colors"
               >
@@ -99,14 +99,7 @@ export function Footer() {
                   {t("footer.contactUs")}
                 </a>
               </li>
-              <li>
-                <a
-                  href="/why-choose-us"
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  {t("footer.whyChooseUs")}
-                </a>
-              </li>
+              
               {/* <li>
                 <a
                   href="#"
@@ -140,6 +133,14 @@ export function Footer() {
               {t("footer.legal")}
             </h4>
             <ul className="space-y-2">
+               <li>
+                <a
+                  href="/why-choose-us"
+                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  {t("footer.whyChooseUs")}
+                </a>
+              </li>
               <li>
                 <a
                   href="/about-us"
@@ -156,7 +157,7 @@ export function Footer() {
                   Careers
                 </a>
               </li> */}
-              <li>
+              {/* <li>
                 <a
                   href="/privacy-policy"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
@@ -171,7 +172,7 @@ export function Footer() {
                 >
                   {t("footer.terms")}
                 </a>
-              </li>
+              </li> */}
             </ul>
           </div>
 
@@ -216,7 +217,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="border-t border-gray-200 pt-8 flex flex-col sm:flex-row justify-between items-center">
           <p className="text-sm text-gray-600">
-            © 2024 HK Perfumes. All rights reserved.
+            © 2024 HICKOKU. All rights reserved.
           </p>
           <div className="flex gap-6 mt-4 sm:mt-0">
             <a

@@ -1,8 +1,9 @@
 "use client";
 
 import { motion, Variants } from "framer-motion";
-import { Lock, Eye, Server, UserCheck, ShieldClose } from "lucide-react";
+import { Lock, Eye, Server, UserCheck, ShieldClose, ArrowLeft } from "lucide-react";
 import { Header } from "../components/Header";
+import Link from "next/link";
 
 const fadeUpVariant: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -44,6 +45,17 @@ export default function PrivacyPolicyPage() {
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none mix-blend-overlay" />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-32 relative z-10">
+        <div className="mb-8 flex justify-start z-20 relative">
+          <Link href="/">
+            <motion.button
+              whileHover={{ x: -3 }}
+              className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="text-sm cursor-pointer font-medium tracking-wide">Back</span>
+            </motion.button>
+          </Link>
+        </div>
         <motion.div 
           initial="hidden"
           animate="visible"

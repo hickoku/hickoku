@@ -341,7 +341,7 @@ export default function ProductDetailPage() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => {
-                    const phoneNumber = "9028765715"; // Adjust the WhatsApp number as needed
+                    const phoneNumber = "9360922878"; // Adjust the WhatsApp number as needed
                     let imageUrl = product.images?.[0] || productImages[0];
                     if (imageUrl && imageUrl.startsWith('/')) {
                       imageUrl = `${window.location.origin}${imageUrl}`;

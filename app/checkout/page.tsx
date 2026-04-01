@@ -8,21 +8,33 @@ import { CheckoutFlow } from "../components/checkout/CheckoutFlow";
 import { Header } from "../components/Header";
 import { useCart } from "../hooks/useCart";
 import { ShoppingBag, Trash2, Plus, Minus } from "lucide-react";
-import { formatPrice, getDeliveryCharge } from "../utils/currency";
+import { formatPrice } from "../utils/currency";
 
-function CartSummary({ defaultExpanded = true }: { defaultExpanded?: boolean }) {
-  const { items, getTotalPrice, getSubtotal, getSurpriseDiscount, removeFromCart, updateQuantity } = useCart();
+function CartSummary({
+  defaultExpanded = true,
+}: {
+  defaultExpanded?: boolean;
+}) {
+  const {
+    items,
+    getTotalPrice,
+    getSubtotal,
+    getSurpriseDiscount,
+    removeFromCart,
+    updateQuantity,
+  } = useCart();
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   if (items.length === 0) return null;
 
-  const originalSubtotal = getSubtotal();
-  const surpriseDiscount = getSurpriseDiscount();
-  const discountedSubtotal = getTotalPrice(); 
-  
-  const tax = Number((discountedSubtotal * 0.18).toFixed(2)); //  18% tax exactly as evaluated (2 decimals)
-  const deliveryCharge = getDeliveryCharge();
-  const total = discountedSubtotal + tax + deliveryCharge;
+  const originalSubtotal = getSubtotal(); // (a)
+  const surpriseDiscount = getSurpriseDiscount(); // (b)
+  const discountedSubtotal = getTotalPrice(); // a - b (GST-inclusive price)
+
+  // GST-inclusive extraction: price already includes 18% GST
+  const actualCost = Number((discountedSubtotal / 1.18).toFixed(2)); // (c) base cost without GST
+  const gst = Number((discountedSubtotal - actualCost).toFixed(2)); // GST component
+  const total = discountedSubtotal; // Total = discounted subtotal (GST already included)
 
   return (
     <motion.div
@@ -44,7 +56,75 @@ function CartSummary({ defaultExpanded = true }: { defaultExpanded?: boolean }) 
           </div>
         </div>
 
-        {/* Items List */}
+        {/* Items List - Always visible */}
+        <div className="p-4 space-y-3 border-b border-gray-200 max-h-80 overflow-y-auto">
+          {items.map((item) => (
+            <motion.div
+              key={item.sku}
+              layout
+              className="flex gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              {/* Image */}
+              <div className="w-16 h-16 rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0">
+                <img
+                  src={item.image}
+                  alt={item.productName}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Details */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-900 truncate">
+                  {item.productName}
+                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-sm font-semibold text-red-600">
+                    ₹{formatPrice(item.price)}
+                  </p>
+                  <p className="text-xs text-gray-400 line-through">
+                    ₹{formatPrice(item.price * 2)}
+                  </p>
+                </div>
+
+                {/* Quantity Controls */}
+                <div className="flex items-center gap-2 mt-2 w-fit bg-white rounded border border-gray-300">
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => updateQuantity(item.sku, item.quantity - 1)}
+                    className="p-1 hover:bg-gray-100 transition-colors"
+                  >
+                    <Minus className="w-3 h-3 text-gray-600" />
+                  </motion.button>
+                  <span className="px-2 text-xs font-medium">
+                    {item.quantity}
+                  </span>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => updateQuantity(item.sku, item.quantity + 1)}
+                    className="p-1 hover:bg-gray-100 transition-colors"
+                  >
+                    <Plus className="w-3 h-3 text-gray-600" />
+                  </motion.button>
+                </div>
+              </div>
+
+              {/* Remove Button */}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => removeFromCart(item.sku)}
+                className="text-gray-400 hover:text-red-600 transition-colors flex-shrink-0"
+              >
+                <Trash2 className="w-4 h-4" />
+              </motion.button>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Price Breakdown - Toggled by Show/Hide Details */}
         <motion.div
           initial={false}
           animate={{
@@ -54,98 +134,48 @@ function CartSummary({ defaultExpanded = true }: { defaultExpanded?: boolean }) 
           transition={{ duration: 0.3 }}
           className="overflow-hidden"
         >
-          <div className="p-4 space-y-3 border-b border-gray-200 max-h-80 overflow-y-auto">
-            {items.map((item) => (
-              <motion.div
-                key={item.sku}
-                layout
-                className="flex gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                {/* Image */}
-                <div className="w-16 h-16 rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0">
-                  <img
-                    src={item.image}
-                    alt={item.productName}
-                    className="w-full h-full object-cover"
-                  />
+          <div className="p-4 space-y-3 bg-white border-b border-gray-200">
+            <div className="space-y-2 pb-3 border-b border-gray-200">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Price</span>
+                <span className="font-medium">
+                  ₹{formatPrice(originalSubtotal)}
+                </span>
+              </div>
+              {surpriseDiscount > 0 && (
+                <div className="flex justify-between text-sm font-semibold text-green-600 bg-green-50 p-2 rounded-lg -mx-2">
+                  <span>🎉 Surprise Discount</span>
+                  <span>-₹{formatPrice(surpriseDiscount)}</span>
                 </div>
-
-                {/* Details */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">
-                    {item.productName}
-                  </p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <p className="text-sm font-semibold text-red-600">₹{formatPrice(item.price)}</p>
-                    <p className="text-xs text-gray-400 line-through">₹{formatPrice(item.price * 2)}</p>
-                  </div>
-
-                  {/* Quantity Controls */}
-                  <div className="flex items-center gap-2 mt-2 w-fit bg-white rounded border border-gray-300">
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() =>
-                        updateQuantity(item.sku, item.quantity - 1)
-                      }
-                      className="p-1 hover:bg-gray-100 transition-colors"
-                    >
-                      <Minus className="w-3 h-3 text-gray-600" />
-                    </motion.button>
-                    <span className="px-2 text-xs font-medium">
-                      {item.quantity}
-                    </span>
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() =>
-                        updateQuantity(item.sku, item.quantity + 1)
-                      }
-                      className="p-1 hover:bg-gray-100 transition-colors"
-                    >
-                      <Plus className="w-3 h-3 text-gray-600" />
-                    </motion.button>
-                  </div>
-                </div>
-
-                {/* Remove Button */}
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => removeFromCart(item.sku)}
-                  className="text-gray-400 hover:text-red-600 transition-colors flex-shrink-0"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </motion.button>
-              </motion.div>
-            ))}
+              )}
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Actual Cost</span>
+                <span className="font-medium">₹{formatPrice(actualCost)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">GST (18%)</span>
+                <span className="font-medium">₹{formatPrice(gst)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Handling Fee</span>
+                <span className="font-medium text-green-600">
+                  <span className="line-through text-gray-400 mr-1">₹20</span>{" "}
+                  FREE
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Delivery Fee</span>
+                <span className="font-medium text-green-600">
+                  <span className="line-through text-gray-400 mr-1">₹50</span>{" "}
+                  FREE
+                </span>
+              </div>
+            </div>
           </div>
         </motion.div>
 
-        {/* Price Breakdown */}
-        <div className="p-4 space-y-3 bg-white">
-          <div className="space-y-2 pb-3 border-b border-gray-200">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Subtotal</span>
-              <span className="font-medium">₹{formatPrice(originalSubtotal)}</span>
-            </div>
-            {surpriseDiscount > 0 && (
-              <div className="flex justify-between text-sm font-semibold text-green-600 bg-green-50 p-2 rounded-lg -mx-2">
-                <span>🎉 Surprise Discount</span>
-                <span>-₹{formatPrice(surpriseDiscount)}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">GST (18%)</span>
-              <span className="font-medium">₹{formatPrice(tax)}</span>
-            </div>
-            {deliveryCharge > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Delivery Charges</span>
-                <span className="font-medium">₹{formatPrice(deliveryCharge)}</span>
-              </div>
-            )}
-          </div>
+        {/* Total - Always visible */}
+        <div className="p-4 bg-white">
           <div className="flex justify-between text-lg font-bold">
             <span>Total</span>
             <span className="text-blue-600">₹{formatPrice(total)}</span>

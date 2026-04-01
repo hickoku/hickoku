@@ -185,20 +185,18 @@ export default function CollectionPage() {
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.15 }}
-                            className="mt-6 flex flex-col items-center gap-4"
+                            className="mt-6 flex items-end justify-between gap-4"
                           >
-                             <div className="flex flex-col items-center gap-1">
-                               <div className="flex items-center justify-center gap-2">
-                                 <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">50% OFF</span>
-                                 <p className="text-sm text-gray-400 line-through">
-                                    Rs. {originalPriceStr}
-                                 </p>
-                               </div>
-                               <p className="text-lg sm:text-xl font-bold text-red-600">
-                                  Rs. {priceInRupees}
+                             <div className="flex flex-col items-start gap-1">
+                               <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded whitespace-nowrap">50% OFF</span>
+                               <p className="text-sm text-gray-400 line-through whitespace-nowrap">
+                                  ₹{originalPriceStr}
+                               </p>
+                               <p className="text-lg sm:text-xl font-bold text-red-600 whitespace-nowrap">
+                                  ₹{priceInRupees}
                                </p>
                              </div>
-                             <span className="inline-block text-xs font-bold uppercase tracking-widest border-2 border-gray-900 text-gray-900 px-8 py-2.5 rounded-full hover:bg-gray-900 hover:text-white transition-colors w-full text-center sm:w-auto mt-2">
+                             <span className="inline-block text-xs font-bold uppercase tracking-widest border-2 border-gray-900 text-gray-900 px-6 py-3.5 rounded-full hover:bg-gray-900 hover:text-white transition-colors text-center whitespace-nowrap">
                                 Shop Now
                              </span>
                           </motion.div>

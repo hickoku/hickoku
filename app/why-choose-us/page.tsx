@@ -1,7 +1,9 @@
 "use client";
 
 import { motion, Variants } from "framer-motion";
-import { Sparkles, Globe, Gem, Star, Crown } from "lucide-react";
+import { Sparkles, Globe, Gem, Star, Crown, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { Header } from "../components/Header";
 
 const fadeUpVariant: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -44,6 +46,7 @@ export default function WhyChooseUsPage() {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-gray-900 overflow-hidden relative selection:bg-amber-500/20">
+      <Header />
       {/* Absolute Ambient Backgrounds */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-400/20 blur-[150px] rounded-full pointer-events-none mix-blend-multiply" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-amber-600/10 blur-[150px] rounded-full pointer-events-none mix-blend-multiply" />
@@ -53,6 +56,17 @@ export default function WhyChooseUsPage() {
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none mix-blend-overlay" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-24 relative z-10">
+        <div className="mb-8 flex justify-start z-20 relative">
+          <Link href="/">
+            <motion.button
+              whileHover={{ x: -3 }}
+              className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="text-sm cursor-pointer font-medium tracking-wide">Back</span>
+            </motion.button>
+          </Link>
+        </div>
         <motion.div 
           initial="hidden"
           animate="visible"
