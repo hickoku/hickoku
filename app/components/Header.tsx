@@ -61,10 +61,13 @@ export function Header() {
             </div>
 
             {/* Center - Logo */}
-            <Link href="/" className="flex-shrink-0 absolute left-1/2 transform -translate-x-1/2">
+            <Link
+              href="/"
+              className="flex-shrink-0 absolute left-1/2 transform -translate-x-1/2"
+            >
               <motion.div
                 // whileHover={{ scale: 1.08 }}
-                className="flex items-center justify-center px-2 sm:px-4 lg:px-6 bg-white/60 backdrop-blur-sm hover:bg-white/80 transition-colors"
+                className="flex items-center justify-center px-2 sm:px-4 lg:px-6  transition-colors"
               >
                 <img
                   src={"/images/logo.png"}
@@ -76,12 +79,12 @@ export function Header() {
 
             {/* Right - Actions */}
             <div className="flex items-center justify-end gap-1 sm:gap-2 lg:gap-7 flex-1">
-                <Link
-                  href="/collection"
-                  className="text-sm font-medium hover:text-gray-600 transition-colors"
-                >
-                  {t("navigation.collections")}
-                </Link>
+              <Link
+                href="/collection"
+                className="text-sm font-medium hover:text-gray-600 transition-colors"
+              >
+                {t("navigation.collections")}
+              </Link>
               {/* Search - Hidden */}
               {/* Heart - Hidden */}
               {/* Language Switcher - Hidden */}
@@ -120,7 +123,7 @@ export function Header() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="fixed inset-0 bg-black/50 z-40 lg:hidden"
             />
-            
+
             {/* Menu Panel */}
             <motion.div
               initial={{ x: -300 }}
@@ -183,7 +186,9 @@ export function Header() {
                 <div className="mt-8 pt-6 border-t border-gray-200 space-y-4">
                   <button className="flex items-center gap-3 w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-colors">
                     <Search className="w-5 h-5" />
-                    <span className="text-sm font-medium">{t("navigation.search")}</span>
+                    <span className="text-sm font-medium">
+                      {t("navigation.search")}
+                    </span>
                   </button>
                   <button className="flex items-center gap-3 w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-colors">
                     <Heart className="w-5 h-5" />
