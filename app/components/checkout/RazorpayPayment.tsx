@@ -74,7 +74,7 @@ export function RazorpayPayment() {
 
       // Step 2: Open Razorpay checkout
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        key: orderData.keyId,
         amount: convertToPaiseForRazorpay(total),
         currency: "INR",
         name: "Hickoku Perfumes",

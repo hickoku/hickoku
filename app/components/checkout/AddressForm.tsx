@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { useContext, useState } from "react";
 import { CheckoutContext } from "../../context/CheckoutContext";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MapPin, Loader2 } from "lucide-react";
 
 export function AddressForm() {
   const context = useContext(CheckoutContext);
@@ -11,6 +11,53 @@ export function AddressForm() {
 
   const { state, dispatch } = context;
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLocating, setIsLocating] = useState(false);
+
+  const fetchAddressFromCoords = async (lat: number, lon: number) => {
+    try {
+      setIsLocating(true);
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+      const data = await res.json();
+      
+      if (data && data.address) {
+        const { address } = data;
+        const newAddressStr = address.road || address.pedestrian || address.suburb || "";
+        const city = address.city || address.town || address.village || address.county || "";
+        const zip = address.postcode || "";
+        const stateName = address.state || "";
+        const country = address.country || "";
+
+        if (newAddressStr) handleAddressChange("street", newAddressStr);
+        if (city) handleAddressChange("city", city);
+        if (zip) handleAddressChange("zipCode", zip);
+        if (stateName) handleAddressChange("state", stateName);
+        if (country) handleAddressChange("country", country);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Could not fetch address details. Please type manually.");
+    } finally {
+      setIsLocating(false);
+    }
+  };
+
+  const getUserLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        fetchAddressFromCoords(position.coords.latitude, position.coords.longitude);
+      },
+      (error) => {
+        setIsLocating(false);
+        console.error("Error getting location", error);
+        alert("Unable to retrieve your location. Please check browser permissions.");
+      }
+    );
+  };
 
   const handleAddressChange = (
     field: keyof typeof state.address,
@@ -72,159 +119,199 @@ export function AddressForm() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-2xl mx-auto"
+      className="max-w-3xl mx-auto"
     >
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold mb-2">Shipping Address</h2>
-        <p className="text-gray-600">
-          Please enter the address where you want your order delivered
-        </p>
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-bold mb-1">Shipping Address</h2>
+          <p className="text-sm text-gray-600">
+            Please enter the address where you want your order delivered
+          </p>
+        </div>
+        {process.env.ENABLE_GEOLOCATION === "true" && (
+          <button
+            type="button"
+            onClick={getUserLocation}
+            disabled={isLocating}
+            className="flex items-center justify-center gap-2 text-sm bg-blue-50 text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-blue-100 transition-colors shrink-0 disabled:opacity-50"
+          >
+            {isLocating ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
+            {isLocating ? "Locating..." : "Use Current Location"}
+          </button>
+        )}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-8 space-y-6">
-        {/* Email - Moved to top */}
-        <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">
-            Email Address
-          </label>
-          <input
-            type="email"
-            value={state.address.email || ""}
-            onChange={(e) => handleAddressChange("email", e.target.value)}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.email ? "border-red-500" : "border-gray-300"
-            }`}
-            placeholder="For order confirmation"
-          />
-          {errors.email && (
-            <p className="text-sm text-red-500 mt-1">{errors.email}</p>
-          )}
-        </div>
+      <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+        <div className="grid md:grid-cols-12 gap-3">
+          {/* Email - Full Width */}
+          <div className="md:col-span-12">
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              Email Address
+            </label>
+            <input
+              type="email"
+              value={state.address.email || ""}
+              onChange={(e) => handleAddressChange("email", e.target.value)}
+              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.email ? "border-red-500" : "border-gray-300"
+              }`}
+              placeholder="For order confirmation"
+            />
+            {errors.email && (
+              <p className="text-xs text-red-500 mt-1">{errors.email}</p>
+            )}
+          </div>
 
-        {/* Separator */}
-        <div className="border-t border-gray-100 pt-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Shipping Address</h3>
-        </div>
+          <div className="md:col-span-12 border-t border-gray-100 my-1"></div>
 
-        {/* First Row - Name */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {formFields.slice(0, 2).map((field) => (
-            <div key={field.key}>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                {field.label}
-              </label>
-              <input
-                type={field.type}
-                value={
-                  state.address[field.key as keyof typeof state.address] || ""
-                }
-                onChange={(e) =>
-                  handleAddressChange(
-                    field.key as keyof typeof state.address,
-                    e.target.value,
-                  )
-                }
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors[field.key] ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              {errors[field.key] && (
-                <p className="text-sm text-red-500 mt-1">{errors[field.key]}</p>
-              )}
-            </div>
-          ))}
-        </div>
+          {/* Row 1: Name & Phone */}
+          <div className="md:col-span-4">
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              First Name
+            </label>
+            <input
+              type="text"
+              value={state.address.firstName || ""}
+              onChange={(e) => handleAddressChange("firstName", e.target.value)}
+              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.firstName ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+            {errors.firstName && (
+              <p className="text-xs text-red-500 mt-1">{errors.firstName}</p>
+            )}
+          </div>
+          <div className="md:col-span-4">
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              Last Name
+            </label>
+            <input
+              type="text"
+              value={state.address.lastName || ""}
+              onChange={(e) => handleAddressChange("lastName", e.target.value)}
+              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.lastName ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+            {errors.lastName && (
+              <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>
+            )}
+          </div>
+          <div className="md:col-span-4">
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={state.address.phone || ""}
+              onChange={(e) => handleAddressChange("phone", e.target.value.replace(/\D/g, ""))}
+              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.phone ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+            {errors.phone && (
+              <p className="text-xs text-red-500 mt-1">{errors.phone}</p>
+            )}
+          </div>
 
-        {/* Phone */}
-        <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">
-            Phone Number
-          </label>
-          <input
-            type="tel"
-            value={state.address.phone || ""}
-            onChange={(e) => handleAddressChange("phone", e.target.value)}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.phone ? "border-red-500" : "border-gray-300"
-            }`}
-          />
-          {errors.phone && (
-            <p className="text-sm text-red-500 mt-1">{errors.phone}</p>
-          )}
-        </div>
+          {/* Row 2: Street Address */}
+          <div className="md:col-span-12">
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              Street Address
+            </label>
+            <input
+              type="text"
+              value={state.address.street || ""}
+              onChange={(e) => handleAddressChange("street", e.target.value)}
+              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.street ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+            {errors.street && (
+              <p className="text-xs text-red-500 mt-1">{errors.street}</p>
+            )}
+          </div>
 
-        {/* Street */}
-        <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">
-            Street Address
-          </label>
-          <input
-            type="text"
-            value={state.address.street || ""}
-            onChange={(e) => handleAddressChange("street", e.target.value)}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.street ? "border-red-500" : "border-gray-300"
-            }`}
-          />
-          {errors.street && (
-            <p className="text-sm text-red-500 mt-1">{errors.street}</p>
-          )}
-        </div>
+          {/* Row 3: City, State, Zip */}
+          <div className="md:col-span-4">
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              City
+            </label>
+            <input
+              type="text"
+              value={state.address.city || ""}
+              onChange={(e) => handleAddressChange("city", e.target.value)}
+              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.city ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+            {errors.city && (
+              <p className="text-xs text-red-500 mt-1">{errors.city}</p>
+            )}
+          </div>
+          <div className="md:col-span-4">
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              State
+            </label>
+            <input
+              type="text"
+              value={state.address.state || ""}
+              onChange={(e) => handleAddressChange("state", e.target.value)}
+              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.state ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+            {errors.state && (
+              <p className="text-xs text-red-500 mt-1">{errors.state}</p>
+            )}
+          </div>
+          <div className="md:col-span-4">
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              Zip Code
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={state.address.zipCode || ""}
+              onChange={(e) => handleAddressChange("zipCode", e.target.value.replace(/\D/g, ""))}
+              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.zipCode ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+            {errors.zipCode && (
+              <p className="text-xs text-red-500 mt-1">{errors.zipCode}</p>
+            )}
+          </div>
 
-        {/* City, State, Zip */}
-        <div className="grid md:grid-cols-3 gap-6">
-          {formFields.slice(5, 8).map((field) => (
-            <div key={field.key}>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                {field.label}
-              </label>
-              <input
-                type={field.type}
-                value={
-                  state.address[field.key as keyof typeof state.address] || ""
-                }
-                onChange={(e) =>
-                  handleAddressChange(
-                    field.key as keyof typeof state.address,
-                    e.target.value,
-                  )
-                }
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors[field.key] ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              {errors[field.key] && (
-                <p className="text-sm text-red-500 mt-1">{errors[field.key]}</p>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Country */}
-        <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">
-            Country
-          </label>
-          <input
-            type="text"
-            value={state.address.country || ""}
-            onChange={(e) => handleAddressChange("country", e.target.value)}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.country ? "border-red-500" : "border-gray-300"
-            }`}
-          />
-          {errors.country && (
-            <p className="text-sm text-red-500 mt-1">{errors.country}</p>
-          )}
+          {/* Row 4: Country */}
+          <div className="md:col-span-12">
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              Country
+            </label>
+            <input
+              type="text"
+              value={state.address.country || ""}
+              onChange={(e) => handleAddressChange("country", e.target.value)}
+              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.country ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+            {errors.country && (
+              <p className="text-xs text-red-500 mt-1">{errors.country}</p>
+            )}
+          </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col-reverse sm:flex-row gap-4 pt-6 border-t">
+        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-5 border-t">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => window.history.back()}
-            className="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-center"
+            className="w-full sm:w-auto px-5 py-2.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-center"
           >
             Back
           </motion.button>
@@ -232,7 +319,7 @@ export function AddressForm() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleContinue}
-            className="w-full sm:w-auto sm:ml-auto px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2"
+            className="w-full sm:w-auto sm:ml-auto px-6 py-2.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2"
           >
             Continue to Payment <ArrowRight className="w-4 h-4" />
           </motion.button>

@@ -21,12 +21,17 @@ interface CreateOrderRequest {
 export async function POST(request: NextRequest) {
     try {
         // Debug: Check environment variables
-        console.log("=== Environment Variables Check ===");
-        console.log("NEXT_PUBLIC_RAZORPAY_KEY_ID:", process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
-        console.log("RAZORPAY_KEY_SECRET exists:", !!process.env.RAZORPAY_KEY_SECRET);
-        console.log("RAZORPAY_KEY_SECRET length:", process.env.RAZORPAY_KEY_SECRET?.length);
+        const isProd = process.env.APP_ENV === "prod";
+        const MUX_RAZORPAY_KEY_ID = isProd ? process.env.RAZORPAY_KEY_ID_PROD : process.env.RAZORPAY_KEY_ID_STAGE;
+        const MUX_RAZORPAY_KEY_SECRET = isProd ? process.env.RAZORPAY_KEY_SECRET_PROD : process.env.RAZORPAY_KEY_SECRET_STAGE;
 
-        if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+        // Debug: Check environment variables
+        console.log("=== Environment Variables Check ===");
+        console.log("APP_ENV:", process.env.APP_ENV);
+        console.log("MUX_RAZORPAY_KEY_ID:", MUX_RAZORPAY_KEY_ID);
+        console.log("MUX_RAZORPAY_KEY_SECRET exists:", !!MUX_RAZORPAY_KEY_SECRET);
+
+        if (!MUX_RAZORPAY_KEY_ID || !MUX_RAZORPAY_KEY_SECRET) {
             console.error("❌ Razorpay credentials missing!");
             return NextResponse.json(
                 { error: "Razorpay credentials not configured" },
@@ -36,8 +41,8 @@ export async function POST(request: NextRequest) {
 
         // Initialize Razorpay inside the function to ensure env vars are loaded
         const razorpay = new Razorpay({
-            key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-            key_secret: process.env.RAZORPAY_KEY_SECRET,
+            key_id: MUX_RAZORPAY_KEY_ID,
+            key_secret: MUX_RAZORPAY_KEY_SECRET,
         });
 
         const body: CreateOrderRequest = await request.json();
@@ -87,8 +92,8 @@ export async function POST(request: NextRequest) {
 
         // Create Razorpay order
         console.log("=== Creating Razorpay Order ===");
-        console.log("Key ID:", process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
-        console.log("Key Secret exists:", !!process.env.RAZORPAY_KEY_SECRET);
+        console.log("Key ID:", isProd ? "PROD" : "STAGE");
+        console.log("Key Secret exists:", true);
         console.log("Order details:", {
             amount: body.total,
             currency: "INR",
@@ -118,6 +123,7 @@ export async function POST(request: NextRequest) {
             razorpayOrderId: razorpayOrder.id,
             amount: body.total,
             currency: "INR",
+            keyId: MUX_RAZORPAY_KEY_ID,
         });
     } catch (error: any) {
         console.error("Error creating order:", error);

@@ -2,8 +2,9 @@
 
 import { Search, ShoppingBag, Heart, User, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCart } from "../hooks/useCart";
 import { useLocale } from "../context/LocaleContext";
 import { LanguageSwitcher } from "./LanguageSwitcher";
@@ -11,15 +12,29 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { openCart, getCartItemCount } = useCart();
   const { t } = useLocale();
   const cartCount = getCartItemCount();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 40);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const isHomePage = pathname === "/";
+  const hideHeader = isHomePage && !isScrolled;
 
   return (
     <>
       <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
+        initial={{ y: -150, opacity: 0 }}
+        animate={{ y: hideHeader ? -150 : 0, opacity: hideHeader ? 0 : 1 }}
+        transition={{ duration: 0.6, type: "spring", bounce: 0.15 }}
         className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 flex flex-col"
       >
         <div className="bg-gray-900 text-white text-xs sm:text-sm font-medium py-2 px-4 text-center tracking-wide w-full">
