@@ -73,12 +73,12 @@ export function CheckoutFlow() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Progress Steps with Forms Below Headers */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-4"
+          className="space-y-3"
         >
           {steps.map((step, index) => {
             const isCompleted = index < actualCurrentStepIndex;
@@ -100,7 +100,7 @@ export function CheckoutFlow() {
                 }`}
               >
                 {/* Step Header */}
-                <div className="p-6">
+                <div className="p-4 sm:px-6">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4 flex-1">
                       {/* Step Circle with Icon */}
@@ -166,7 +166,7 @@ export function CheckoutFlow() {
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="border-t-2 border-gray-200 p-6 bg-white"
+                    className="border-t-2 border-gray-200 p-4 sm:p-5 bg-white"
                   >
                     {step.id === "address" && <AddressForm />}
                     {/* {step.id === "shipping" && <ShippingMethod />} */}

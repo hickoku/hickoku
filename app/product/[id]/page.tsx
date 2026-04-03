@@ -37,9 +37,9 @@ interface Product {
 }
 
 const productImages = [
-  "https://images.unsplash.com/photo-1619007556336-4d99b008471e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJmdW1lJTIwaGVybyUyMGJhbm5lciUyMGVsZWdhbnR8ZW58MXx8fHwxNzcwNTQxNTI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
-  "https://images.unsplash.com/photo-1740427326116-61306495584c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aGl0ZSUyMGZsb3dlcnMlMjBwZXJmdW1lJTIwZnJlc2h8ZW58MXx8fHwxNzcwNTQxNTI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
-  "https://images.unsplash.com/photo-1761937841527-fac9281e53fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwaW5rJTIwZmxvcmFsJTIwcGVyZnVtZSUyMGZlbWluaW5lfGVufDF8fHx8MTc3MDU0MTUyOHww&ixlib=rb-4.1.0&q=80&w=1080",
+  "/hickoku-assets/slider/Slider1.png",
+  "/hickoku-assets/slider/Slider2.jpeg",
+  "/hickoku-assets/slider/Slider3.jpeg",
 ];
 
 export default function ProductDetailPage() {
@@ -287,7 +287,6 @@ export default function ProductDetailPage() {
               {/* Product Info */}
               <div className="space-y-2 text-sm text-gray-600">
                 <p>100% Authentic Products</p>
-                <p>Free Delivery or 7 to 8 Days</p>
               </div>
 
               {/* Variant Description */}

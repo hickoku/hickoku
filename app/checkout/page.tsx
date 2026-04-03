@@ -217,14 +217,14 @@ function CheckoutPageContent() {
             <CartSummary defaultExpanded={false} />
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-4 gap-6">
             {/* Main Checkout Flow */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-3">
               <CheckoutFlow />
             </div>
 
             {/* Cart Summary Sidebar */}
-            <div className="hidden lg:block">
+            <div className="hidden lg:block lg:col-span-1">
               <CartSummary />
             </div>
           </div>

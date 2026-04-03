@@ -51,7 +51,7 @@ export const OrderConfirmationEmail = ({
   total = 0,
   trackingUrl = "https://hickoku.com/order-tracking",
 }: OrderConfirmationEmailProps) => {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://hickoku.com";
+  const baseUrl = process.env.APP_URL || "https://hickoku.com";
 
   return (
     <Html>

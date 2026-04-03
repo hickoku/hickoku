@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
                     shippingCost: order.shippingCost,
                     tax: order.tax,
                     total: order.total,
-                    trackingUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/order-tracking/${order.orderId}`
+                    trackingUrl: `${process.env.APP_URL || 'http://localhost:3000'}/order-tracking/${order.orderId}`
                 })
             );
 
