@@ -122,14 +122,12 @@ export async function addToCart(
             throw new Error('Product is out of stock');
         }
 
+        // Standardize SKU (trim and potentially case-insensitive if needed, but sticking to trim for now)
+        const normalizedSku = item.sku.trim();
+
         // Get existing cart to check current quantity
         const currentCart = await getCart(sessionId);
-        // Identify item by SKU (assuming SKU is unique per variant) OR by VariantID
-        // Architecture doc says "cart/orders will always reference variantId".
-        // But `CartItem` uses SKU as SK in DynamoDB `ITEM#${sku}`.
-        // So we stick to SKU for uniqueness in Cart?
-        // Yes, SKU should be unique.
-        const existingItem = currentCart.items.find((i) => i.sku === item.sku);
+        const existingItem = currentCart.items.find((i) => i.sku === normalizedSku);
         const newQuantity = existingItem ? existingItem.quantity + item.quantity : item.quantity;
 
         // Validate total quantity doesn't exceed stock
@@ -149,8 +147,8 @@ export async function addToCart(
             TableName: 'cart',
             Item: {
                 PK: `CART#${sessionId}`,
-                SK: `ITEM#${item.sku}`,
-                sku: item.sku,
+                SK: `ITEM#${normalizedSku}`,
+                sku: normalizedSku,
                 productId: item.productId,
                 variantId: item.variantId,
                 productName: item.productName,

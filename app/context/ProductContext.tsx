@@ -19,6 +19,7 @@ interface Product {
   image: string;
   badge?: string;
   defaultVariantId?: string; // Added for cart
+  defaultSku?: string; // Added for cart
 }
 
 // 2. Define what the context will provide
@@ -66,6 +67,9 @@ export function ProductProvider({ children }: { children: ReactNode }) {
             defaultVariantId:
               p.variants?.find((v: any) => v.status !== false)?.id ||
               `${p.id}01`,
+            defaultSku:
+              p.variants?.find((v: any) => v.status !== false)?.sku ||
+              `HICK-${p.id}`,
           }));
 
         setProducts(mappedProducts);
