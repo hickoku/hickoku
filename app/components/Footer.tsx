@@ -1,6 +1,6 @@
 "use client";
 
-import { Instagram, Facebook, Twitter } from "lucide-react";
+import { Instagram, Facebook } from "lucide-react";
 import { motion } from "motion/react";
 import { useLocale } from "../context/LocaleContext";
 
@@ -34,13 +34,13 @@ export function Footer() {
               >
                 <Facebook className="w-4 h-4" />
               </motion.a>
-              <motion.a
+              {/* <motion.a
                 href="#"
                 whileHover={{ scale: 1.1 }}
                 className="p-2 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-colors"
               >
                 <Twitter className="w-4 h-4" />
-              </motion.a>
+              </motion.a> */}
             </div>
           </div>
 

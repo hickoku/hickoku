@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import { Heart, ShoppingBag, Eye } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "../hooks/useCart";
 import { formatPrice } from "../utils/currency";
 
@@ -31,7 +31,22 @@ export function ProductCard({
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [currentSrc, setCurrentSrc] = useState(image);
   const { addToCart } = useCart();
+
+  useEffect(() => {
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+    if (isMobile && image.includes("/mobile")) {
+      setCurrentSrc(image);
+    } else {
+      // Load existing path (without /mobile if it was there)
+      setCurrentSrc(image.replace("/mobile/", "/"));
+    }
+  }, [image]);
+
+  const handleImageError = () => {
+    setCurrentSrc(image.replace("/mobile/", "/"));
+  };
 
   return (
     <motion.div
@@ -46,8 +61,9 @@ export function ProductCard({
       {/* Image Container */}
       <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
         <motion.img
-          src={image}
+          src={currentSrc}
           alt={name}
+          onError={handleImageError}
           className="w-full h-full object-cover"
           animate={{ scale: isHovered ? 1.08 : 1 }}
           transition={{ duration: 0.6 }}

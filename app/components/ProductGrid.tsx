@@ -72,7 +72,7 @@ export function ProductGrid() {
             transition={{ delay: index * 0.1 }}
           >
             <Link href={`/product/${product.id}`}>
-              <ProductCard {...product} />
+              <ProductCard {...product} defaultSku={product.defaultSku} />
             </Link>
           </motion.div>
         ))}

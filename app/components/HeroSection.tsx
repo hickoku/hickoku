@@ -21,7 +21,7 @@ const getHeroSlides = (t: any) => [
     subtitle: "",
     description: "",
     desktopImage: "/hickoku-assets/slider/Slider2.jpeg",
-    mobileImage: "/hickoku-assets/slider/mobile/Slider5.png",
+    mobileImage: "/hickoku-assets/slider/mobile/Slider2.png",
     bgColor: "none",
   },
   {
