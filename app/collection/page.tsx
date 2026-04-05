@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Header } from "../components/Header";
+import { ProductCard } from "../components/ProductCard";
 import { formatPrice } from "../utils/currency";
 
 interface ProductVariant {
@@ -27,15 +28,6 @@ interface Product {
   variants: ProductVariant[]; // Changed to array
 }
 
-// Color schemes for products (based on category and index)
-const colorSchemes = [
-  { bgColor: "#f5e6e8", textColor: "#8b4f5e" }, // Pink/Rose
-  { bgColor: "#1a1a1a", textColor: "#D4AF37" }, // Dark/Gold
-  { bgColor: "#e8d5cf", textColor: "#6b4e42" }, // Beige/Brown
-  { bgColor: "#d4752e", textColor: "#ffffff" }, // Orange/White
-  { bgColor: "#5a1a1a", textColor: "#D4AF37" }, // Burgundy/Gold
-  { bgColor: "#1a3a2e", textColor: "#D4AF37" }, // Dark Green/Gold
-];
 
 export default function CollectionPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -108,7 +100,7 @@ export default function CollectionPage() {
 
           {!loading && !error && (
             <motion.div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
               initial="hidden"
               animate="visible"
               variants={{
@@ -120,91 +112,35 @@ export default function CollectionPage() {
               }}
             >
               {products.map((product, index) => {
-                const colorScheme = colorSchemes[index % colorSchemes.length];
-                const variant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
-                const originalPrice = variant ? variant.price : 0;
-                const discountedPrice = originalPrice * 0.5;
-                const priceInRupees = variant ? formatPrice(discountedPrice) : "N/A";
-                const originalPriceStr = variant ? formatPrice(originalPrice) : "N/A";
+                const variant =
+                  product.variants && product.variants.length > 0
+                    ? product.variants[0]
+                    : null;
+                const price = variant ? String(variant.price) : "0";
+                const image = product.images?.[0] || "";
 
                 return (
-                  <Link key={product.id} href={`/product/${product.id}`}>
-                    <motion.div
-                      variants={{
-                        hidden: { opacity: 0, y: 30 },
-                        visible: { opacity: 1, y: 0 },
-                      }}
-                      whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                      className="group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer h-full flex flex-col"
-                    >
-                      {/* Flex layout: Column on mobile, keeping image on top/left */}
-                      <div className="flex flex-col h-full"> 
-                        {/* Image Section */}
-                        <div className="w-full h-64 sm:h-72 relative overflow-hidden">
-                          <motion.img
-                            src={product.images[0]}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                            whileHover={{ scale: 1.1 }}
-                            transition={{ duration: 0.6 }}
-                          />
-                          <div className="absolute inset-0 bg-black/20" />
-                          
-                          {/* Price Tag Overlay for mobile/desktop unified look or keep separate? 
-                              Let's keep the split style but vertical on mobile. 
-                              Actually, user wants "alignment" fixed. 
-                              The previous design was side-by-side. 
-                              Let's try a standard card layout: Image top, Details bottom.
-                              But the design system seems to rely on the "Color on right" background.
-                              Let's adapt: Image top, Colored Details bottom.
-                          */}
-                        </div>
-
-                        {/* Details Section */}
-                        <div className="w-full p-4 sm:p-6 flex flex-col justify-between flex-grow bg-white">
-                          <div className="space-y-2 text-center">
-                            <motion.h3
-                              initial={{ opacity: 0, y: -10 }}
-                              whileInView={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.4 }}
-                              className="text-xl sm:text-2xl tracking-wide font-medium text-gray-900"
-                            >
-                              {product.name}
-                            </motion.h3>
-
-                            <motion.p
-                              initial={{ opacity: 0, y: 20 }}
-                              whileInView={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.5, delay: 0.1 }}
-                              className="text-sm sm:text-base font-medium line-clamp-3 leading-relaxed italic text-gray-600"
-                            >
-                              {product.highlight}
-                            </motion.p>
-                          </div>
-
-                          <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.15 }}
-                            className="mt-6 flex items-end justify-between gap-4"
-                          >
-                             <div className="flex flex-col items-start gap-1">
-                               <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded whitespace-nowrap">50% OFF</span>
-                               <p className="text-sm text-gray-400 line-through whitespace-nowrap">
-                                  ₹{originalPriceStr}
-                               </p>
-                               <p className="text-lg sm:text-xl font-bold text-red-600 whitespace-nowrap">
-                                  ₹{priceInRupees}
-                               </p>
-                             </div>
-                             <span className="inline-block text-xs font-bold uppercase tracking-widest border-2 border-gray-900 text-gray-900 px-6 py-3.5 rounded-full hover:bg-gray-900 hover:text-white transition-colors text-center whitespace-nowrap">
-                                Shop Now
-                             </span>
-                          </motion.div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  </Link>
+                  <motion.div
+                    key={product.id}
+                    variants={{
+                      hidden: { opacity: 0, y: 30 },
+                      visible: { opacity: 1, y: 0 },
+                    }}
+                  >
+                    <Link href={`/product/${product.id}`}>
+                      <ProductCard
+                        id={product.id}
+                        name={product.name}
+                        description={product.description}
+                        highlight={product.highlight}
+                        price={price}
+                        image={image}
+                        category={product.category as "For Her" | "For Him"}
+                        defaultVariantId={variant?.id}
+                        defaultSku={variant?.sku}
+                      />
+                    </Link>
+                  </motion.div>
                 );
               })}
             </motion.div>
