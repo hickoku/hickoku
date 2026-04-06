@@ -14,6 +14,13 @@ export async function POST(request: NextRequest) {
 
         if (order) {
             const apiResponse = await createDelhiveryOrder(order);
+            
+            // Extract AWB if successful
+            if (apiResponse && apiResponse.packages && apiResponse.packages[0]?.waybill) {
+                const awb = apiResponse.packages[0].waybill;
+                await orderRepository.updateDelhiveryDetails(orderId, awb);
+            }
+
             return NextResponse.json({
                 success: true,
                 message: "Delhivery sync finished",

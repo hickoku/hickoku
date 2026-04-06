@@ -113,27 +113,97 @@ export default function OrderConfirmationPage() {
           transition={{ delay: 0.3 }}
           className="bg-white rounded-xl shadow-lg p-8 mb-6"
         >
-          {/* Order Number */}
+          {/* Order Number & AWB */}
           <div className="border-b border-gray-200 pb-4 mb-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <p className="text-sm text-gray-600">Order Number</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {order.orderNumber}
                 </p>
+                {order.awb && (
+                  <p className="text-sm text-blue-600 font-medium mt-1">
+                    AWB: {order.awb}
+                  </p>
+                )}
               </div>
-              <div className="text-right">
+              <div className="sm:text-right">
                 <p className="text-sm text-gray-600">Order Date</p>
                 <p className="font-medium text-gray-900">
                   {new Date(order.createdAt).toLocaleDateString("en-IN", {
                     day: "numeric",
                     month: "long",
                     year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
                   })}
                 </p>
               </div>
             </div>
           </div>
+
+          {/* Cancellation Option (Subtle) */}
+          {(() => {
+            const createdAt = new Date(order.createdAt);
+            const now = new Date();
+            
+            // Cancellation Window Logic:
+            // If ordered BEFORE 2PM: active till 2PM same day.
+            // If ordered AFTER 2PM: active till 1PM next day.
+            let expiry = new Date(createdAt);
+            if (createdAt.getHours() < 14) {
+              expiry.setHours(14, 0, 0, 0);
+            } else {
+              expiry.setDate(expiry.getDate() + 1);
+              expiry.setHours(13, 0, 0, 0);
+            }
+
+            const canCancel = now < expiry && order.status === "pending";
+
+            if (canCancel) {
+              return (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                  <p className="text-xs text-gray-500 mb-2">
+                    Changed your mind? You can cancel your order until {expiry.toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })}.
+                  </p>
+                  <button
+                    onClick={async () => {
+                      if (confirm("Are you sure you want to cancel this order? A full refund will be initiated.")) {
+                        try {
+                          const res = await fetch(`/api/orders/user-cancel`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ orderId: order.orderId })
+                          });
+                          const data = await res.json();
+                          if (data.success) {
+                            alert("Order cancelled successfully. Refund initiated.");
+                            window.location.reload();
+                          } else {
+                            alert(data.error || "Failed to cancel order");
+                          }
+                        } catch (e) {
+                          alert("An error occurred. Please try again.");
+                        }
+                      }
+                    }}
+                    className="text-xs font-semibold text-red-500 hover:text-red-700 transition-colors underline"
+                  >
+                    Cancel Order
+                  </button>
+                </div>
+              );
+            } else if (order.status === "pending") {
+              return (
+                <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-100">
+                  <p className="text-xs text-orange-700">
+                    The cancellation window for this order has closed. If you need assistance, please contact us at support@hickoku.com.
+                  </p>
+                </div>
+              );
+            }
+            return null;
+          })()}
 
           {/* Order Items */}
           <div className="mb-6">
@@ -215,22 +285,25 @@ export default function OrderConfirmationPage() {
               ) : null}
               <div className="flex justify-between text-gray-600">
                 <span>Actual Cost</span>
-                <span>₹{formatPrice(Number((order.total / 1.18).toFixed(2)))}</span>
+                <span>₹{formatPrice(Number(((order.subtotal - (order.surpriseDiscount || 0)) / 1.18).toFixed(2)))}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>GST (18%)</span>
-                <span>₹{formatPrice(Number((order.total - order.total / 1.18).toFixed(2)))}</span>
+                <span>₹{formatPrice(Number(((order.subtotal - (order.surpriseDiscount || 0)) - (order.subtotal - (order.surpriseDiscount || 0)) / 1.18).toFixed(2)))}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Handling Fee</span>
                 <span className="text-green-600 font-medium">
-                  <span className="line-through text-gray-400 mr-1">₹20</span> FREE
+                  <span style={{ textDecoration: "line-through" }} className="text-gray-400 mr-1">₹20</span> FREE
                 </span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Delivery Fee</span>
                 <span className="text-green-600 font-medium">
-                  <span className="line-through text-gray-400 mr-1">₹50</span> FREE
+                  <span style={{ textDecoration: "line-through" }} className="text-gray-400 mr-1">
+                    ₹{formatPrice(order.shippingCost > 0 ? order.shippingCost : 50)}
+                  </span>
+                  FREE
                 </span>
               </div>
               <div className="flex justify-between text-xl font-bold text-gray-900 pt-2 border-t border-gray-200">

@@ -46,6 +46,7 @@ export interface AdminOrderNotificationProps {
   paymentId?: string;
   razorpayOrderId?: string;
   orderDate: string;
+  awb?: string;
 }
 
 const formatPrice = (amount: number) => {
@@ -54,7 +55,7 @@ const formatPrice = (amount: number) => {
 
 export const AdminOrderNotification = ({
   orderNumber = "HK-0000000",
-  orderId = "",
+  orderId = "order_id",
   customerFirstName = "",
   customerLastName = "",
   customerEmail = "",
@@ -69,9 +70,11 @@ export const AdminOrderNotification = ({
   paymentId = "",
   razorpayOrderId = "",
   orderDate = "",
+  awb = "",
 }: AdminOrderNotificationProps) => {
-  const actualCost = Number((total / 1.18).toFixed(2));
-  const gst = Number((total - actualCost).toFixed(2));
+  const discountedSubtotal = total - shippingCost;
+  const actualCost = Number((discountedSubtotal / 1.18).toFixed(2));
+  const gst = Number((discountedSubtotal - actualCost).toFixed(2));
 
   return (
     <Html>
@@ -169,11 +172,22 @@ export const AdminOrderNotification = ({
             </Row>
             <Row style={priceRow}>
               <Column><Text style={priceLabel}>Handling Fee</Text></Column>
-              <Column><Text style={freeText}>FREE</Text></Column>
+              <Column>
+                <Text style={freeText}>
+                  <span style={{ textDecoration: "line-through", color: "#9ca3af", marginRight: "4px" }}>₹20</span> FREE
+                </Text>
+              </Column>
             </Row>
             <Row style={priceRow}>
               <Column><Text style={priceLabel}>Delivery Fee</Text></Column>
-              <Column><Text style={freeText}>FREE</Text></Column>
+              <Column>
+                <Text style={freeText}>
+                  <span style={{ textDecoration: "line-through", color: "#9ca3af", marginRight: "4px" }}>
+                    {formatPrice(shippingCost > 0 ? shippingCost : 50)}
+                  </span>{" "}
+                  FREE
+                </Text>
+              </Column>
             </Row>
             <Hr style={dottedHr} />
             <Row style={priceRow}>
@@ -207,6 +221,40 @@ export const AdminOrderNotification = ({
               <Column style={infoLabel}><Text style={labelText}>Internal Order ID</Text></Column>
               <Column style={infoValue}><Text style={valueText}>{orderId}</Text></Column>
             </Row>
+            {awb && (
+              <Row style={infoRow}>
+                <Column style={infoLabel}><Text style={labelText}>AWB (Tracking ID)</Text></Column>
+                <Column style={infoValue}><Text style={awbText}>{awb}</Text></Column>
+              </Row>
+            )}
+          </Section>
+
+          <Hr style={hr} />
+
+          {/* Logistics Actions */}
+          <Section>
+            <Heading style={sectionHeading}>🚚 Logistics Actions</Heading>
+            <Row>
+              <Column style={{ paddingRight: "8px" }}>
+                <a
+                  href={`${process.env.APP_URL || 'http://localhost:3000'}/api/admin/shipment/pickup?orderId=${orderId}&token=${process.env.ADMIN_ACTION_TOKEN || 'secret'}`}
+                  style={buttonPrimary}
+                >
+                  Initiate Pickup
+                </a>
+              </Column>
+              <Column style={{ paddingLeft: "8px" }}>
+                <a
+                  href={`${process.env.APP_URL || 'http://localhost:3000'}/api/admin/shipment/cancel?orderId=${orderId}&awb=${awb || ''}&token=${process.env.ADMIN_ACTION_TOKEN || 'secret'}`}
+                  style={buttonSecondary}
+                >
+                  Cancel Order & Shipment
+                </a>
+              </Column>
+            </Row>
+            <Text style={actionNote}>
+              * These actions require authorization. Clicking will trigger the Delhivery API.
+            </Text>
           </Section>
 
           <Hr style={hr} />
@@ -287,6 +335,7 @@ const infoValue = { width: "65%" };
 
 const labelText = { fontSize: "13px", color: "#6b7280", margin: "0", fontWeight: "600" };
 const valueText = { fontSize: "14px", color: "#111827", margin: "0" };
+const awbText = { fontSize: "14px", color: "#2563eb", margin: "0", fontWeight: "700" };
 
 const addressText = { fontSize: "14px", color: "#374151", lineHeight: "22px", margin: "0" };
 
@@ -306,6 +355,38 @@ const freeText = { fontSize: "14px", color: "#16a34a", fontWeight: "600", margin
 
 const totalLabel = { fontSize: "16px", color: "#111827", fontWeight: "800", margin: "0" };
 const totalValue = { fontSize: "18px", color: "#dc2626", fontWeight: "800", margin: "0", textAlign: "right" as const };
+
+const buttonPrimary = {
+  backgroundColor: "#2563eb",
+  borderRadius: "6px",
+  color: "#fff",
+  fontSize: "14px",
+  fontWeight: "600",
+  textDecoration: "none",
+  textAlign: "center" as const,
+  display: "block",
+  padding: "12px 24px",
+};
+
+const buttonSecondary = {
+  backgroundColor: "#f1f5f9",
+  borderRadius: "6px",
+  color: "#475569",
+  fontSize: "14px",
+  fontWeight: "600",
+  textDecoration: "none",
+  textAlign: "center" as const,
+  display: "block",
+  padding: "12px 24px",
+  border: "1px solid #e2e8f0",
+};
+
+const actionNote = {
+  fontSize: "12px",
+  color: "#94a3b8",
+  marginTop: "12px",
+  fontStyle: "italic",
+};
 
 const footerSection = { textAlign: "center" as const, paddingTop: "12px" };
 const footerText = { fontSize: "13px", color: "#6b7280", lineHeight: "20px", margin: "0 0 8px 0" };

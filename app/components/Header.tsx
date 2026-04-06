@@ -38,9 +38,9 @@ export function Header() {
         className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 flex flex-col"
       >
         <div className="bg-gray-900 text-white text-xs sm:text-sm font-medium py-2 px-4 text-center tracking-wide w-full">
-          🎉 Surprise{" "}
+          🎉 Enjoy{" "}
           <span className="text-amber-400 font-bold ml-1">₹25 OFF</span> on each
-          item when you buy 2 or more items!
+          item when you purchase 2 or more items!
         </div>
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 w-full">
           <div className="flex items-center justify-between h-full">

@@ -61,7 +61,7 @@ export function RazorpayPayment() {
           subtotal,
           surpriseDiscount,
           tax: Number((discountedSubtotal - discountedSubtotal / 1.18).toFixed(2)),
-          shippingCost: 0,
+          shippingCost: state.shippingCost,
           total,
         }),
       });
@@ -117,19 +117,28 @@ export function RazorpayPayment() {
               // Mark payment step as completed
               dispatch({ type: "MARK_STEP_COMPLETED", payload: "payment" });
 
-              // Detached background email dispatch (0ms latency proxy)
-              fetch("/api/orders/send-email", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ orderId: orderData.orderId })
-              }).catch(e => console.error("Detached email fetch failed", e));
+              // Chained background processing to ensure AWB is captured in the email
+              (async () => {
+                try {
+                  // 1. Sync with Delhivery first to get the AWB
+                  const syncResponse = await fetch("/api/orders/delhivery-sync", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ orderId: orderData.orderId })
+                  });
+                  if (!syncResponse.ok) console.error("Background sync failed");
 
-              // Detached background Delhivery manifest sync (0ms latency proxy)
-              fetch("/api/orders/delhivery-sync", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ orderId: orderData.orderId })
-              }).catch(e => console.error("Detached delhivery sync failed", e));
+                  // 2. Send email only after sync (so AWB is in the DB)
+                  const emailResponse = await fetch("/api/orders/send-email", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ orderId: orderData.orderId })
+                  });
+                  if (!emailResponse.ok) console.error("Background email failed");
+                } catch (e) {
+                  console.error("Detached background processing failed", e);
+                }
+              })();
 
               // Clear cart IN THE BACKGROUND after executing redirect instantly to prevent flash empty
               router.push(`/checkout/confirmation?orderId=${orderData.orderId}`);

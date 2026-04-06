@@ -17,6 +17,10 @@ export async function POST(request: NextRequest) {
         const order = await orderRepository.getOrder(orderId);
 
         if (order && order.customerEmail) {
+            const appUrl = process.env.APP_URL || 'http://localhost:3000';
+            const awb = order.awb || ((order as any).shipmentData?.packages?.[0]?.waybill) || "";
+            const cancelUrl = `${appUrl}/checkout/confirmation?orderId=${order.orderId}`;
+
             // 1. Customer Confirmation Email
             const customerHtml = await render(
                 React.createElement(OrderConfirmationEmail, {
@@ -28,7 +32,9 @@ export async function POST(request: NextRequest) {
                     shippingCost: order.shippingCost,
                     tax: order.tax,
                     total: order.total,
-                    trackingUrl: `${process.env.APP_URL || 'http://localhost:3000'}/order-tracking/${order.orderId}`
+                    trackingUrl: `${appUrl}/order-tracking/${order.orderId}`,
+                    awb: awb,
+                    cancelUrl: cancelUrl
                 })
             );
 
@@ -51,6 +57,7 @@ export async function POST(request: NextRequest) {
                     paymentId: (order as any).razorpayPaymentId || "",
                     razorpayOrderId: order.razorpayOrderId || "",
                     orderDate: order.createdAt,
+                    awb: order.awb || "",
                 })
             );
 

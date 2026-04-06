@@ -21,8 +21,10 @@ export interface CheckoutState {
   address: Partial<ShippingAddress>;
   shippingMethod: "standard" | "express" | "overnight" | null;
   shippingCost: number;
+  shippingLoading?: boolean;
   paymentMethod: "razorpay" | null;
   completedSteps: string[];
+  isDelhiveryEnabled: boolean;
 }
 
 type CheckoutAction =
@@ -36,6 +38,8 @@ type CheckoutAction =
     }
   | { type: "SET_PAYMENT_METHOD"; payload: CheckoutState["paymentMethod"] }
   | { type: "MARK_STEP_COMPLETED"; payload: string }
+  | { type: "SET_SHIPPING_LOADING"; payload: boolean }
+  | { type: "SET_DELHIVERY_CONFIG"; payload: boolean }
   | { type: "RESET_CHECKOUT" };
 
 const initialState: CheckoutState = {
@@ -45,8 +49,10 @@ const initialState: CheckoutState = {
   address: {},
   shippingMethod: "standard", // Default to standard
   shippingCost: 0, // Defaults to 0 to safely defer to getDeliveryCharge() dynamically
+  shippingLoading: false,
   paymentMethod: null,
   completedSteps: [],
+  isDelhiveryEnabled: true,
 };
 
 const checkoutReducer = (
@@ -81,6 +87,12 @@ const checkoutReducer = (
         ...state,
         completedSteps: [...new Set([...state.completedSteps, action.payload])],
       };
+
+    case "SET_SHIPPING_LOADING":
+      return { ...state, shippingLoading: action.payload };
+
+    case "SET_DELHIVERY_CONFIG":
+      return { ...state, isDelhiveryEnabled: action.payload };
 
     case "RESET_CHECKOUT":
       return initialState;
@@ -168,6 +180,20 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
       localStorage.setItem("checkoutState", JSON.stringify(state));
     }
   }, [state]);
+
+  // Fetch Delhivery Config on mount
+  React.useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const res = await fetch("/api/checkout/config");
+        const data = await res.json();
+        dispatch({ type: "SET_DELHIVERY_CONFIG", payload: data.enableDelhivery });
+      } catch (e) {
+        console.error("Failed to fetch checkout config", e);
+      }
+    };
+    fetchConfig();
+  }, []);
 
   return (
     <CheckoutContext.Provider value={{ state, dispatch }}>

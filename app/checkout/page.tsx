@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import { CheckoutProvider } from "../context/CheckoutContext";
+import { CheckoutProvider, CheckoutContext } from "../context/CheckoutContext";
 import { CheckoutFlow } from "../components/checkout/CheckoutFlow";
 import { Header } from "../components/Header";
 import { useCart } from "../hooks/useCart";
@@ -23,10 +23,12 @@ function CartSummary({
     removeFromCart,
     updateQuantity,
   } = useCart();
+  const checkoutContext = useContext(CheckoutContext);
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   if (items.length === 0) return null;
 
+  const shippingCost = checkoutContext?.state.shippingCost || 0;
   const originalSubtotal = getSubtotal(); // (a)
   const surpriseDiscount = getSurpriseDiscount(); // (b)
   const discountedSubtotal = getTotalPrice(); // a - b (GST-inclusive price)
@@ -34,7 +36,7 @@ function CartSummary({
   // GST-inclusive extraction: price already includes 18% GST
   const actualCost = Number((discountedSubtotal / 1.18).toFixed(2)); // (c) base cost without GST
   const gst = Number((discountedSubtotal - actualCost).toFixed(2)); // GST component
-  const total = discountedSubtotal; // Total = discounted subtotal (GST already included)
+  const total = discountedSubtotal; // Total only includes items (GST-inclusive). Delivery is FREE but shown with scratch-out.
 
   return (
     <motion.div
@@ -159,15 +161,22 @@ function CartSummary({
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Handling Fee</span>
                 <span className="font-medium text-green-600">
-                  <span className="line-through text-gray-400 mr-1">₹20</span>{" "}
-                  FREE
+                  <span style={{ textDecoration: "line-through" }} className="text-gray-400 mr-1">₹20</span> FREE
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Delivery Fee</span>
                 <span className="font-medium text-green-600">
-                  <span className="line-through text-gray-400 mr-1">₹50</span>{" "}
-                  FREE
+                  {checkoutContext?.state.shippingLoading ? (
+                    <span className="text-gray-400">Calculating...</span>
+                  ) : (
+                    <>
+                      <span style={{ textDecoration: "line-through" }} className="text-gray-400 mr-2">
+                        ₹{formatPrice(shippingCost > 0 ? shippingCost : 50)}
+                      </span>
+                      FREE
+                    </>
+                  )}
                 </span>
               </div>
             </div>
@@ -196,15 +205,26 @@ function CartSummary({
 
 function CheckoutPageContent() {
   const router = useRouter();
+  const { items, isCartLoaded } = useCart();
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Auth check removed for simplified checkout flow
     setIsReady(true);
-  }, [router]);
+  }, []);
 
-  if (!isReady) {
-    return null;
+  // Redirect if cart is empty and component is ready and cart metadata is loaded
+  useEffect(() => {
+    if (isReady && isCartLoaded && items.length === 0) {
+      router.push("/");
+    }
+  }, [isReady, isCartLoaded, items.length, router]);
+
+  if (!isReady || !isCartLoaded || items.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
   return (

@@ -1,17 +1,77 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { CheckoutContext } from "../../context/CheckoutContext";
-import { ArrowRight, MapPin, Loader2 } from "lucide-react";
+import { useCart } from "../../hooks/useCart";
+import { ArrowRight, MapPin, Loader2, Check } from "lucide-react";
 
 export function AddressForm() {
   const context = useContext(CheckoutContext);
+  const { items, getCartItemCount } = useCart();
   if (!context) return null;
 
   const { state, dispatch } = context;
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLocating, setIsLocating] = useState(false);
+  const [isPincodeValidating, setIsPincodeValidating] = useState(false);
+  const [pincodeStatus, setPincodeStatus] = useState<"idle" | "valid" | "invalid">("idle");
+
+  const validatePincode = async (zip: string) => {
+    if (!zip || zip.length < 6) return;
+    
+    // Skip all Delhivery network calls if disabled
+    if (!state.isDelhiveryEnabled) {
+      return;
+    }
+    try {
+      setIsPincodeValidating(true);
+      const res = await fetch(`/api/checkout/pincode?pincode=${zip}`);
+      const data = await res.json();
+      
+      if (data.serviceable) {
+        setPincodeStatus("valid");
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.zipCode;
+          return newErrors;
+        });
+
+        // NEW: Fetch dynamic shipping cost after pincode is validated
+        const totalQty = getCartItemCount() || 1;
+        const weightInGrams = totalQty * 500; // Estimate 500g per bottle
+        
+        dispatch({ type: "SET_SHIPPING_LOADING", payload: true });
+        const costRes = await fetch("/api/checkout/shipping-cost", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pincode: zip, weight: weightInGrams })
+        });
+        const costData = await costRes.json();
+        console.log("[Shipping] Dynamic Cost API Result:", costData);
+        
+        if (costData.success) {
+          dispatch({ 
+            type: "SET_SHIPPING_METHOD", 
+            payload: { method: "standard", cost: costData.shippingCost } 
+          });
+        }
+        dispatch({ type: "SET_SHIPPING_LOADING", payload: false });
+      } else {
+        setPincodeStatus("invalid");
+        setErrors((prev) => ({
+          ...prev,
+          zipCode: "Sorry, we are not available in your area yet.",
+        }));
+      }
+    } catch (error) {
+      console.error("Pincode validation failed:", error);
+      // Fallback to valid to not block user on API error
+      setPincodeStatus("valid");
+    } finally {
+      setIsPincodeValidating(false);
+    }
+  };
 
   const fetchAddressFromCoords = async (lat: number, lon: number) => {
     try {
@@ -29,7 +89,10 @@ export function AddressForm() {
 
         if (newAddressStr) handleAddressChange("street", newAddressStr);
         if (city) handleAddressChange("city", city);
-        if (zip) handleAddressChange("zipCode", zip);
+        if (zip) {
+          handleAddressChange("zipCode", zip);
+          validatePincode(zip);
+        }
         if (stateName) handleAddressChange("state", stateName);
         if (country) handleAddressChange("country", country);
       }
@@ -67,6 +130,14 @@ export function AddressForm() {
       type: "UPDATE_ADDRESS",
       payload: { [field]: value },
     });
+    
+    if (field === "zipCode") {
+      setPincodeStatus("idle");
+      if (value.length === 6) {
+        validatePincode(value);
+      }
+    }
+
     if (errors[field]) {
       setErrors({ ...errors, [field]: "" });
     }
@@ -87,8 +158,12 @@ export function AddressForm() {
       newErrors.street = "Street address is required";
     if (!state.address.city?.trim()) newErrors.city = "City is required";
     if (!state.address.state?.trim()) newErrors.state = "State is required";
-    if (!state.address.zipCode?.trim())
+    if (!state.address.zipCode?.trim()) {
       newErrors.zipCode = "Zip code is required";
+    } else if (pincodeStatus === "invalid") {
+      newErrors.zipCode = "Sorry, we are not available in your area yet.";
+    }
+
     if (!state.address.country?.trim())
       newErrors.country = "Country is required";
 
@@ -96,8 +171,13 @@ export function AddressForm() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
+    if (state.address.zipCode && pincodeStatus === "idle") {
+      await validatePincode(state.address.zipCode);
+    }
+
     if (validateForm()) {
+      if (pincodeStatus === "invalid") return;
       dispatch({ type: "MARK_STEP_COMPLETED", payload: "address" });
       dispatch({ type: "SET_STEP", payload: "payment" });
     }
@@ -267,20 +347,29 @@ export function AddressForm() {
               <p className="text-xs text-red-500 mt-1">{errors.state}</p>
             )}
           </div>
-          <div className="md:col-span-4">
-            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+          <div className="md:col-span-4 transition-all">
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1 flex items-center justify-between">
               Zip Code
+              {isPincodeValidating && <Loader2 className="w-3 h-3 animate-spin text-blue-500" />}
+              {!isPincodeValidating && state.isDelhiveryEnabled && pincodeStatus === "valid" && <Check className="w-3 h-3 text-green-500" />}
             </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={state.address.zipCode || ""}
-              onChange={(e) => handleAddressChange("zipCode", e.target.value.replace(/\D/g, ""))}
-              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.zipCode ? "border-red-500" : "border-gray-300"
-              }`}
-            />
+            <div className="relative">
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                value={state.address.zipCode || ""}
+                onChange={(e) => handleAddressChange("zipCode", e.target.value.replace(/\D/g, ""))}
+                className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 transition-all ${
+                  errors.zipCode 
+                    ? "border-red-500 focus:ring-red-500 bg-red-50" 
+                    : (state.isDelhiveryEnabled && pincodeStatus === "valid")
+                    ? "border-green-500 focus:ring-green-500 bg-green-50"
+                    : "border-gray-300 focus:ring-blue-500"
+                }`}
+              />
+            </div>
             {errors.zipCode && (
               <p className="text-xs text-red-500 mt-1">{errors.zipCode}</p>
             )}
@@ -316,12 +405,14 @@ export function AddressForm() {
             Back
           </motion.button>
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: isPincodeValidating ? 1 : 1.02 }}
+            whileTap={{ scale: isPincodeValidating ? 1 : 0.98 }}
             onClick={handleContinue}
-            className="w-full sm:w-auto sm:ml-auto px-6 py-2.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2"
+            disabled={isPincodeValidating}
+            className="w-full sm:w-auto sm:ml-auto px-6 py-2.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Continue to Payment <ArrowRight className="w-4 h-4" />
+            {isPincodeValidating ? "Validating..." : "Continue to Payment"} 
+            {!isPincodeValidating && <ArrowRight className="w-4 h-4" />}
           </motion.button>
         </div>
       </div>
