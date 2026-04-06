@@ -32,6 +32,12 @@ export default function OrderTrackingPage() {
       return;
     }
 
+    // NEW: Direct redirect if the ID itself looks like an AWB
+    if (/^\d+$/.test(orderId) && orderId.length >= 10) {
+      window.location.replace(`https://www.delhivery.com/track-v2/package/${orderId}`);
+      return;
+    }
+
     // Fetch order details from API
     fetch(`/api/orders/${orderId}`)
       .then((res) => {
@@ -40,7 +46,14 @@ export default function OrderTrackingPage() {
       })
       .then((data) => {
         if (data.success) {
-          setOrder(data.order);
+          const fetchedOrder = data.order;
+          setOrder(fetchedOrder);
+          
+          // NEW: If order has an AWB, redirect to Delhivery
+          const awb = fetchedOrder.awb || (fetchedOrder.shipmentData?.packages?.[0]?.waybill);
+          if (awb) {
+            window.location.replace(`https://www.delhivery.com/track-v2/package/${awb}`);
+          }
         } else {
           setError("Order not found");
         }

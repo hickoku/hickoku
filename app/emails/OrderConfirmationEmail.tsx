@@ -34,6 +34,8 @@ export interface OrderConfirmationEmailProps {
   shippingCost: number;
   total: number;
   trackingUrl: string;
+  awb?: string;
+  cancelUrl?: string;
 }
 
 const formatPrice = (amount: number) => {
@@ -50,6 +52,8 @@ export const OrderConfirmationEmail = ({
   shippingCost = 0,
   total = 0,
   trackingUrl = "https://hickoku.com/order-tracking",
+  awb = "",
+  cancelUrl = "",
 }: OrderConfirmationEmailProps) => {
   const baseUrl = process.env.APP_URL || "https://hickoku.com";
 
@@ -78,6 +82,18 @@ export const OrderConfirmationEmail = ({
               <Link href={trackingUrl} style={button}>
                 Track Your Order
               </Link>
+              {awb && (
+                <Text style={awbText}>
+                  AWB Tracking ID: <strong>{awb}</strong>
+                </Text>
+              )}
+              {cancelUrl && (
+                <Section style={{ marginTop: "12px" }}>
+                  <Link href={cancelUrl} style={cancelLink}>
+                    Cancel Order
+                  </Link>
+                </Section>
+              )}
             </Section>
           </Section>
 
@@ -149,7 +165,11 @@ export const OrderConfirmationEmail = ({
                 <Text style={totalLabel}>Actual Cost</Text>
               </Column>
               <Column>
-                <Text style={totalValue}>{formatPrice(Number((total / 1.18).toFixed(2)))}</Text>
+                <Text style={totalValue}>
+                  {formatPrice(
+                    Number(((total - shippingCost) / 1.18).toFixed(2)),
+                  )}
+                </Text>
               </Column>
             </Row>
             <Row style={totalRow}>
@@ -157,7 +177,17 @@ export const OrderConfirmationEmail = ({
                 <Text style={totalLabel}>GST (18%)</Text>
               </Column>
               <Column>
-                <Text style={totalValue}>{formatPrice(Number((total - total / 1.18).toFixed(2)))}</Text>
+                <Text style={totalValue}>
+                  {formatPrice(
+                    Number(
+                      (
+                        total -
+                        shippingCost -
+                        (total - shippingCost) / 1.18
+                      ).toFixed(2),
+                    ),
+                  )}
+                </Text>
               </Column>
             </Row>
             <Row style={totalRow}>
@@ -166,7 +196,16 @@ export const OrderConfirmationEmail = ({
               </Column>
               <Column>
                 <Text style={freeValue}>
-                  <span style={{ textDecoration: "line-through", color: "#9ca3af", marginRight: "4px" }}>₹20.00</span>{" "}FREE
+                  <span
+                    style={{
+                      textDecoration: "line-through",
+                      color: "#9ca3af",
+                      marginRight: "4px",
+                    }}
+                  >
+                    ₹20.00
+                  </span>{" "}
+                  FREE
                 </Text>
               </Column>
             </Row>
@@ -176,7 +215,16 @@ export const OrderConfirmationEmail = ({
               </Column>
               <Column>
                 <Text style={freeValue}>
-                  <span style={{ textDecoration: "line-through", color: "#9ca3af", marginRight: "4px" }}>₹50.00</span>{" "}FREE
+                  <span
+                    style={{
+                      textDecoration: "line-through",
+                      color: "#9ca3af",
+                      marginRight: "4px",
+                    }}
+                  >
+                    {formatPrice(shippingCost > 0 ? shippingCost : 50.0)}
+                  </span>{" "}
+                  FREE
                 </Text>
               </Column>
             </Row>
@@ -464,6 +512,19 @@ const socialContainer = {
 
 const socialIconCol = {
   padding: "0 10px",
+};
+
+const awbText = {
+  fontSize: "14px",
+  color: "#4b5563",
+  marginTop: "16px",
+  marginBottom: "0",
+};
+
+const cancelLink = {
+  fontSize: "13px",
+  color: "#9ca3af",
+  textDecoration: "underline",
 };
 
 const legalText = {
