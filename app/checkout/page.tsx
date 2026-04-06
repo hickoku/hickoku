@@ -161,7 +161,13 @@ function CartSummary({
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Handling Fee</span>
                 <span className="font-medium text-green-600">
-                  <span style={{ textDecoration: "line-through" }} className="text-gray-400 mr-1">₹20</span> FREE
+                  <span
+                    style={{ textDecoration: "line-through" }}
+                    className="text-gray-400 mr-1"
+                  >
+                    ₹20.00
+                  </span>{" "}
+                  FREE
                 </span>
               </div>
               <div className="flex justify-between text-sm">
@@ -171,8 +177,11 @@ function CartSummary({
                     <span className="text-gray-400">Calculating...</span>
                   ) : (
                     <>
-                      <span style={{ textDecoration: "line-through" }} className="text-gray-400 mr-2">
-                        ₹{formatPrice(shippingCost > 0 ? shippingCost : 50)}
+                      <span
+                        style={{ textDecoration: "line-through" }}
+                        className="text-gray-400 mr-2"
+                      >
+                        ₹{formatPrice(shippingCost > 0 ? shippingCost : 50.0)}
                       </span>
                       FREE
                     </>

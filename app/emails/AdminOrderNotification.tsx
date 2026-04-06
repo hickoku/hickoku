@@ -60,7 +60,13 @@ export const AdminOrderNotification = ({
   customerLastName = "",
   customerEmail = "",
   customerPhone = "",
-  shippingAddress = { street: "", city: "", state: "", zipCode: "", country: "India" },
+  shippingAddress = {
+    street: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "India",
+  },
   items = [],
   subtotal = 0,
   surpriseDiscount = 0,
@@ -79,7 +85,10 @@ export const AdminOrderNotification = ({
   return (
     <Html>
       <Head />
-      <Preview>🚨 New Order #{orderNumber} — {customerFirstName} {customerLastName} — {formatPrice(total)}</Preview>
+      <Preview>
+        🚨 New Order #{orderNumber} — {customerFirstName} {customerLastName} —{" "}
+        {formatPrice(total)}
+      </Preview>
       <Body style={main}>
         <Container style={container}>
           {/* Header */}
@@ -88,10 +97,12 @@ export const AdminOrderNotification = ({
             <Heading style={heading}>🚨 New Order Received</Heading>
             <Text style={subText}>
               Order <strong>{orderNumber}</strong> placed on{" "}
-              {orderDate ? new Date(orderDate).toLocaleString("en-IN", {
-                dateStyle: "long",
-                timeStyle: "short",
-              }) : "N/A"}
+              {orderDate
+                ? new Date(orderDate).toLocaleString("en-IN", {
+                    dateStyle: "long",
+                    timeStyle: "short",
+                  })
+                : "N/A"}
             </Text>
           </Section>
 
@@ -101,16 +112,30 @@ export const AdminOrderNotification = ({
           <Section>
             <Heading style={sectionHeading}>👤 Customer Details</Heading>
             <Row style={infoRow}>
-              <Column style={infoLabel}><Text style={labelText}>Name</Text></Column>
-              <Column style={infoValue}><Text style={valueText}>{customerFirstName} {customerLastName}</Text></Column>
+              <Column style={infoLabel}>
+                <Text style={labelText}>Name</Text>
+              </Column>
+              <Column style={infoValue}>
+                <Text style={valueText}>
+                  {customerFirstName} {customerLastName}
+                </Text>
+              </Column>
             </Row>
             <Row style={infoRow}>
-              <Column style={infoLabel}><Text style={labelText}>Email</Text></Column>
-              <Column style={infoValue}><Text style={valueText}>{customerEmail}</Text></Column>
+              <Column style={infoLabel}>
+                <Text style={labelText}>Email</Text>
+              </Column>
+              <Column style={infoValue}>
+                <Text style={valueText}>{customerEmail}</Text>
+              </Column>
             </Row>
             <Row style={infoRow}>
-              <Column style={infoLabel}><Text style={labelText}>Phone</Text></Column>
-              <Column style={infoValue}><Text style={valueText}>{customerPhone}</Text></Column>
+              <Column style={infoLabel}>
+                <Text style={labelText}>Phone</Text>
+              </Column>
+              <Column style={infoValue}>
+                <Text style={valueText}>{customerPhone}</Text>
+              </Column>
             </Row>
           </Section>
 
@@ -120,8 +145,11 @@ export const AdminOrderNotification = ({
           <Section>
             <Heading style={sectionHeading}>📦 Shipping Address</Heading>
             <Text style={addressText}>
-              {shippingAddress.street}<br />
-              {shippingAddress.city}, {shippingAddress.state} {shippingAddress.zipCode}<br />
+              {shippingAddress.street}
+              <br />
+              {shippingAddress.city}, {shippingAddress.state}{" "}
+              {shippingAddress.zipCode}
+              <br />
               {shippingAddress.country}
             </Text>
           </Section>
@@ -135,13 +163,19 @@ export const AdminOrderNotification = ({
               <Row key={index} style={itemRow}>
                 <Column style={{ width: "60%" }}>
                   <Text style={itemName}>{item.productName}</Text>
-                  <Text style={itemMeta}>Size: {item.size} | Qty: {item.quantity}</Text>
+                  <Text style={itemMeta}>
+                    Size: {item.size} | Qty: {item.quantity}
+                  </Text>
                 </Column>
                 <Column style={{ width: "20%", textAlign: "center" as const }}>
-                  <Text style={itemMeta}>₹{Number(item.price).toFixed(2)} × {item.quantity}</Text>
+                  <Text style={itemMeta}>
+                    ₹{Number(item.price).toFixed(2)} × {item.quantity}
+                  </Text>
                 </Column>
                 <Column style={{ width: "20%", textAlign: "right" as const }}>
-                  <Text style={itemPrice}>{formatPrice(item.price * item.quantity)}</Text>
+                  <Text style={itemPrice}>
+                    {formatPrice(item.price * item.quantity)}
+                  </Text>
                 </Column>
               </Row>
             ))}
@@ -153,37 +187,74 @@ export const AdminOrderNotification = ({
           <Section>
             <Heading style={sectionHeading}>💰 Pricing Breakdown</Heading>
             <Row style={priceRow}>
-              <Column><Text style={priceLabel}>Price (Subtotal)</Text></Column>
-              <Column><Text style={priceValue}>{formatPrice(subtotal)}</Text></Column>
+              <Column>
+                <Text style={priceLabel}>Price (Subtotal)</Text>
+              </Column>
+              <Column>
+                <Text style={priceValue}>{formatPrice(subtotal)}</Text>
+              </Column>
             </Row>
             {surpriseDiscount > 0 && (
               <Row style={priceRow}>
-                <Column><Text style={discountLabel}>Surprise Discount</Text></Column>
-                <Column><Text style={discountValue}>-{formatPrice(surpriseDiscount)}</Text></Column>
+                <Column>
+                  <Text style={discountLabel}>Surprise Discount 🎉</Text>
+                </Column>
+                <Column>
+                  <Text style={discountValue}>
+                    -{formatPrice(surpriseDiscount)}
+                  </Text>
+                </Column>
               </Row>
             )}
             <Row style={priceRow}>
-              <Column><Text style={priceLabel}>Actual Cost (excl. GST)</Text></Column>
-              <Column><Text style={priceValue}>{formatPrice(actualCost)}</Text></Column>
+              <Column>
+                <Text style={priceLabel}>Actual Cost (excl. GST)</Text>
+              </Column>
+              <Column>
+                <Text style={priceValue}>{formatPrice(actualCost)}</Text>
+              </Column>
             </Row>
             <Row style={priceRow}>
-              <Column><Text style={priceLabel}>GST (18%)</Text></Column>
-              <Column><Text style={priceValue}>{formatPrice(gst)}</Text></Column>
+              <Column>
+                <Text style={priceLabel}>GST (18%)</Text>
+              </Column>
+              <Column>
+                <Text style={priceValue}>{formatPrice(gst)}</Text>
+              </Column>
             </Row>
             <Row style={priceRow}>
-              <Column><Text style={priceLabel}>Handling Fee</Text></Column>
+              <Column>
+                <Text style={priceLabel}>Handling Fee</Text>
+              </Column>
               <Column>
                 <Text style={freeText}>
-                  <span style={{ textDecoration: "line-through", color: "#9ca3af", marginRight: "4px" }}>₹20</span> FREE
+                  <span
+                    style={{
+                      textDecoration: "line-through",
+                      color: "#9ca3af",
+                      marginRight: "4px",
+                    }}
+                  >
+                    ₹20.00
+                  </span>{" "}
+                  FREE
                 </Text>
               </Column>
             </Row>
             <Row style={priceRow}>
-              <Column><Text style={priceLabel}>Delivery Fee</Text></Column>
+              <Column>
+                <Text style={priceLabel}>Delivery Fee</Text>
+              </Column>
               <Column>
                 <Text style={freeText}>
-                  <span style={{ textDecoration: "line-through", color: "#9ca3af", marginRight: "4px" }}>
-                    {formatPrice(shippingCost > 0 ? shippingCost : 50)}
+                  <span
+                    style={{
+                      textDecoration: "line-through",
+                      color: "#9ca3af",
+                      marginRight: "4px",
+                    }}
+                  >
+                    {formatPrice(shippingCost > 0 ? shippingCost : 50.0)}
                   </span>{" "}
                   FREE
                 </Text>
@@ -191,8 +262,12 @@ export const AdminOrderNotification = ({
             </Row>
             <Hr style={dottedHr} />
             <Row style={priceRow}>
-              <Column><Text style={totalLabel}>TOTAL CHARGED</Text></Column>
-              <Column><Text style={totalValue}>{formatPrice(total)}</Text></Column>
+              <Column>
+                <Text style={totalLabel}>TOTAL CHARGED</Text>
+              </Column>
+              <Column>
+                <Text style={totalValue}>{formatPrice(total)}</Text>
+              </Column>
             </Row>
           </Section>
 
@@ -202,29 +277,49 @@ export const AdminOrderNotification = ({
           <Section>
             <Heading style={sectionHeading}>🏦 Payment Details</Heading>
             <Row style={infoRow}>
-              <Column style={infoLabel}><Text style={labelText}>Payment Mode</Text></Column>
-              <Column style={infoValue}><Text style={valueText}>Razorpay (Prepaid)</Text></Column>
+              <Column style={infoLabel}>
+                <Text style={labelText}>Payment Mode</Text>
+              </Column>
+              <Column style={infoValue}>
+                <Text style={valueText}>Razorpay (Prepaid)</Text>
+              </Column>
             </Row>
             {paymentId && (
               <Row style={infoRow}>
-                <Column style={infoLabel}><Text style={labelText}>Payment ID</Text></Column>
-                <Column style={infoValue}><Text style={valueText}>{paymentId}</Text></Column>
+                <Column style={infoLabel}>
+                  <Text style={labelText}>Payment ID</Text>
+                </Column>
+                <Column style={infoValue}>
+                  <Text style={valueText}>{paymentId}</Text>
+                </Column>
               </Row>
             )}
             {razorpayOrderId && (
               <Row style={infoRow}>
-                <Column style={infoLabel}><Text style={labelText}>Razorpay Order ID</Text></Column>
-                <Column style={infoValue}><Text style={valueText}>{razorpayOrderId}</Text></Column>
+                <Column style={infoLabel}>
+                  <Text style={labelText}>Razorpay Order ID</Text>
+                </Column>
+                <Column style={infoValue}>
+                  <Text style={valueText}>{razorpayOrderId}</Text>
+                </Column>
               </Row>
             )}
             <Row style={infoRow}>
-              <Column style={infoLabel}><Text style={labelText}>Internal Order ID</Text></Column>
-              <Column style={infoValue}><Text style={valueText}>{orderId}</Text></Column>
+              <Column style={infoLabel}>
+                <Text style={labelText}>Internal Order ID</Text>
+              </Column>
+              <Column style={infoValue}>
+                <Text style={valueText}>{orderId}</Text>
+              </Column>
             </Row>
             {awb && (
               <Row style={infoRow}>
-                <Column style={infoLabel}><Text style={labelText}>AWB (Tracking ID)</Text></Column>
-                <Column style={infoValue}><Text style={awbText}>{awb}</Text></Column>
+                <Column style={infoLabel}>
+                  <Text style={labelText}>AWB (Tracking ID)</Text>
+                </Column>
+                <Column style={infoValue}>
+                  <Text style={awbText}>{awb}</Text>
+                </Column>
               </Row>
             )}
           </Section>
@@ -237,7 +332,7 @@ export const AdminOrderNotification = ({
             <Row>
               <Column style={{ paddingRight: "8px" }}>
                 <a
-                  href={`${process.env.APP_URL || 'http://localhost:3000'}/api/admin/shipment/pickup?orderId=${orderId}&token=${process.env.ADMIN_ACTION_TOKEN || 'secret'}`}
+                  href={`${process.env.APP_URL || "http://localhost:3000"}/api/admin/shipment/pickup?orderId=${orderId}&token=${process.env.ADMIN_ACTION_TOKEN || "secret"}`}
                   style={buttonPrimary}
                 >
                   Initiate Pickup
@@ -245,7 +340,7 @@ export const AdminOrderNotification = ({
               </Column>
               <Column style={{ paddingLeft: "8px" }}>
                 <a
-                  href={`${process.env.APP_URL || 'http://localhost:3000'}/api/admin/shipment/cancel?orderId=${orderId}&awb=${awb || ''}&token=${process.env.ADMIN_ACTION_TOKEN || 'secret'}`}
+                  href={`${process.env.APP_URL || "http://localhost:3000"}/api/admin/shipment/cancel?orderId=${orderId}&awb=${awb || ""}&token=${process.env.ADMIN_ACTION_TOKEN || "secret"}`}
                   style={buttonSecondary}
                 >
                   Cancel Order & Shipment
@@ -253,7 +348,8 @@ export const AdminOrderNotification = ({
               </Column>
             </Row>
             <Text style={actionNote}>
-              * These actions require authorization. Clicking will trigger the Delhivery API.
+              * These actions require authorization. Clicking will trigger the
+              Delhivery API.
             </Text>
           </Section>
 
@@ -261,7 +357,9 @@ export const AdminOrderNotification = ({
 
           <Section style={footerSection}>
             <Text style={footerText}>
-              This is an automated notification from Hickoku Perfumes order system.<br />
+              This is an automated notification from Hickoku Perfumes order
+              system.
+              <br />
               Please process this order at the earliest.
             </Text>
             <Text style={legalText}>
@@ -327,34 +425,102 @@ const sectionHeading = {
 };
 
 const hr = { borderColor: "#e5e7eb", margin: "20px 0" };
-const dottedHr = { borderColor: "#e5e7eb", borderStyle: "dashed", margin: "10px 0" };
+const dottedHr = {
+  borderColor: "#e5e7eb",
+  borderStyle: "dashed",
+  margin: "10px 0",
+};
 
 const infoRow = { marginBottom: "6px" };
 const infoLabel = { width: "35%" };
 const infoValue = { width: "65%" };
 
-const labelText = { fontSize: "13px", color: "#6b7280", margin: "0", fontWeight: "600" };
+const labelText = {
+  fontSize: "13px",
+  color: "#6b7280",
+  margin: "0",
+  fontWeight: "600",
+};
 const valueText = { fontSize: "14px", color: "#111827", margin: "0" };
-const awbText = { fontSize: "14px", color: "#2563eb", margin: "0", fontWeight: "700" };
+const awbText = {
+  fontSize: "14px",
+  color: "#2563eb",
+  margin: "0",
+  fontWeight: "700",
+};
 
-const addressText = { fontSize: "14px", color: "#374151", lineHeight: "22px", margin: "0" };
+const addressText = {
+  fontSize: "14px",
+  color: "#374151",
+  lineHeight: "22px",
+  margin: "0",
+};
 
-const itemRow = { marginBottom: "12px", borderBottom: "1px solid #f3f4f6", paddingBottom: "8px" };
-const itemName = { fontSize: "14px", fontWeight: "600", color: "#111827", margin: "0 0 2px 0" };
+const itemRow = {
+  marginBottom: "12px",
+  borderBottom: "1px solid #f3f4f6",
+  paddingBottom: "8px",
+};
+const itemName = {
+  fontSize: "14px",
+  fontWeight: "600",
+  color: "#111827",
+  margin: "0 0 2px 0",
+};
 const itemMeta = { fontSize: "12px", color: "#6b7280", margin: "0" };
-const itemPrice = { fontSize: "14px", fontWeight: "600", color: "#111827", margin: "0", textAlign: "right" as const };
+const itemPrice = {
+  fontSize: "14px",
+  fontWeight: "600",
+  color: "#111827",
+  margin: "0",
+  textAlign: "right" as const,
+};
 
 const priceRow = { marginBottom: "6px" };
 const priceLabel = { fontSize: "14px", color: "#4b5563", margin: "0" };
-const priceValue = { fontSize: "14px", color: "#111827", fontWeight: "500", margin: "0", textAlign: "right" as const };
+const priceValue = {
+  fontSize: "14px",
+  color: "#111827",
+  fontWeight: "500",
+  margin: "0",
+  textAlign: "right" as const,
+};
 
-const discountLabel = { fontSize: "14px", color: "#16a34a", fontWeight: "600", margin: "0" };
-const discountValue = { fontSize: "14px", color: "#16a34a", fontWeight: "700", margin: "0", textAlign: "right" as const };
+const discountLabel = {
+  fontSize: "14px",
+  color: "#16a34a",
+  fontWeight: "600",
+  margin: "0",
+};
+const discountValue = {
+  fontSize: "14px",
+  color: "#16a34a",
+  fontWeight: "700",
+  margin: "0",
+  textAlign: "right" as const,
+};
 
-const freeText = { fontSize: "14px", color: "#16a34a", fontWeight: "600", margin: "0", textAlign: "right" as const };
+const freeText = {
+  fontSize: "14px",
+  color: "#16a34a",
+  fontWeight: "600",
+  margin: "0",
+  textAlign: "right" as const,
+};
 
-const totalLabel = { fontSize: "16px", color: "#111827", fontWeight: "800", margin: "0" };
-const totalValue = { fontSize: "18px", color: "#dc2626", fontWeight: "800", margin: "0", textAlign: "right" as const };
+const totalLabel = {
+  fontSize: "16px",
+  color: "#111827",
+  fontWeight: "800",
+  margin: "0",
+};
+const totalValue = {
+  fontSize: "18px",
+  color: "#dc2626",
+  fontWeight: "800",
+  margin: "0",
+  textAlign: "right" as const,
+};
 
 const buttonPrimary = {
   backgroundColor: "#2563eb",
@@ -389,5 +555,10 @@ const actionNote = {
 };
 
 const footerSection = { textAlign: "center" as const, paddingTop: "12px" };
-const footerText = { fontSize: "13px", color: "#6b7280", lineHeight: "20px", margin: "0 0 8px 0" };
+const footerText = {
+  fontSize: "13px",
+  color: "#6b7280",
+  lineHeight: "20px",
+  margin: "0 0 8px 0",
+};
 const legalText = { fontSize: "11px", color: "#9ca3af", margin: "0" };

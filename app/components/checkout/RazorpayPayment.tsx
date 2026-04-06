@@ -7,7 +7,11 @@ import { CheckoutContext } from "../../context/CheckoutContext";
 import { useCart } from "../../hooks/useCart";
 import { CreditCard, Loader } from "lucide-react";
 import { toast } from "sonner";
-import { formatPrice, convertToPaiseForRazorpay, getDeliveryCharge } from "../../utils/currency";
+import {
+  formatPrice,
+  convertToPaiseForRazorpay,
+  getDeliveryCharge,
+} from "../../utils/currency";
 
 declare global {
   interface Window {
@@ -18,7 +22,8 @@ declare global {
 export function RazorpayPayment() {
   const context = useContext(CheckoutContext);
   const router = useRouter();
-  const { items, getTotalPrice, getSubtotal, getSurpriseDiscount, clearCart } = useCart();
+  const { items, getTotalPrice, getSubtotal, getSurpriseDiscount, clearCart } =
+    useCart();
   const [isProcessing, setIsProcessing] = useState(false);
 
   if (!context) return null;
@@ -60,7 +65,9 @@ export function RazorpayPayment() {
           })),
           subtotal,
           surpriseDiscount,
-          tax: Number((discountedSubtotal - discountedSubtotal / 1.18).toFixed(2)),
+          tax: Number(
+            (discountedSubtotal - discountedSubtotal / 1.18).toFixed(2),
+          ),
           shippingCost: state.shippingCost,
           total,
         }),
@@ -121,27 +128,33 @@ export function RazorpayPayment() {
               (async () => {
                 try {
                   // 1. Sync with Delhivery first to get the AWB
-                  const syncResponse = await fetch("/api/orders/delhivery-sync", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ orderId: orderData.orderId })
-                  });
+                  const syncResponse = await fetch(
+                    "/api/orders/delhivery-sync",
+                    {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ orderId: orderData.orderId }),
+                    },
+                  );
                   if (!syncResponse.ok) console.error("Background sync failed");
 
                   // 2. Send email only after sync (so AWB is in the DB)
                   const emailResponse = await fetch("/api/orders/send-email", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ orderId: orderData.orderId })
+                    body: JSON.stringify({ orderId: orderData.orderId }),
                   });
-                  if (!emailResponse.ok) console.error("Background email failed");
+                  if (!emailResponse.ok)
+                    console.error("Background email failed");
                 } catch (e) {
                   console.error("Detached background processing failed", e);
                 }
               })();
 
               // Clear cart IN THE BACKGROUND after executing redirect instantly to prevent flash empty
-              router.push(`/checkout/confirmation?orderId=${orderData.orderId}`);
+              router.push(
+                `/checkout/confirmation?orderId=${orderData.orderId}`,
+              );
               setTimeout(() => clearCart(), 1500);
             } else {
               throw new Error("Payment verification failed");
@@ -165,7 +178,7 @@ export function RazorpayPayment() {
               await fetch("/api/orders/fail-payment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ orderId: orderData.orderId })
+                body: JSON.stringify({ orderId: orderData.orderId }),
               });
             } catch (e) {
               console.error("Failed to notify payment failure API");
@@ -191,13 +204,20 @@ export function RazorpayPayment() {
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/95 backdrop-blur-md">
           <div className="flex flex-col items-center">
             <Loader className="w-12 h-12 text-blue-600 animate-spin mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Processing Payment</h2>
-            <p className="text-gray-500">Please wait while we secure your transaction...</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Processing Payment
+            </h2>
+            <p className="text-gray-500">
+              Please wait while we secure your transaction...
+            </p>
           </div>
         </div>
       )}
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-2">Complete Payment</h2>
           <p className="text-gray-600">
@@ -205,70 +225,70 @@ export function RazorpayPayment() {
           </p>
         </div>
 
-      {/* Payment Method Button */}
-      <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={handlePayment}
-        disabled={isProcessing}
-        className="w-full p-6 border-2 border-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all text-left mb-6 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-blue-600 text-white rounded-lg flex items-center justify-center">
-            <CreditCard className="w-6 h-6" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold">Razorpay Secure Payment</h3>
-            <p className="text-sm text-gray-600">
-              Credit Card, Debit Card, UPI, Net Banking
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-gray-600">Click to pay</p>
-            <p className="font-semibold">₹{formatPrice(total)}</p>
-          </div>
-        </div>
-      </motion.button>
-
-      {/* Security Notice */}
-      <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-sm mb-6">
-        <p className="text-green-800">
-          ✓ Your payment is secured by Razorpay's industry-leading encryption
-        </p>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex gap-4">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => dispatch({ type: "SET_STEP", payload: "address" })}
-          disabled={isProcessing}
-          className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors font-medium"
-        >
-          Back
-        </motion.button>
+        {/* Payment Method Button */}
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={handlePayment}
           disabled={isProcessing}
-          className="ml-auto px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
+          className="w-full p-6 border-2 border-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all text-left mb-6 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isProcessing ? (
-            <>
-              <Loader className="w-4 h-4 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            <>
-              <CreditCard className="w-4 h-4" />
-              Pay ₹{formatPrice(total)}
-            </>
-          )}
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-blue-600 text-white rounded-lg flex items-center justify-center">
+              <CreditCard className="w-6 h-6" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold">Razorpay Secure Payment</h3>
+              <p className="text-sm text-gray-600">
+                Credit Card, Debit Card, UPI, Net Banking
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-600">Click to pay</p>
+              <p className="font-semibold">₹{formatPrice(total)}</p>
+            </div>
+          </div>
         </motion.button>
-      </div>
-    </motion.div>
+
+        {/* Security Notice */}
+        <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-sm mb-6">
+          <p className="text-green-800">
+            ✓ Your payment is secured by Razorpay's industry-leading encryption
+          </p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-4">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => dispatch({ type: "SET_STEP", payload: "address" })}
+            disabled={isProcessing}
+            className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors font-medium"
+          >
+            Back
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handlePayment}
+            disabled={isProcessing}
+            className="ml-auto px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
+          >
+            {isProcessing ? (
+              <>
+                <Loader className="w-4 h-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <CreditCard className="w-4 h-4" />
+                Pay ₹{formatPrice(total)}
+              </>
+            )}
+          </motion.button>
+        </div>
+      </motion.div>
     </>
   );
 }

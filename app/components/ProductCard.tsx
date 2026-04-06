@@ -16,6 +16,7 @@ interface ProductCardProps {
   badge?: string;
   category: "For Her" | "For Him";
   defaultVariantId?: string; // New prop
+  defaultSku?: string; // New prop
 }
 
 export function ProductCard({
@@ -28,6 +29,7 @@ export function ProductCard({
   category,
   id,
   defaultVariantId, // Added
+  defaultSku, // Added
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
@@ -145,7 +147,7 @@ export function ProductCard({
                 productName: name,
                 price: Number(price.replace(/[^0-9.]/g, "")) * 0.5,
                 image,
-                sku: `HICK-${id}`,
+                sku: defaultSku || `HICK-${id}`,
                 size: "Standard",
                 quantity: 1,
               })
@@ -183,7 +185,7 @@ export function ProductCard({
                 productName: name,
                 price: Number(price.replace(/[^0-9.]/g, "")) * 0.5,
                 image,
-                sku: `HICK-${id}`,
+                sku: defaultSku || `HICK-${id}`,
                 size: "Standard",
                 quantity: 1,
               });

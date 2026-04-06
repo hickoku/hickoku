@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from "react";
+import { usePathname } from "next/navigation";
 
 export interface CartItem {
   id?: string; // Optional internal ID
@@ -66,6 +67,12 @@ interface CartProviderProps {
 
 export function CartProvider({ children }: CartProviderProps) {
   const [state, setState] = useState<CartState>(initialState);
+  const pathname = usePathname();
+
+  // Close cart on navigation
+  useEffect(() => {
+    setState((prev) => ({ ...prev, isOpen: false }));
+  }, [pathname]);
 
   // Fetch cart from API
   const fetchCart = useCallback(async () => {

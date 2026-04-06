@@ -165,7 +165,11 @@ export const OrderConfirmationEmail = ({
                 <Text style={totalLabel}>Actual Cost</Text>
               </Column>
               <Column>
-                <Text style={totalValue}>{formatPrice(Number(((total - shippingCost) / 1.18).toFixed(2)))}</Text>
+                <Text style={totalValue}>
+                  {formatPrice(
+                    Number(((total - shippingCost) / 1.18).toFixed(2)),
+                  )}
+                </Text>
               </Column>
             </Row>
             <Row style={totalRow}>
@@ -173,7 +177,17 @@ export const OrderConfirmationEmail = ({
                 <Text style={totalLabel}>GST (18%)</Text>
               </Column>
               <Column>
-                <Text style={totalValue}>{formatPrice(Number(((total - shippingCost) - (total - shippingCost) / 1.18).toFixed(2)))}</Text>
+                <Text style={totalValue}>
+                  {formatPrice(
+                    Number(
+                      (
+                        total -
+                        shippingCost -
+                        (total - shippingCost) / 1.18
+                      ).toFixed(2),
+                    ),
+                  )}
+                </Text>
               </Column>
             </Row>
             <Row style={totalRow}>
@@ -182,7 +196,16 @@ export const OrderConfirmationEmail = ({
               </Column>
               <Column>
                 <Text style={freeValue}>
-                  <span style={{ textDecoration: "line-through", color: "#9ca3af", marginRight: "4px" }}>₹20.00</span> FREE
+                  <span
+                    style={{
+                      textDecoration: "line-through",
+                      color: "#9ca3af",
+                      marginRight: "4px",
+                    }}
+                  >
+                    ₹20.00
+                  </span>{" "}
+                  FREE
                 </Text>
               </Column>
             </Row>
@@ -192,8 +215,14 @@ export const OrderConfirmationEmail = ({
               </Column>
               <Column>
                 <Text style={freeValue}>
-                  <span style={{ textDecoration: "line-through", color: "#9ca3af", marginRight: "4px" }}>
-                    {formatPrice(shippingCost > 0 ? shippingCost : 50.00)}
+                  <span
+                    style={{
+                      textDecoration: "line-through",
+                      color: "#9ca3af",
+                      marginRight: "4px",
+                    }}
+                  >
+                    {formatPrice(shippingCost > 0 ? shippingCost : 50.0)}
                   </span>{" "}
                   FREE
                 </Text>

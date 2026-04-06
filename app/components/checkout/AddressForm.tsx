@@ -296,6 +296,8 @@ export function AddressForm() {
             )}
           </div>
 
+          <div className="md:col-span-12 border-t border-gray-100 my-1"></div>
+
           {/* Row 2: Street Address */}
           <div className="md:col-span-12">
             <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">

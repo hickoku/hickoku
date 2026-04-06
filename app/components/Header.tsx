@@ -29,13 +29,21 @@ export function Header() {
   const isHomePage = pathname === "/";
   const hideHeader = isHomePage && !isScrolled;
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 40);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <>
       <motion.header
-        initial={{ y: -150, opacity: 0 }}
         animate={{ y: hideHeader ? -150 : 0, opacity: hideHeader ? 0 : 1 }}
         transition={{ duration: 0.6, type: "spring", bounce: 0.15 }}
         className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 flex flex-col"
+        initial={{ y: -150, opacity: 0 }}
       >
         <div className="bg-gray-900 text-white text-xs sm:text-sm font-medium py-2 px-4 text-center tracking-wide w-full">
           🎉 Enjoy{" "}
