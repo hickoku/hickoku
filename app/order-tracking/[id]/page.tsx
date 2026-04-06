@@ -176,7 +176,7 @@ export default function OrderTrackingPage() {
               <div>
                 <button
                   onClick={() => router.back()}
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-4 transition-colors"
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-4 transition-colors cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Back

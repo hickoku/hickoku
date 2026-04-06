@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
                     const htmlMessage = await render(
                         React.createElement(PaymentFailureEmail, {
                             customerFirstName: order.customerFirstName,
-                            checkoutUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/checkout`
+                            checkoutUrl: `${process.env.APP_URL || 'http://localhost:3000'}/checkout`
                         })
                     );
                     await sendHtmlEmail(

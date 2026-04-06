@@ -45,7 +45,7 @@ export default function WhyChooseUsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-gray-900 overflow-hidden relative selection:bg-amber-500/20">
+    <div className="min-h-screen flex flex-col bg-[#FAFAFA] text-gray-900 overflow-hidden relative selection:bg-amber-500/20">
       <Header />
       {/* Absolute Ambient Backgrounds */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-400/20 blur-[150px] rounded-full pointer-events-none mix-blend-multiply" />
@@ -55,7 +55,7 @@ export default function WhyChooseUsPage() {
       {/* Grid Pattern Overlay */}
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none mix-blend-overlay" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-24 relative z-10">
+      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-36 pb-24 relative z-10">
         <div className="mb-8 flex justify-start z-20 relative">
           <Link href="/">
             <motion.button
@@ -164,7 +164,7 @@ export default function WhyChooseUsPage() {
             </a>
           </div>
         </motion.div>
-      </div>
+      </main>
     </div>
   );
 }

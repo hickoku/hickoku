@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from "react";
+import { usePathname } from "next/navigation";
 
 export interface CartItem {
   id?: string; // Optional internal ID
@@ -64,6 +65,12 @@ interface CartProviderProps {
 
 export function CartProvider({ children }: CartProviderProps) {
   const [state, setState] = useState<CartState>(initialState);
+  const pathname = usePathname();
+
+  // Close cart on navigation
+  useEffect(() => {
+    setState((prev) => ({ ...prev, isOpen: false }));
+  }, [pathname]);
 
   // Fetch cart from API
   const fetchCart = useCallback(async () => {
@@ -138,20 +145,23 @@ export function CartProvider({ children }: CartProviderProps) {
       setState((prev) => ({ ...prev, loading: true, error: null }));
 
       // Optimistic update
-      const existingItem = state.items.find((i) => i.sku === item.sku);
-      const optimisticItems = existingItem
-        ? state.items.map((i) =>
-            i.sku === item.sku
-              ? { ...i, quantity: i.quantity + item.quantity }
-              : i
-          )
-        : [...state.items, { ...item, addedAt: new Date().toISOString() }];
+      setState((prev) => {
+        const existingItem = prev.items.find((i) => i.sku === item.sku);
+        const optimisticItems = existingItem
+          ? prev.items.map((i) =>
+              i.sku === item.sku
+                ? { ...i, quantity: i.quantity + item.quantity }
+                : i
+            )
+          : [...prev.items, { ...item, addedAt: new Date().toISOString() }];
 
-      setState((prev) => ({
-        ...prev,
-        items: optimisticItems,
-        isOpen: true,
-      }));
+        return {
+          ...prev,
+          items: optimisticItems,
+          isOpen: true,
+          error: null,
+        };
+      });
 
       const response = await fetch('/api/cart', {
         method: 'POST',

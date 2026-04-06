@@ -14,7 +14,7 @@ export function formatPrice(amount: number | string): string {
 }
 
 export function getDeliveryCharge(): number {
-    if (process.env.NEXT_PUBLIC_ENABLE_SHIPPING === 'false') {
+    if (process.env.ENABLE_SHIPPING === 'false') {
         return 0;
     }
     return IS_DATABASE_IN_PAISE ? 5000 : 50; // ₹50

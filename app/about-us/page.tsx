@@ -27,7 +27,7 @@ export default function AboutUsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-gray-900 overflow-hidden relative selection:bg-amber-500/20">
+    <div className="min-h-screen flex flex-col bg-[#FAFAFA] text-gray-900 overflow-hidden relative selection:bg-amber-500/20">
       <Header />
       
       {/* Absolute Ambient Backgrounds */}
@@ -37,7 +37,7 @@ export default function AboutUsPage() {
       {/* Grid Pattern Overlay */}
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none mix-blend-overlay" />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-24 relative z-10">
+      <main className="flex-grow max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-36 pb-24 relative z-10">
         <div className="mb-8 flex justify-start z-20 relative">
           <Link href="/">
             <motion.button

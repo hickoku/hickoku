@@ -29,7 +29,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Verify signature
-        const secret = process.env.RAZORPAY_KEY_SECRET!;
+        const isProd = process.env.APP_ENV === "prod";
+        const secret = isProd ? process.env.RAZORPAY_KEY_SECRET_PROD! : process.env.RAZORPAY_KEY_SECRET_STAGE!;
         const generatedSignature = crypto
             .createHmac("sha256", secret)
             .update(`${body.razorpayOrderId}|${body.razorpayPaymentId}`)
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
                     const htmlMessage = await render(
                         React.createElement(PaymentFailureEmail, {
                             customerFirstName: order.customerFirstName,
-                            checkoutUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/checkout`
+                            checkoutUrl: `${process.env.APP_URL || 'http://localhost:3000'}/checkout`
                         })
                     );
                     await sendHtmlEmail(

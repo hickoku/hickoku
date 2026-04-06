@@ -19,6 +19,7 @@ interface Product {
   image: string;
   badge?: string;
   defaultVariantId?: string; // Added for cart
+  defaultSku?: string; // Added for cart
 }
 
 // 2. Define what the context will provide
@@ -43,18 +44,33 @@ export function ProductProvider({ children }: { children: ReactNode }) {
         if (!response.ok) throw new Error("Failed to fetch");
         const data: any[] = await response.json();
         console.log("Fetched products from API:", data);
-        // Map Enhanced Product to Simple Product for Context
-        const mappedProducts: Product[] = data.map((p) => ({
-          id: p.id,
-          category: p.category as "For Her" | "For Him",
-          name: p.name,
-          description: p.description,
-          highlight: p.highlight,
-          price: String(p.basePrice || p.variants?.[0]?.price || 0),
-          image: p.images?.[0] || "",
-          badge: p.badge,
-          defaultVariantId: p.variants?.[0]?.id || `${p.id}01`,
-        }));
+        // Only show products with at least one visible variant
+        const mappedProducts: Product[] = data
+          .filter(
+            (p) =>
+              Array.isArray(p.variants) &&
+              p.variants.some((v: any) => v.status !== false),
+          )
+          .map((p) => ({
+            id: p.id,
+            category: p.category as "For Her" | "For Him",
+            name: p.name,
+            description: p.description,
+            highlight: p.highlight,
+            price: String(
+              p.basePrice ||
+                p.variants?.find((v: any) => v.status !== false)?.price ||
+                0,
+            ),
+            image: p.images?.[0] || "",
+            badge: p.badge,
+            defaultVariantId:
+              p.variants?.find((v: any) => v.status !== false)?.id ||
+              `${p.id}01`,
+            defaultSku:
+              p.variants?.find((v: any) => v.status !== false)?.sku ||
+              `HICK-${p.id}`,
+          }));
 
         setProducts(mappedProducts);
       } catch (err) {

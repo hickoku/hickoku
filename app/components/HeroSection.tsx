@@ -8,33 +8,51 @@ import { useLocale } from "../context/LocaleContext";
 const getHeroSlides = (t: any) => [
   {
     id: 1,
-    title: t("hero.silkMusk.title"),
-    subtitle: t("hero.silkMusk.subtitle"),
-    description: t("hero.silkMusk.description"),
-    image:
-      "https://images.unsplash.com/photo-1619007556336-4d99b008471e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJmdW1lJTIwaGVybyUyMGJhbm5lciUyMGVsZWdhbnR8ZW58MXx8fHwxNzcwNTQxNTI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    bgColor: "bg-[#dfe5db]",
+    title: "",
+    subtitle: "",
+    description: "",
+    desktopImage: "/hickoku-assets/slider/Slider1.png",
+    mobileImage: "/hickoku-assets/slider/mobile/Slider1.png",
+    bgColor: "none",
   },
   {
     id: 2,
-    title: t("hero.midnightAgar.title"),
-    subtitle: t("hero.midnightAgar.subtitle"),
-    description: t("hero.midnightAgar.description"),
-    image:
-      "https://images.unsplash.com/photo-1759793500110-e3cb1f0fe6ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxibGFjayUyMGx1eHVyeSUyMHBlcmZ1bWUlMjBtYXNjdWxpbmV8ZW58MXx8fHwxNzcwNTQxNTI4fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    bgColor: "bg-gray-900",
+    title: "",
+    subtitle: "",
+    description: "",
+    desktopImage: "/hickoku-assets/slider/Slider2.jpeg",
+    mobileImage: "/hickoku-assets/slider/mobile/Slider2.png",
+    bgColor: "none",
   },
+  {
+    id: 3,
+    title: "",
+    subtitle: "",
+    description: "",
+    desktopImage: "/hickoku-assets/slider/Slider3.jpeg",
+    mobileImage: "/hickoku-assets/slider/mobile/Slider5.png",
+    bgColor: "none",
+  }
 ];
 
 export function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { t } = useLocale();
   const heroSlides = getHeroSlides(t);
 
   useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 40);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 5000);
+    }, 10000);
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
@@ -51,7 +69,23 @@ export function HeroSection() {
   const slide = heroSlides[currentSlide];
 
   return (
-    <section className="relative h-[600px] overflow-hidden mt-16 sm:mt-20">
+    <motion.section 
+      layout
+      transition={{ duration: 0.6, type: "spring", bounce: 0.15 }}
+      style={{
+        marginTop: isScrolled
+          ? (typeof window !== 'undefined' && window.innerWidth >= 640 ? '118px' : '102px')
+          : "0px"
+      }}
+      className="relative w-full aspect-[4/5] sm:aspect-auto overflow-hidden block bg-white"
+    >
+      {/* Invisible placeholder dynamically tracks the specific image's native aspect ratio only on Desktop! */}
+      <img
+        src={slide.desktopImage}
+        className="w-full h-auto invisible pointer-events-none hidden sm:block -mb-[180px]"
+        alt=""
+      />
+
       <AnimatePresence mode="wait">
         <motion.div
           key={slide.id}
@@ -59,63 +93,82 @@ export function HeroSection() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.6 }}
-          className={`absolute inset-0 ${slide.bgColor}`}
+          className={`absolute inset-0 ${slide?.bgColor}`}
         >
           <div className="absolute inset-0">
+            {/* Mobile Image */}
             <img
-              src={slide.image}
-              alt={slide.title}
-              className="w-full h-full object-cover mix-blend-overlay opacity-40"
+              src={slide.mobileImage}
+              alt={slide.title || "Hero banner"}
+              className={`w-full h-full object-cover sm:hidden ${
+                slide.title || slide.subtitle || slide.description
+                  ? "mix-blend-overlay opacity-40"
+                  : "opacity-100"
+              }`}
+            />
+            {/* Desktop Image */}
+            <img
+              src={slide.desktopImage}
+              alt={slide.title || "Hero banner"}
+              className={`w-full h-full object-cover hidden sm:block ${
+                slide.title || slide.subtitle || slide.description
+                  ? "mix-blend-overlay opacity-40"
+                  : "opacity-100"
+              }`}
             />
           </div>
 
-          <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
-            <motion.div
-              initial={{ x: -50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className={`max-w-2xl ${currentSlide === 1 ? "text-white" : "text-gray-900"}`}
-            >
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="text-sm tracking-widest uppercase mb-4"
-              >
-                {slide.subtitle}
-              </motion.p>
-              <motion.h2
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="text-6xl sm:text-7xl lg:text-8xl mb-6 tracking-tight"
-              >
-                {slide.title}
-              </motion.h2>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-lg mb-8 opacity-90"
-              >
-                {slide.description}
-              </motion.p>
-              <motion.button
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`px-8 py-3 rounded-full transition-all ${
-                  currentSlide === 1
-                    ? "bg-white text-gray-900 hover:bg-gray-100"
-                    : "bg-gray-900 text-white hover:bg-gray-800"
+          {(slide.title || slide.subtitle || slide.description) && (
+            <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+              <motion.div
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+                className={`max-w-2xl ${
+                  currentSlide === 1 ? "text-white" : "text-gray-900"
                 }`}
               >
-                Discover Now
-              </motion.button>
-            </motion.div>
-          </div>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-sm tracking-widest uppercase mb-4"
+                >
+                  {slide.subtitle}
+                </motion.p>
+                <motion.h2
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="text-6xl sm:text-7xl lg:text-8xl mb-6 tracking-tight"
+                >
+                  {slide.title}
+                </motion.h2>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="text-lg mb-8 opacity-90"
+                >
+                  {slide.description}
+                </motion.p>
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`px-8 py-3 rounded-full transition-all ${
+                    currentSlide === 1
+                      ? "bg-white text-gray-900 hover:bg-gray-100"
+                      : "bg-gray-900 text-white hover:bg-gray-800"
+                  }`}
+                >
+                  Discover Now
+                </motion.button>
+              </motion.div>
+            </div>
+          )}
         </motion.div>
       </AnimatePresence>
 
@@ -145,6 +198,6 @@ export function HeroSection() {
           />
         ))}
       </div>
-    </section>
+    </motion.section>
   );
 }
