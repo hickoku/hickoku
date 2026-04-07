@@ -150,7 +150,7 @@ export function HeroSection() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="text-lg mb-8 opacity-90"
+                  className="text-lg mb-8 opacity-90 capitalize"
                 >
                   {slide.description}
                 </motion.p>

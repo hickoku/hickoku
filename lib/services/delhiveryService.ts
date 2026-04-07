@@ -42,6 +42,37 @@ function rawPost(url: string, token: string, body: string): Promise<any> {
   });
 }
 
+/**
+ * Helper to get site-wide Delhivery configuration based on environment.
+ */
+const getDelhiveryConfig = () => {
+  const isProd = process.env.APP_ENV === "prod" || process.env.NODE_ENV === "production";
+  const apiKey = isProd
+    ? process.env.DELHIVERY_API_KEY_PROD
+    : process.env.DELHIVERY_API_KEY_STAGE;
+  const apiUrl = isProd
+    ? process.env.DELHIVERY_API_URL_PROD
+    : process.env.DELHIVERY_API_URL_STAGE;
+  const warehouseName = isProd
+    ? process.env.DELHIVERY_WAREHOUSE_NAME_PROD
+    : process.env.DELHIVERY_WAREHOUSE_NAME_STAGE;
+  const clientName = isProd
+    ? process.env.DELHIVERY_CLIENT_NAME_PROD
+    : process.env.DELHIVERY_CLIENT_NAME_STAGE;
+
+  // Derive baseUrl from the full API URL (e.g., .../api/cmu/create.json)
+  let baseUrl = isProd ? process.env.DELHIVERY_BASE_URL_PROD : process.env.DELHIVERY_BASE_URL_STAGE;
+  if (apiUrl) {
+    try {
+      baseUrl = new URL(apiUrl).origin;
+    } catch (e) {
+      console.error("[Delhivery] Invalid API URL:", apiUrl);
+    }
+  }
+
+  return { isProd, apiKey, apiUrl, baseUrl, warehouseName, clientName };
+};
+
 export const createDelhiveryOrder = async (order: any) => {
   if (process.env.ENABLE_DELHIVERY !== "true") {
     console.log(
@@ -50,19 +81,7 @@ export const createDelhiveryOrder = async (order: any) => {
     return null;
   }
 
-  const isProd = process.env.APP_ENV === "prod";
-  const clientName = isProd
-    ? process.env.DELHIVERY_CLIENT_NAME_PROD
-    : process.env.DELHIVERY_CLIENT_NAME_STAGE;
-  const warehouseName = isProd
-    ? process.env.DELHIVERY_WAREHOUSE_NAME_PROD
-    : process.env.DELHIVERY_WAREHOUSE_NAME_STAGE;
-  const apiUrl = isProd
-    ? process.env.DELHIVERY_API_URL_PROD
-    : process.env.DELHIVERY_API_URL_STAGE;
-  const apiKey = isProd
-    ? process.env.DELHIVERY_API_KEY_PROD
-    : process.env.DELHIVERY_API_KEY_STAGE;
+  const { apiUrl, apiKey, warehouseName } = getDelhiveryConfig();
 
   if (!apiUrl || !apiKey) {
     console.error(
@@ -104,7 +123,7 @@ export const createDelhiveryOrder = async (order: any) => {
       seller_inv: order.orderNumber,
       quantity: totalQty.toString(),
       waybill: "",
-      shipment_width: "100",
+      shipment_width: parseFloat((totalQty * 55).toString()),
       shipping_mode: "Surface",
       address_type: "",
     };
@@ -158,19 +177,11 @@ export const createDelhiveryOrder = async (order: any) => {
 export const checkPincodeServiceability = async (pincode: string) => {
   if (process.env.ENABLE_DELHIVERY !== "true") return true;
 
-  const isProd = process.env.APP_ENV === "prod";
-  const apiKey = isProd
-    ? process.env.DELHIVERY_API_KEY_PROD
-    : process.env.DELHIVERY_API_KEY_STAGE;
-  const baseUrl = isProd
-    ? "https://track.delhivery.com"
-    : "https://staging-express.delhivery.com";
-  // const baseUrl = "https://track.delhivery.com";
-
+  const { apiKey, baseUrl } = getDelhiveryConfig();
 
   try {
     const url = `${baseUrl}/c/api/pin-codes/json/?filter_codes=${pincode}`;
-    console.log("url", url)
+    console.log("[Delhivery] Pincode check URL:", url);
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -207,20 +218,10 @@ export const createDelhiveryPickup = async () => {
     console.log("[DELHIVERY DISABLED] Skipped pickup request");
     return { success: true, message: "Disabled via config" };
   }
-  const isProd = process.env.APP_ENV === "prod";
-  const apiKey = isProd
-    ? process.env.DELHIVERY_API_KEY_PROD
-    : process.env.DELHIVERY_API_KEY_STAGE;
-  const apiUrl = isProd
-    ? process.env.DELHIVERY_API_URL_PROD
-    : process.env.DELHIVERY_API_URL_STAGE;
 
-  if (!apiUrl) throw new Error("Delhivery API URL not configured.");
-  const baseUrl = new URL(apiUrl).origin;
+  const { apiKey, baseUrl, warehouseName } = getDelhiveryConfig();
 
-  const warehouseName = isProd
-    ? process.env.DELHIVERY_WAREHOUSE_NAME_PROD
-    : process.env.DELHIVERY_WAREHOUSE_NAME_STAGE;
+  if (!baseUrl) throw new Error("Delhivery API URL not configured.");
 
   try {
     const payload = {
@@ -266,16 +267,10 @@ export const cancelDelhiveryShipment = async (awb: string) => {
     console.log("[DELHIVERY DISABLED] Skipped cancellation for AWB:", awb);
     return { success: true, status: "Cancelled" };
   }
-  const isProd = process.env.APP_ENV === "prod";
-  const apiKey = isProd
-    ? process.env.DELHIVERY_API_KEY_PROD
-    : process.env.DELHIVERY_API_KEY_STAGE;
-  const apiUrl = isProd
-    ? process.env.DELHIVERY_API_URL_PROD
-    : process.env.DELHIVERY_API_URL_STAGE;
 
-  if (!apiUrl) throw new Error("Delhivery API URL not configured.");
-  const baseUrl = new URL(apiUrl).origin;
+  const { apiKey, baseUrl } = getDelhiveryConfig();
+
+  if (!baseUrl) throw new Error("Delhivery API URL not configured.");
 
   try {
     const payload = {
@@ -325,13 +320,7 @@ export const cancelDelhiveryShipment = async (awb: string) => {
 export const getDelhiveryShippingCost = async (destinationPincode: string, weightInGrams: number = 180) => {
   if (process.env.ENABLE_DELHIVERY !== "true") return 0;
 
-  const isProd = process.env.APP_ENV === "prod";
-  const apiKey = isProd
-    ? process.env.DELHIVERY_API_KEY_PROD
-    : process.env.DELHIVERY_API_KEY_STAGE;
-  const baseUrl = isProd
-    ? "https://track.delhivery.com"
-    : "https://staging-express.delhivery.com";
+  const { apiKey, baseUrl } = getDelhiveryConfig();
 
 
   // Origin pincode for Kamptee warehouse
