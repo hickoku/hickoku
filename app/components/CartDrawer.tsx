@@ -134,25 +134,26 @@ export function CartDrawer() {
                           {t("cart.sku")}: {item.sku}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
-                          <p className="text-lg font-bold text-red-600">
-                            ₹{formatPrice(item.price)}
-                          </p>
+                         <span className="text-xs font-bold text-red-600">
+                            50% OFF
+                          </span>
                           <p className="text-sm text-gray-400 line-through">
                             ₹{formatPrice(item.price * 2)}
                           </p>
-                          <span className="text-xs font-bold text-red-600">
-                            50% OFF
-                          </span>
                         </div>
+                         <p className="text-lg font-bold text-red-600">
+                            ₹{formatPrice(item.price)}
+                          </p>
                       </div>
 
                       {/* Quantity Controls */}
                       <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 w-fit">
                         <motion.button
+                          disabled={item.quantity === 1 ? true : false}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() =>
-                            updateQuantity(item.sku, item.quantity - 1)
+                            item.quantity > 1 && updateQuantity(item.sku, item.quantity - 1)
                           }
                           className="p-1 hover:bg-gray-100 transition-colors"
                         >
@@ -162,6 +163,7 @@ export function CartDrawer() {
                           {item.quantity}
                         </span>
                         <motion.button
+                          disabled={item.quantity === 10? true : false}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() =>

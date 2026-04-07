@@ -3,7 +3,7 @@ User-agent: *
 Disallow: /
 
 # Host
-# Host: https://yourdomain.com
+Host: https://hickoku-new.staging.com
 
 # Sitemaps
-# Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://hickoku-new.staging.com/sitemap.xml
