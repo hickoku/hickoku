@@ -24,6 +24,7 @@ interface CartState {
   totalPrice: number;
   isOpen: boolean;
   loading: boolean;
+  isCartLoaded: boolean;
   error: string | null;
   sessionId: string | null;
   stockWarnings: Array<{
@@ -51,7 +52,8 @@ const initialState: CartState = {
   surpriseDiscount: 0,
   totalPrice: 0,
   isOpen: false,
-  loading: false,
+  loading: true, // Start with loading true
+  isCartLoaded: false,
   error: null,
   sessionId: null,
   stockWarnings: [],
@@ -123,12 +125,14 @@ export function CartProvider({ children }: CartProviderProps) {
         sessionId: data.sessionId,
         stockWarnings,
         loading: false,
+        isCartLoaded: true,
       }));
     } catch (error: any) {
       console.error('Error fetching cart:', error);
       setState((prev) => ({
         ...prev,
         loading: false,
+        isCartLoaded: true,
         error: error.message,
       }));
     }

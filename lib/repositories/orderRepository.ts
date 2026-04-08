@@ -88,6 +88,9 @@ export interface Order {
     createdAt: string;
     paidAt?: string;
     confirmedAt?: string;
+    awb?: string;
+    refundId?: string;
+    refundStatus?: string;
     updatedAt: string;
 }
 
@@ -234,6 +237,54 @@ export class OrderRepository {
                 },
                 ExpressionAttributeValues: {
                     ":status": status,
+                    ":updatedAt": new Date().toISOString(),
+                },
+            })
+        );
+    }
+
+    /**
+     * Update Delhivery shipment details (AWB)
+     */
+    async updateDelhiveryDetails(
+        orderId: string,
+        awb: string
+    ): Promise<void> {
+        await docClient.send(
+            new UpdateCommand({
+                TableName: TABLE_NAME,
+                Key: {
+                    PK: `ORDER#${orderId}`,
+                    SK: "METADATA",
+                },
+                UpdateExpression: "SET awb = :awb, updatedAt = :updatedAt",
+                ExpressionAttributeValues: {
+                    ":awb": awb,
+                    ":updatedAt": new Date().toISOString(),
+                },
+            })
+        );
+    }
+
+    /**
+     * Update refund details
+     */
+    async updateRefundDetails(
+        orderId: string,
+        refundId: string,
+        refundStatus: string
+    ): Promise<void> {
+        await docClient.send(
+            new UpdateCommand({
+                TableName: TABLE_NAME,
+                Key: {
+                    PK: `ORDER#${orderId}`,
+                    SK: "METADATA",
+                },
+                UpdateExpression: "SET refundId = :refundId, refundStatus = :refundStatus, updatedAt = :updatedAt",
+                ExpressionAttributeValues: {
+                    ":refundId": refundId,
+                    ":refundStatus": refundStatus,
                     ":updatedAt": new Date().toISOString(),
                 },
             })

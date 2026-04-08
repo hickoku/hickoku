@@ -188,9 +188,15 @@ export function Footer() {
               onSubmit={(e) => {
                 e.preventDefault();
                 const formData = new FormData(e.currentTarget);
-                const orderId = formData.get("orderId") as string;
-                if (orderId.trim()) {
-                  window.location.href = `/order-tracking/${orderId.trim()}`;
+                const query = (formData.get("orderId") as string).trim();
+                
+                if (query) {
+                  // If it looks like a Delhivery AWB (numeric and length ~14, or generic > 10 chars)
+                  if (/^\d+$/.test(query) && query.length >= 10) {
+                    window.open(`https://www.delhivery.com/track-v2/package/${query}`, "_blank");
+                  } else {
+                    window.location.href = `/order-tracking/${query}`;
+                  }
                 }
               }}
               className="space-y-2"
@@ -198,7 +204,7 @@ export function Footer() {
               <input
                 type="text"
                 name="orderId"
-                placeholder="Order ID"
+                placeholder="Order ID or AWB"
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />

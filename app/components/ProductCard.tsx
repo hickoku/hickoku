@@ -61,7 +61,7 @@ export function ProductCard({
       className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300"
     >
       {/* Image Container */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
+      <div className="relative aspect-[3/4] overflow-hidden">
         <motion.img
           src={currentSrc}
           alt={name}
@@ -162,7 +162,7 @@ export function ProductCard({
       {/* Product Info */}
       <div className="p-6">
         <h3 className="text-xl font-bold mb-2">{name}</h3>
-        <p className="text-sm text-gray-600 mb-4 line-clamp-2">{description}</p>
+        <p className="text-sm text-gray-900 font-medium mb-4 line-clamp-2 capitalize">{description}</p>
 
         <div className="flex items-center justify-between gap-4 pt-4 border-t border-gray-100">
           <div className="flex flex-col items-start gap-1">

@@ -55,7 +55,7 @@ export default function ProductDetailPage() {
 
   // Auto-slide main image every 5 seconds
   useEffect(() => {
-    const imageCount = product?.images?.length || productImages.length;
+    const imageCount = product?.images?.length || 0;
     if (imageCount <= 1) return;
 
     const timer = setInterval(() => {
@@ -82,12 +82,14 @@ export default function ProductDetailPage() {
   }, [id]);
 
   const nextImage = () => {
-    const imageCount = product?.images?.length || productImages.length;
+    const imageCount = product?.images?.length || 0;
+    if (imageCount === 0) return;
     setCurrentImage((prev) => (prev + 1) % imageCount);
   };
 
   const prevImage = () => {
-    const imageCount = product?.images?.length || productImages.length;
+    const imageCount = product?.images?.length || 0;
+    if (imageCount === 0) return;
     setCurrentImage((prev) =>
       prev - 1 < 0 ? imageCount - 1 : prev - 1,
     );
@@ -129,11 +131,9 @@ export default function ProductDetailPage() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <img
-                    src={productImages[currentImage]}
-                    alt="Product"
-                    className="w-full h-full object-cover"
-                  />
+                  <div className="w-full h-full flex items-center justify-center bg-gray-50 text-gray-400">
+                    No Image Available
+                  </div>
                 )}
 
                 {/* Navigation Arrows */}
@@ -157,7 +157,7 @@ export default function ProductDetailPage() {
                   ref={thumbnailScrollRef}
                   className="flex gap-4 overflow-x-auto pb-4 scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                 >
-                {product && product.images && product.images.length > 1 ? (
+                {product && product.images && product.images.length > 1 && (
                   product.images.map((image, index) => (
                     <motion.button
                       key={index}
@@ -176,30 +176,11 @@ export default function ProductDetailPage() {
                       />
                     </motion.button>
                   ))
-                ) : (
-                  productImages.map((image, index) => (
-                    <motion.button
-                      key={index}
-                      whileHover={{ scale: 1.05 }}
-                      onClick={() => setCurrentImage(index)}
-                      className={`flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 transition-all ${
-                        currentImage === index
-                          ? "border-gray-900"
-                          : "border-gray-200"
-                      }`}
-                    >
-                      <img
-                        src={image}
-                        alt={`Thumbnail ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </motion.button>
-                  ))
                 )}
                 </div>
                 
                 {/* Thumbnail Arrows */}
-                {((product?.images?.length || productImages.length) > 4) && (
+                {((product?.images?.length || 0) > 4) && (
                   <>
                     <button
                       onClick={() => {
@@ -236,7 +217,7 @@ export default function ProductDetailPage() {
                   {/* Title & Price */}
                   <div>
                     <h1 className="text-3xl mb-2">{product.name}</h1>
-                    <p className="text-sm text-gray-600 mb-2 whitespace-pre-line">
+                    <p className="text-sm text-gray-900 font-medium mb-2 whitespace-pre-line capitalize">
                       {product.variants[0].shortDesc || product.highlight}
                     </p>
                     <div className="flex items-center gap-3">
@@ -250,9 +231,6 @@ export default function ProductDetailPage() {
                         50% OFF
                       </span>
                     </div>
-                    {/* <p className="text-sm text-gray-500 mt-1">
-                      Size: {product.variants[0].size}
-                    </p> */}
                   </div>
 
               {/* Size Selection */}
@@ -269,21 +247,6 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* Stock Status */}
-              {/* <div>
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${
-                    product.variants[0].inventoryStatus === 'IN_STOCK' ? 'bg-green-500' : 'bg-red-500'
-                  }`} />
-                  <p className="text-sm text-gray-600">
-                    {product.variants[0].inventoryStatus === 'IN_STOCK' 
-                      ? `In Stock (${product.variants[0].stock} available)` 
-                      : 'Out of Stock'
-                    }
-                  </p>
-                </div>
-              </div> */}
-
               {/* Product Info */}
               <div className="space-y-2 text-sm text-gray-600">
                 <p>100% Authentic Products</p>
@@ -293,7 +256,7 @@ export default function ProductDetailPage() {
               {product.variants[0].desc && (
                 <div className="pt-4 pb-2">
                   <h3 className="text-sm font-semibold mb-2">Description</h3>
-                  <div className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">
+                  <div className="text-sm text-gray-900 font-medium whitespace-pre-line leading-relaxed capitalize">
                     {product.variants[0].desc}
                   </div>
                 </div>
@@ -340,8 +303,8 @@ export default function ProductDetailPage() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => {
-                    const phoneNumber = "9360922878"; // Adjust the WhatsApp number as needed
-                    let imageUrl = product.images?.[0] || productImages[0];
+                    const phoneNumber = "9360922878"; 
+                    let imageUrl = product.images?.[0] || "";
                     if (imageUrl && imageUrl.startsWith('/')) {
                       imageUrl = `${window.location.origin}${imageUrl}`;
                     }
@@ -361,97 +324,6 @@ export default function ProductDetailPage() {
                   CONNECT TO WHATSAPP
                 </motion.button>
               </div>
-
-              {/* Tabs */}
-              {/* <div className="pt-6">
-                <div className="flex gap-8 border-b border-gray-200 mb-6">
-                  {["DESCRIPTION", "DELIVERY & RETURNS", "CONTACTS"].map(
-                    (tab) => (
-                      <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab.toLowerCase())}
-                        className={`pb-3 text-sm tracking-wider relative ${
-                          activeTab === tab.toLowerCase()
-                            ? "text-gray-900"
-                            : "text-gray-500 hover:text-gray-700"
-                        }`}
-                      >
-                        {tab}
-                        {activeTab === tab.toLowerCase() && (
-                          <motion.div
-                            layoutId="activeTab"
-                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900"
-                          />
-                        )}
-                      </button>
-                    ),
-                  )}
-                </div>
-
-                <div className="text-sm text-gray-600 space-y-3">
-                  {activeTab === "description" && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="space-y-2"
-                    >
-                      <p className="tracking-wide">
-                        <span className="text-gray-900">
-                          Catalog Article Number:{" "}
-                        </span>
-                        Medium Size
-                      </p>
-                      <p className="tracking-wide">
-                        <span className="text-gray-900">
-                          Soft letting style
-                        </span>
-                      </p>
-                      <p>Carry in the hand or over on the shoulder</p>
-                      <p>Golden colored metal details</p>
-                      <p>Leather belt and belt clasp</p>
-                      <p>Metal HK engraved buckle</p>
-                      <p>Lining: 100% cotton canvas</p>
-                      <p>Upper: 100% leather</p>
-                      <p>Luxurious with velour card pocket</p>
-                      <p className="mt-2">
-                        <span className="text-gray-900">Gold hardware</span>
-                      </p>
-                      <p>
-                        <span className="text-gray-900">Dimensions: </span>45 x
-                        39 x 16 cm
-                      </p>
-                      <p>Volume: Accommodates 50 A4 paper sheets</p>
-                      <p>
-                        <span className="text-gray-900">Item: </span>
-                        8809636HWLINE
-                      </p>
-                    </motion.div>
-                  )}
-                  {activeTab === "delivery & returns" && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    >
-                      <p>Free delivery on orders over Rs. 5000</p>
-                      <p className="mt-2">
-                        Standard delivery takes 7-8 business days
-                      </p>
-                      <p className="mt-2">Easy returns within 30 days</p>
-                    </motion.div>
-                  )}
-                  {activeTab === "contacts" && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    >
-                      <p>For any queries, please contact us at:</p>
-                      <p className="mt-2">Email: support@hkperfumes.com</p>
-                      <p>Phone: +92 300 1234567</p>
-                      <p>WhatsApp: +92 300 1234567</p>
-                    </motion.div>
-                  )}
-                </div>
-              </div> */}
                 </>
               )}
             </motion.div>

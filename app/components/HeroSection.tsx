@@ -20,7 +20,7 @@ const getHeroSlides = (t: any) => [
     title: "",
     subtitle: "",
     description: "",
-    desktopImage: "/hickoku-assets/slider/Slider2.jpeg",
+    desktopImage: "/hickoku-assets/slider/Slider2.png",
     mobileImage: "/hickoku-assets/slider/mobile/Slider2.png",
     bgColor: "none",
   },
@@ -29,10 +29,10 @@ const getHeroSlides = (t: any) => [
     title: "",
     subtitle: "",
     description: "",
-    desktopImage: "/hickoku-assets/slider/Slider3.jpeg",
+    desktopImage: "/hickoku-assets/slider/Slider3.png",
     mobileImage: "/hickoku-assets/slider/mobile/Slider5.png",
     bgColor: "none",
-  }
+  },
 ];
 
 export function HeroSection() {
@@ -69,13 +69,15 @@ export function HeroSection() {
   const slide = heroSlides[currentSlide];
 
   return (
-    <motion.section 
+    <motion.section
       layout
       transition={{ duration: 0.6, type: "spring", bounce: 0.15 }}
       style={{
         marginTop: isScrolled
-          ? (typeof window !== 'undefined' && window.innerWidth >= 640 ? '118px' : '102px')
-          : "0px"
+          ? typeof window !== "undefined" && window.innerWidth >= 640
+            ? "118px"
+            : "102px"
+          : "0px",
       }}
       className="relative w-full aspect-[4/5] sm:aspect-auto overflow-hidden block bg-white"
     >
@@ -148,7 +150,7 @@ export function HeroSection() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="text-lg mb-8 opacity-90"
+                  className="text-lg mb-8 opacity-90 capitalize"
                 >
                   {slide.description}
                 </motion.p>
