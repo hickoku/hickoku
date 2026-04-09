@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    if (order.status !== "pending") {
+    if (order.status !== "pending" && order.status !== "confirmed") {
       return NextResponse.json({ 
         error: `Order cannot be cancelled as it is already ${order.status}.` 
       }, { status: 400 });

@@ -1,9 +1,12 @@
-# *
 User-agent: *
-Disallow: /
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /checkout/success
+Disallow: /checkout/confirmation
 
 # Host
-Host: https://hickoku-new.staging.com
+Host: https://hickoku.com
 
 # Sitemaps
-Sitemap: https://hickoku-new.staging.com/sitemap.xml
+Sitemap: https://hickoku.com/sitemap.xml
