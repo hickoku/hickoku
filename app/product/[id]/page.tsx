@@ -120,11 +120,7 @@ export default function ProductDetailPage() {
             {/* Left - Image Gallery */}
             <div className="space-y-4">
               {/* Main Image */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="relative aspect-[3/4] bg-white rounded-lg overflow-hidden shadow-md"
-              >
+              <div className="relative aspect-[3/4] bg-white rounded-lg overflow-hidden shadow-md">
                 {product && product.images && product.images.length > 0 ? (
                   <Image
                     src={product.images[currentImage] || product.images[0]}
@@ -153,7 +149,7 @@ export default function ProductDetailPage() {
                 >
                   <ChevronRight className="w-6 h-6" />
                 </button>
-              </motion.div>
+              </div>
 
               {/* Thumbnail Gallery */}
               <div className="relative group">

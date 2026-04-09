@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Header } from "../components/Header";
-import { ProductCard } from "../components/ProductCard";
+import { ProductCard, ProductSkeleton } from "../components/ProductCard";
 import { useProducts } from "../context/ProductContext";
 import { useLocale } from "../context/LocaleContext";
 
@@ -48,47 +48,29 @@ export default function CollectionPage() {
 
           {/* Collection Grid */}
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            {isLoading && (
-              <div className="text-center py-12">
-                <p className="text-gray-600">Loading products...</p>
-              </div>
-            )}
-
             {error && (
               <div className="text-center py-12">
                 <p className="text-red-600">Error: {error}</p>
               </div>
             )}
 
-            {!isLoading && !error && (
-              <motion.div
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-                initial="hidden"
-                animate="visible"
-                variants={{
-                  visible: {
-                    transition: {
-                      staggerChildren: 0.1,
-                    },
-                  },
-                }}
-              >
-                {products.map((product, index) => (
-                  <motion.div
-                    key={product.id}
-                    variants={{
-                      hidden: { opacity: 0, y: 30 },
-                      visible: { opacity: 1, y: 0 },
-                    }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Link href={`/product/${product.id}`}>
-                      <ProductCard {...product} priority={index < 3} />
-                    </Link>
-                  </motion.div>
-                ))}
-              </motion.div>
-            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[400px]">
+              {isLoading ? (
+                [...Array(6)].map((_, i) => (
+                  <ProductSkeleton key={`skeleton-${i}`} />
+                ))
+              ) : (
+                !error && (
+                  products.map((product, index) => (
+                    <div key={product.id}>
+                      <Link href={`/product/${product.id}`}>
+                        <ProductCard {...product} priority={index < 3} />
+                      </Link>
+                    </div>
+                  ))
+                )
+              )}
+            </div>
           </div>
         </main>
       </div>
