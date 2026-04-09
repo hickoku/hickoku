@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "motion/react";
 import {
   ArrowLeft,
@@ -125,10 +126,13 @@ export default function ProductDetailPage() {
                 className="relative aspect-[3/4] bg-white rounded-lg overflow-hidden shadow-md"
               >
                 {product && product.images && product.images.length > 0 ? (
-                  <img
+                  <Image
                     src={product.images[currentImage] || product.images[0]}
                     alt={product.name}
-                    className="w-full h-full object-cover"
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-50 text-gray-400">
@@ -169,10 +173,12 @@ export default function ProductDetailPage() {
                           : "border-gray-200"
                       }`}
                     >
-                      <img
+                      <Image
                         src={image}
                         alt={`${product.name} ${index + 1}`}
-                        className="w-full h-full object-cover cursor-pointer"
+                        fill
+                        sizes="96px"
+                        className="object-cover cursor-pointer"
                       />
                     </motion.button>
                   ))
