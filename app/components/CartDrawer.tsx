@@ -149,13 +149,15 @@ export function CartDrawer() {
                       {/* Quantity Controls */}
                       <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 w-fit">
                         <motion.button
-                          disabled={item.quantity === 1 ? true : false}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
+                          disabled={item.quantity <= 1}
+                          whileHover={item.quantity > 1 ? { scale: 1.05 } : {}}
+                          whileTap={item.quantity > 1 ? { scale: 0.95 } : {}}
                           onClick={() =>
                             item.quantity > 1 && updateQuantity(item.sku, item.quantity - 1)
                           }
-                          className="p-1 hover:bg-gray-100 transition-colors"
+                          className={`p-1 hover:bg-gray-100 transition-colors ${
+                            item.quantity <= 1 ? "opacity-30 cursor-not-allowed pointer-events-none" : ""
+                          }`}
                         >
                           <Minus className="w-4 h-4" />
                         </motion.button>
@@ -163,13 +165,15 @@ export function CartDrawer() {
                           {item.quantity}
                         </span>
                         <motion.button
-                          disabled={item.quantity === 10? true : false}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
+                          disabled={item.quantity >= 10}
+                          whileHover={item.quantity < 10 ? { scale: 1.05 } : {}}
+                          whileTap={item.quantity < 10 ? { scale: 0.95 } : {}}
                           onClick={() =>
                             updateQuantity(item.sku, item.quantity + 1)
                           }
-                          className="p-1 hover:bg-gray-100 transition-colors"
+                          className={`p-1 hover:bg-gray-100 transition-colors ${
+                            item.quantity >= 10 ? "opacity-30 cursor-not-allowed pointer-events-none" : ""
+                          }`}
                         >
                           <Plus className="w-4 h-4" />
                         </motion.button>

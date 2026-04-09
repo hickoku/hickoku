@@ -25,6 +25,11 @@ export default function OrderConfirmationPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Cancellation State
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelStatus, setCancelStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   useEffect(() => {
     if (!orderId) {
       setError("No order ID provided");
@@ -81,7 +86,7 @@ export default function OrderConfirmationPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gray-50 py-12 mt-12">
+      <div className="min-h-screen bg-gray-50 py-12 mt-22">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Success Header */}
           <motion.div
@@ -98,10 +103,12 @@ export default function OrderConfirmationPage() {
               <CheckCircle className="w-12 h-12 text-green-600" />
             </motion.div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Order Confirmed!
+              {order.status === "cancelled" ? "Order Cancelled" : "Order Confirmed!"}
             </h1>
             <p className="text-gray-600">
-              Thank you for your purchase. Your order has been confirmed.
+              {order.status === "cancelled" 
+                ? "This order has been cancelled and a refund has been initiated."
+                : "Thank you for your purchase. Your order has been confirmed."}
             </p>
           </motion.div>
 
@@ -141,7 +148,7 @@ export default function OrderConfirmationPage() {
               </div>
             </div>
 
-            {/* Cancellation Option (Subtle) */}
+            {/* Cancellation Option (Improved UX) */}
             {(() => {
               const createdAt = new Date(order.createdAt);
               const now = new Date();
@@ -157,53 +164,105 @@ export default function OrderConfirmationPage() {
                 expiry.setHours(13, 0, 0, 0);
               }
 
-              const canCancel = now < expiry && order.status === "pending";
+              const canCancel = now < expiry && (order.status === "pending" || order.status === "confirmed") && cancelStatus === 'idle';
+
+              if (order.status === "cancelled") {
+                return (
+                  <div className="mb-6 p-4 bg-red-50 rounded-lg border border-red-200">
+                    <p className="text-sm font-semibold text-red-800">This order has been cancelled.</p>
+                    <p className="text-xs text-red-700 mt-1">If you have any questions regarding your refund, please contact support.</p>
+                  </div>
+                );
+              }
+
+              const handleCancel = async () => {
+                if (!confirm("Are you sure you want to cancel this order? A full refund will be initiated.")) return;
+                
+                setIsCancelling(true);
+                setErrorMessage(null);
+                try {
+                  const res = await fetch(`/api/orders/user-cancel`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ orderId: order.orderId }),
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    setCancelStatus('success');
+                    // Refresh order data after success to show cancelled status
+                    setTimeout(() => window.location.reload(), 3000);
+                  } else {
+                    setCancelStatus('error');
+                    setErrorMessage(data.error);
+                  }
+                } catch (e) {
+                  setCancelStatus('error');
+                  setErrorMessage("An unexpected error occurred.");
+                } finally {
+                  setIsCancelling(false);
+                }
+              };
+
+              if (cancelStatus === 'success') {
+                return (
+                  <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-sm font-semibold text-green-800">Order successfully cancelled!</p>
+                    <p className="text-xs text-green-700 mt-1">A full refund has been initiated. This page will refresh shortly.</p>
+                  </div>
+                );
+              }
+
+              if (cancelStatus === 'error') {
+                return (
+                  <div className="mb-6 p-4 bg-red-50 rounded-lg border border-red-200">
+                    <p className="text-sm font-semibold text-red-800">Cancellation Failed</p>
+                    <p className="text-xs text-red-700 mt-1">
+                      {errorMessage || "We couldn't cancel your order automatically."}
+                    </p>
+                    <p className="text-xs text-red-700 mt-2 font-bold">
+                      Please call or WhatsApp us at support for immediate assistance.
+                    </p>
+                    <button 
+                      onClick={() => setCancelStatus('idle')}
+                      className="text-xs text-blue-600 underline mt-2"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                );
+              }
 
               if (canCancel) {
                 return (
                   <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
-                    <p className="text-xs text-gray-500 mb-2">
-                      Changed your mind? You can cancel your order until{" "}
-                      {expiry.toLocaleTimeString("en-IN", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                      .
-                    </p>
-                    <button
-                      onClick={async () => {
-                        if (
-                          confirm(
-                            "Are you sure you want to cancel this order? A full refund will be initiated.",
-                          )
-                        ) {
-                          try {
-                            const res = await fetch(`/api/orders/user-cancel`, {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ orderId: order.orderId }),
-                            });
-                            const data = await res.json();
-                            if (data.success) {
-                              alert(
-                                "Order cancelled successfully. Refund initiated.",
-                              );
-                              window.location.reload();
-                            } else {
-                              alert(data.error || "Failed to cancel order");
-                            }
-                          } catch (e) {
-                            alert("An error occurred. Please try again.");
-                          }
-                        }
-                      }}
-                      className="text-xs font-semibold text-red-500 hover:text-red-700 transition-colors underline"
-                    >
-                      Cancel Order
-                    </button>
+                    <div className="flex justify-between items-center">
+                      <div>
+                         <p className="text-xs text-gray-500">
+                          Changed your mind? Cancel until{" "}
+                          {expiry.toLocaleTimeString("en-IN", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleCancel}
+                        disabled={isCancelling}
+                        className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-700 transition-colors underline disabled:opacity-50"
+                      >
+                        {isCancelling ? (
+                          <>
+                            <Loader className="w-3 h-3 animate-spin" />
+                            Cancelling...
+                          </>
+                        ) : (
+                          "Cancel Order"
+                        )}
+                      </button>
+                    </div>
                   </div>
                 );
-              } else if (order.status === "pending") {
+              } else if (order.status === "pending" && cancelStatus === 'idle') {
                 return (
                   <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-100">
                     <p className="text-xs text-orange-700">
