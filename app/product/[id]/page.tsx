@@ -122,13 +122,10 @@ export default function ProductDetailPage() {
               {/* Main Image */}
               <div className="relative aspect-[3/4] bg-white rounded-lg overflow-hidden shadow-md">
                 {product && product.images && product.images.length > 0 ? (
-                  <Image
+                  <img
                     src={product.images[currentImage] || product.images[0]}
                     alt={product.name}
-                    fill
-                    priority
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-50 text-gray-400">
@@ -163,7 +160,7 @@ export default function ProductDetailPage() {
                       key={index}
                       whileHover={{ scale: 1.05 }}
                       onClick={() => setCurrentImage(index)}
-                      className={`flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 transition-all ${
+                      className={`flex-shrink-0 w-24 h-24 relative rounded-lg overflow-hidden border-2 transition-all ${
                         currentImage === index
                           ? "border-gray-900"
                           : "border-gray-200"
