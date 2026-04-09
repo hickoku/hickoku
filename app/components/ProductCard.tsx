@@ -1,13 +1,14 @@
 "use client";
 
 import { motion } from "motion/react";
+import Image from "next/image";
 import { Heart, ShoppingBag, Eye } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useCart } from "../hooks/useCart";
 import { formatPrice } from "../utils/currency";
 
 interface ProductCardProps {
-  id: string; // Changed to string
+  id: string;
   name: string;
   description: string;
   highlight: string;
@@ -15,8 +16,9 @@ interface ProductCardProps {
   image: string;
   badge?: string;
   category: "For Her" | "For Him";
-  defaultVariantId?: string; // New prop
-  defaultSku?: string; // New prop
+  defaultVariantId?: string;
+  defaultSku?: string;
+  priority?: boolean; // Added for LCP optimization
 }
 
 export function ProductCard({
@@ -28,27 +30,13 @@ export function ProductCard({
   badge,
   category,
   id,
-  defaultVariantId, // Added
-  defaultSku, // Added
+  defaultVariantId,
+  defaultSku,
+  priority = false, // Added
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
-  const [currentSrc, setCurrentSrc] = useState(image);
   const { addToCart } = useCart();
-
-  useEffect(() => {
-    const isMobile = window.matchMedia("(max-width: 768px)").matches;
-    if (isMobile && image.includes("/mobile")) {
-      setCurrentSrc(image);
-    } else {
-      // Load existing path (without /mobile if it was there)
-      setCurrentSrc(image.replace("/mobile/", "/"));
-    }
-  }, [image]);
-
-  const handleImageError = () => {
-    setCurrentSrc(image.replace("/mobile/", "/"));
-  };
 
   return (
     <motion.div
@@ -61,15 +49,21 @@ export function ProductCard({
       className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300"
     >
       {/* Image Container */}
-      <div className="relative aspect-[3/4] overflow-hidden">
-        <motion.img
-          src={currentSrc}
-          alt={name}
-          onError={handleImageError}
-          className="w-full h-full object-cover"
+      <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
+        <motion.div
           animate={{ scale: isHovered ? 1.08 : 1 }}
           transition={{ duration: 0.6 }}
-        />
+          className="w-full h-full"
+        >
+          <Image
+            src={image}
+            alt={name}
+            fill
+            priority={priority}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover"
+          />
+        </motion.div>
 
         {/* Badge */}
         {badge && (
@@ -177,7 +171,7 @@ export function ProductCard({
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={(e) => {
+            onClick={(e: React.MouseEvent) => {
               e.preventDefault();
               addToCart({
                 productId: id,
