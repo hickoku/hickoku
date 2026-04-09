@@ -21,6 +21,25 @@ interface ProductCardProps {
   priority?: boolean; // Added for LCP optimization
 }
 
+export function ProductSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl overflow-hidden shadow-sm h-full animate-pulse">
+      <div className="aspect-[3/4] bg-gray-200" />
+      <div className="p-6 space-y-4">
+        <div className="h-6 bg-gray-200 rounded w-3/4" />
+        <div className="h-4 bg-gray-200 rounded w-full" />
+        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-200 rounded w-16" />
+            <div className="h-6 bg-gray-200 rounded w-24" />
+          </div>
+          <div className="h-10 bg-gray-200 rounded w-28" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ProductCard({
   name,
   description,
@@ -39,14 +58,10 @@ export function ProductCard({
   const { addToCart } = useCart();
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.5 }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300"
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 h-full"
     >
       {/* Image Container */}
       <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
@@ -191,6 +206,6 @@ export function ProductCard({
           </motion.button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

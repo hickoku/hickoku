@@ -5,7 +5,8 @@ import { CartProvider } from "./context/CartContext";
 import { CartDrawer } from "./components/CartDrawer";
 import { LocaleProvider } from "./context/LocaleContext";
 import { ProductProvider } from "./context/ProductContext";
-
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 export const metadata: Metadata = {
   title: "Hickoku Perfumes",
   description: "Affordable Premium Perfume Brands for Everyone",
@@ -41,6 +42,8 @@ export default function RootLayout({
             </CartProvider>
           </ProductProvider>
         </LocaleProvider>
+        <Analytics/>
+        <SpeedInsights/>
       </body>
     </html>
   );
