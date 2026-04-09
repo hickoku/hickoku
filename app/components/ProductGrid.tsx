@@ -1,6 +1,6 @@
 "use client";
 
-import { ProductCard } from "./ProductCard";
+import { ProductCard, ProductSkeleton } from "./ProductCard";
 import { motion } from "motion/react";
 import { useState } from "react";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import { useLocale } from "../context/LocaleContext";
 import { useProducts } from "../context/ProductContext";
 
 export function ProductGrid() {
-  const { products } = useProducts();
+  const { products, isLoading } = useProducts();
   console.log("products", products);
   // if (isLoading) return <p>Loading products...</p>;
   // if (error) return <p>Error: {error}</p>;
@@ -58,25 +58,21 @@ export function ProductGrid() {
       </motion.div>
 
       {/* Products Grid */}
-      <motion.div
-        layout
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-      >
-        {filteredProducts.map((product, index) => (
-          <motion.div
-            key={product.id}
-            layout
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ delay: index * 0.1 }}
-          >
-            <Link href={`/product/${product.id}`}>
-              <ProductCard {...product} priority={index < 3} />
-            </Link>
-          </motion.div>
-        ))}
-      </motion.div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[400px]">
+        {isLoading ? (
+          [...Array(6)].map((_, i) => (
+            <ProductSkeleton key={`skeleton-${i}`} />
+          ))
+        ) : (
+          filteredProducts.map((product, index) => (
+            <div key={product.id}>
+              <Link href={`/product/${product.id}`}>
+                <ProductCard {...product} priority={index < 3} />
+              </Link>
+            </div>
+          ))
+        )}
+      </div>
 
       {/* View All Button */}
       <motion.div
