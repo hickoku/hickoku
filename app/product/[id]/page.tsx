@@ -65,6 +65,28 @@ export default function ProductDetailPage() {
 
     return () => clearInterval(timer);
   }, [product, currentImage]);
+  
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = () => {
+    if (thumbnailScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = thumbnailScrollRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    // Add small delay to ensure images are rendered for correct scrollWidth
+    const timer = setTimeout(checkScroll, 100);
+    window.addEventListener('resize', checkScroll);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', checkScroll);
+    };
+  }, [product?.images]);
 
   useEffect(() => {
     async function fetchProduct() {
@@ -151,7 +173,9 @@ export default function ProductDetailPage() {
               {/* Thumbnail Gallery */}
               <div className="relative group">
                 <div 
+                  id="thumbnail-container"
                   ref={thumbnailScrollRef}
+                  onScroll={checkScroll}
                   className="flex gap-4 overflow-x-auto pb-4 scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                 >
                 {product && product.images && product.images.length > 1 && (
@@ -181,22 +205,26 @@ export default function ProductDetailPage() {
                 {/* Thumbnail Arrows */}
                 {((product?.images?.length || 0) > 4) && (
                   <>
-                    <button
-                      onClick={() => {
-                        if (thumbnailScrollRef.current) thumbnailScrollRef.current.scrollBy({ left: -200, behavior: 'smooth' });
-                      }}
-                      className="absolute left-1 top-[48px] -translate-y-1/2 p-1.5 bg-white/90 shadow-md border border-gray-100 text-gray-800 rounded-full z-10 hover:bg-white cursor-pointer"
-                    >
-                      <ChevronLeft className="w-5 h-5 cursor-pointer" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (thumbnailScrollRef.current) thumbnailScrollRef.current.scrollBy({ left: 200, behavior: 'smooth' });
-                      }}
-                      className="absolute right-1 top-[48px] -translate-y-1/2 p-1.5 bg-white/90 shadow-md border border-gray-100 text-gray-800 rounded-full z-10 hover:bg-white cursor-pointer"
-                    >
-                      <ChevronRight className="w-5 h-5 cursor-pointer" />
-                    </button>
+                    {canScrollLeft && (
+                      <button
+                        onClick={() => {
+                          if (thumbnailScrollRef.current) thumbnailScrollRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+                        }}
+                        className="absolute left-1 top-[48px] -translate-y-1/2 p-1.5 bg-white/90 shadow-md border border-gray-100 text-gray-800 rounded-full z-10 hover:bg-white cursor-pointer"
+                      >
+                        <ChevronLeft className="w-5 h-5 cursor-pointer" />
+                      </button>
+                    )}
+                    {canScrollRight && (
+                      <button
+                        onClick={() => {
+                          if (thumbnailScrollRef.current) thumbnailScrollRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+                        }}
+                        className="absolute right-1 top-[48px] -translate-y-1/2 p-1.5 bg-white/90 shadow-md border border-gray-100 text-gray-800 rounded-full z-10 hover:bg-white cursor-pointer"
+                      >
+                        <ChevronRight className="w-5 h-5 cursor-pointer" />
+                      </button>
+                    )}
                   </>
                 )}
               </div>
