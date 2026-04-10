@@ -7,9 +7,6 @@ import { LocaleProvider } from "./context/LocaleContext";
 import { ProductProvider } from "./context/ProductContext";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { GoogleAnalytics } from "@next/third-parties/google";
-
-
 export const metadata: Metadata = {
   title: "Hickoku Perfumes",
   description: "Affordable Premium Perfume Brands for Everyone",
@@ -47,9 +44,6 @@ export default function RootLayout({
         </LocaleProvider>
         <Analytics/>
         <SpeedInsights/>
-        {process.env.GA_ID && (
-          <GoogleAnalytics gaId={process.env.GA_ID} />
-        )}
       </body>
     </html>
   );

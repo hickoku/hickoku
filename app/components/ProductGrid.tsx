@@ -2,36 +2,22 @@
 
 import { ProductCard, ProductSkeleton } from "./ProductCard";
 import { motion } from "motion/react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useLocale } from "../context/LocaleContext";
 import { useProducts } from "../context/ProductContext";
 
-interface ProductGridProps {
-  initialProducts?: any[];
-}
-
-export function ProductGrid({ initialProducts }: ProductGridProps) {
-  const { products: contextProducts, isLoading: contextLoading } = useProducts();
-  const [products, setProducts] = useState(initialProducts || contextProducts);
-  const [isLoading, setIsLoading] = useState(!initialProducts && contextLoading);
-
-  useEffect(() => {
-    if (!initialProducts && contextProducts.length > 0) {
-      setProducts(contextProducts);
-      setIsLoading(contextLoading);
-    }
-  }, [contextProducts, contextLoading, initialProducts]);
+export function ProductGrid() {
+  const { products, isLoading } = useProducts();
+  console.log("products", products);
+  // if (isLoading) return <p>Loading products...</p>;
+  // if (error) return <p>Error: {error}</p>;
 
   const [filter, setFilter] = useState<"All" | "For Her" | "For Him">("All");
   const { t } = useLocale();
-  
-  const displayProducts = initialProducts || products;
   const filteredProducts =
-    filter === "All" ? displayProducts : displayProducts.filter((p: any) => p.category === filter);
+    filter === "All" ? products : products.filter((p) => p.category === filter);
   
-  const showLoading = !initialProducts && isLoading;
-
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       {/* Section Header */}
@@ -46,18 +32,41 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
           Discover our curated selection of luxury fragrances, each crafted to
           tell a unique story
         </p>
+
+        {/* Filter Tabs */}
+        {/* <div className="flex justify-center gap-4 mt-8">
+          {(["All", "For Her", "For Him"] as const).map((tab) => (
+            <motion.button
+              key={tab}
+              onClick={() => setFilter(tab)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-6 py-2 rounded-full text-sm tracking-wider uppercase transition-all ${
+                filter === tab
+                  ? "bg-gray-900 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {tab === "All"
+                ? "All"
+                : tab === "For Her"
+                  ? t("navigation.forHer")
+                  : t("navigation.forHim")}
+            </motion.button>
+          ))}
+        </div> */}
       </motion.div>
 
       {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[400px]">
-        {showLoading ? (
+        {isLoading ? (
           [...Array(6)].map((_, i) => (
             <ProductSkeleton key={`skeleton-${i}`} />
           ))
         ) : (
           filteredProducts.map((product, index) => (
             <div key={product.id}>
-              <Link href={`/product/${product.slug}`}>
+              <Link href={`/product/${product.id}`}>
                 <ProductCard {...product} priority={index < 3} />
               </Link>
             </div>

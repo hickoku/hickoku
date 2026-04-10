@@ -8,11 +8,9 @@ interface LoadingScreenProps {
 }
 
 export function LoadingScreen({ onLoadingComplete }: LoadingScreenProps) {
-  const [isMounted, setIsMounted] = useState(false);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    setIsMounted(true);
     const timer = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -36,7 +34,7 @@ export function LoadingScreen({ onLoadingComplete }: LoadingScreenProps) {
     >
       {/* Animated particles/mist effect */}
       <div className="absolute inset-0">
-        {isMounted && [...Array(20)].map((_, i) => (
+        {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-2 h-2 bg-white/10 rounded-full"
@@ -163,7 +161,7 @@ export function LoadingScreen({ onLoadingComplete }: LoadingScreenProps) {
           transition={{ delay: 1, duration: 0.8 }}
           className="text-5xl text-white tracking-[0.3em] mb-4"
         >
-          HICKOKU
+          HK
         </motion.h1>
 
         <motion.p

@@ -17,7 +17,6 @@ interface Product {
   highlight: string;
   price: string;
   image: string;
-  slug: string;
   badge?: string;
   defaultVariantId?: string; // Added for cart
   defaultSku?: string; // Added for cart
@@ -64,7 +63,6 @@ export function ProductProvider({ children }: { children: ReactNode }) {
                 0,
             ),
             image: p.images?.[0] || "",
-            slug: p.slug,
             badge: p.badge,
             defaultVariantId:
               p.variants?.find((v: any) => v.status !== false)?.id ||
