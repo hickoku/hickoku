@@ -7,12 +7,8 @@ import { LocaleProvider } from "./context/LocaleContext";
 import { ProductProvider } from "./context/ProductContext";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import dynamic from "next/dynamic";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
-const GoogleAnalytics = dynamic(
-  () => import("@next/third-parties/google").then((mod) => mod.GoogleAnalytics),
-  { ssr: false }
-);
 
 export const metadata: Metadata = {
   title: "Hickoku Perfumes",
