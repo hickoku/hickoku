@@ -3,6 +3,7 @@
 import { useEffect, useState, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
+import Image from "next/image";
 import { CheckoutProvider, CheckoutContext } from "../context/CheckoutContext";
 import { CheckoutFlow } from "../components/checkout/CheckoutFlow";
 import { Header } from "../components/Header";
@@ -67,11 +68,12 @@ function CartSummary({
               className="flex gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
             >
               {/* Image */}
-              <div className="w-16 h-16 rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0">
-                <img
+              <div className="w-16 h-16 relative rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0">
+                <Image
                   src={item.image}
                   alt={item.productName}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               </div>
 

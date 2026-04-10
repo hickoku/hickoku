@@ -14,6 +14,7 @@ interface ProductCardProps {
   highlight: string;
   price: string;
   image: string;
+  slug: string;
   badge?: string;
   category: "For Her" | "For Him";
   defaultVariantId?: string;

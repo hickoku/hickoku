@@ -4,6 +4,7 @@ import { Search, ShoppingBag, Heart, User, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useCart } from "../hooks/useCart";
 import { useLocale } from "../context/LocaleContext";
@@ -97,10 +98,13 @@ export function Header() {
                 // whileHover={{ scale: 1.08 }}
                 className="flex items-center justify-center px-2 sm:px-4 lg:px-6  transition-colors"
               >
-                <img
-                  src={"/images/logo.png"}
+                <Image
+                  src="/images/logo.png"
                   alt="HK Logo"
-                  className="h-12 sm:h-16 lg:h-20 object-contain"
+                  width={160}
+                  height={80}
+                  priority
+                  className="h-12 sm:h-16 lg:h-20 w-auto object-contain"
                 />
               </motion.div>
             </Link>
@@ -171,10 +175,12 @@ export function Header() {
 
                 {/* Logo */}
                 <div className="mb-8 mt-2">
-                  <img
-                    src={"/images/logo.png"}
+                  <Image
+                    src="/images/logo.png"
                     alt="HK Logo"
-                    className="h-16 object-contain"
+                    width={120}
+                    height={64}
+                    className="h-16 w-auto object-contain"
                   />
                 </div>
 
