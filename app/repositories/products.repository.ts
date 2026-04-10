@@ -5,6 +5,7 @@ import {
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { unstable_cache } from "next/cache";
 
 const client = new DynamoDBClient({
   region: process.env.AWS_REGION || "ap-south-1", // Default to new region
@@ -49,10 +50,10 @@ export interface Product {
 }
 
 /**
- * Get all products with their variants
- * @param category - Optional category filter
+ * Internal function to get all products with their variants
+ * (Used by the cached version)
  */
-export async function getAllProductsWithVariants(
+async function getAllProductsWithVariantsInternal(
   category?: string,
 ): Promise<Product[]> {
   try {
@@ -136,10 +137,21 @@ export async function getAllProductsWithVariants(
 }
 
 /**
- * Get a single product with its variants
- * @param productId - Product ID (e.g., "1")
+ * Cached version of getAllProductsWithVariants
  */
-export async function getProductWithVariant(
+export const getAllProductsWithVariants = unstable_cache(
+  async (category?: string) => getAllProductsWithVariantsInternal(category),
+  ["products-list"],
+  {
+    revalidate: 3600, // Cache for 1 hour
+    tags: ["products"],
+  },
+);
+
+/**
+ * Internal function to get a single product with its variants
+ */
+async function getProductWithVariantInternal(
   productId: string,
 ): Promise<Product | null> {
   try {
@@ -201,6 +213,27 @@ export async function getProductWithVariant(
     console.error("Error fetching product:", error);
     throw new Error("Failed to fetch product");
   }
+}
+
+/**
+ * Cached version of getProductWithVariant
+ */
+export const getProductWithVariant = unstable_cache(
+  async (productId: string) => getProductWithVariantInternal(productId),
+  ["product-detail"],
+  {
+    revalidate: 3600, // Cache for 1 hour
+    tags: ["products"],
+  },
+);
+
+/**
+ * Get a single product by its slug
+ * SEO-friendly lookup using the cached product list
+ */
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  const products = await getAllProductsWithVariants();
+  return products.find((p) => p.slug === slug) || null;
 }
 
 /**
