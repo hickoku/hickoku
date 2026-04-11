@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocale } from "../context/LocaleContext";
+import Image from "next/image";
 
 const getHeroSlides = (t: any) => [
   {
@@ -99,25 +100,33 @@ export function HeroSection() {
         >
           <div className="absolute inset-0">
             {/* Mobile Image */}
-            <img
-              src={slide.mobileImage}
-              alt={slide.title || "Hero banner"}
-              className={`w-full h-full object-cover sm:hidden ${
+            <div className={`relative w-full h-full sm:hidden ${
                 slide.title || slide.subtitle || slide.description
                   ? "mix-blend-overlay opacity-40"
                   : "opacity-100"
-              }`}
-            />
+              }`}>
+              <Image
+                src={slide.mobileImage}
+                alt={slide.title || "Hero banner"}
+                fill
+                priority
+                className="object-cover"
+              />
+            </div>
             {/* Desktop Image */}
-            <img
-              src={slide.desktopImage}
-              alt={slide.title || "Hero banner"}
-              className={`w-full h-full object-cover hidden sm:block ${
+            <div className={`relative w-full h-full hidden sm:block ${
                 slide.title || slide.subtitle || slide.description
                   ? "mix-blend-overlay opacity-40"
                   : "opacity-100"
-              }`}
-            />
+              }`}>
+              <Image
+                src={slide.desktopImage}
+                alt={slide.title || "Hero banner"}
+                fill
+                priority
+                className="object-cover"
+              />
+            </div>
           </div>
 
           {(slide.title || slide.subtitle || slide.description) && (

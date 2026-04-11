@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "../context/LocaleContext";
 import { formatPrice } from "../utils/currency";
+import Image from "next/image";
 
 export function CartDrawer() {
   const {
@@ -116,11 +117,12 @@ export function CartDrawer() {
                     className="flex gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                   >
                     {/* Product Image */}
-                    <div className="w-20 h-20 flex-shrink-0 bg-white rounded-lg overflow-hidden border border-gray-200">
-                      <img
+                    <div className="w-20 h-20 relative flex-shrink-0 bg-white rounded-lg overflow-hidden border border-gray-200">
+                      <Image
                         src={item.image}
                         alt={item.productName}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     </div>
 
