@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { useCart } from "../hooks/useCart";
 import { useLocale } from "../context/LocaleContext";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import Image from "next/image";
 
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -28,14 +29,6 @@ export function Header() {
 
   const isHomePage = pathname === "/";
   const hideHeader = isHomePage && !isScrolled;
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   return (
     <>
@@ -97,10 +90,13 @@ export function Header() {
                 // whileHover={{ scale: 1.08 }}
                 className="flex items-center justify-center px-2 sm:px-4 lg:px-6  transition-colors"
               >
-                <img
-                  src={"/images/logo.png"}
+                <Image
+                  src="/images/logo.png"
                   alt="HK Logo"
-                  className="h-12 sm:h-16 lg:h-20 object-contain"
+                  width={160}
+                  height={80}
+                  priority
+                  className="h-12 sm:h-16 lg:h-20 w-auto object-contain"
                 />
               </motion.div>
             </Link>
@@ -171,10 +167,12 @@ export function Header() {
 
                 {/* Logo */}
                 <div className="mb-8 mt-2">
-                  <img
-                    src={"/images/logo.png"}
+                  <Image
+                    src="/images/logo.png"
                     alt="HK Logo"
-                    className="h-16 object-contain"
+                    width={128}
+                    height={64}
+                    className="h-16 w-auto object-contain"
                   />
                 </div>
 

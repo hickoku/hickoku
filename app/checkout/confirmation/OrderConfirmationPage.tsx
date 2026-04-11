@@ -15,6 +15,7 @@ import Link from "next/link";
 import { Order } from "@/lib/repositories/orderRepository";
 import { formatPrice } from "@/app/utils/currency";
 import { Header } from "@/app/components/Header";
+import Image from "next/image";
 
 export default function OrderConfirmationPage() {
   const searchParams = useSearchParams();
@@ -287,11 +288,14 @@ export default function OrderConfirmationPage() {
                     key={index}
                     className="flex gap-4 p-3 bg-gray-50 rounded-lg"
                   >
-                    <img
-                      src={item.image}
-                      alt={item.productName}
-                      className="w-16 h-16 object-cover rounded-lg"
-                    />
+                    <div className="w-16 h-16 relative flex-shrink-0">
+                      <Image
+                        src={item.image}
+                        alt={item.productName}
+                        fill
+                        className="object-cover rounded-lg"
+                      />
+                    </div>
                     <div className="flex-1">
                       <p className="font-semibold text-gray-900">
                         {item.productName}

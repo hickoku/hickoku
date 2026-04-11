@@ -7,6 +7,7 @@ import { CheckoutContext } from "../../context/CheckoutContext";
 import { useCart } from "../../hooks/useCart";
 import { CreditCard, Loader } from "lucide-react";
 import { toast } from "sonner";
+import Script from "next/script";
 import {
   formatPrice,
   convertToPaiseForRazorpay,
@@ -200,6 +201,7 @@ export function RazorpayPayment() {
 
   return (
     <>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       {isProcessing && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/95 backdrop-blur-md">
           <div className="flex flex-col items-center">
