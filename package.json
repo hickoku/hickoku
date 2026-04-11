@@ -91,5 +91,12 @@
     "postcss": "^8.4.0",
     "tailwindcss": "4.1.12",
     "typescript": "^5.0.0"
-  }
+  },
+  "browserslist": [
+    "last 1 year",
+    "> 0.5%",
+    "not dead",
+    "not op_mini all",
+    "not ie 11"
+  ]
 }

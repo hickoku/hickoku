@@ -9,7 +9,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { toast } from "sonner";
 import { Header } from "../../components/Header";
 import { useCart } from "../../hooks/useCart";
@@ -45,25 +45,31 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const { addToCart } = useCart();
   const thumbnailScrollRef = useRef<HTMLDivElement>(null);
   
+  const leftSentinelRef = useRef<HTMLDivElement>(null);
+  const rightSentinelRef = useRef<HTMLDivElement>(null);
+  
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  const checkScroll = () => {
-    if (thumbnailScrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = thumbnailScrollRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
-    }
-  };
-
   useEffect(() => {
-    checkScroll();
-    const timer = setTimeout(checkScroll, 100);
-    window.addEventListener('resize', checkScroll);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', checkScroll);
-    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.target === leftSentinelRef.current) {
+            setCanScrollLeft(!entry.isIntersecting);
+          }
+          if (entry.target === rightSentinelRef.current) {
+            setCanScrollRight(!entry.isIntersecting);
+          }
+        });
+      },
+      { root: thumbnailScrollRef.current, threshold: 0.9 }
+    );
+
+    if (leftSentinelRef.current) observer.observe(leftSentinelRef.current);
+    if (rightSentinelRef.current) observer.observe(rightSentinelRef.current);
+
+    return () => observer.disconnect();
   }, [product.images]);
 
   // Auto-slide main image
@@ -146,9 +152,10 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               <div className="relative group">
                 <div 
                   ref={thumbnailScrollRef}
-                  onScroll={checkScroll}
                   className="flex gap-4 overflow-x-auto pb-4 scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                 >
+                  {/* Left Sentinel */}
+                  <div ref={leftSentinelRef} className="w-1 h-px shrink-0 opacity-0 pointer-events-none" />
                 {product.images && product.images.length > 1 && (
                   product.images.map((image, index) => (
                     <motion.button
@@ -171,6 +178,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                     </motion.button>
                   ))
                 )}
+                  {/* Right Sentinel */}
+                  <div ref={rightSentinelRef} className="w-1 h-px shrink-0 opacity-0 pointer-events-none" />
                 </div>
                 
                 {((product?.images?.length || 0) > 4) && (
@@ -201,10 +210,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             </div>
 
             {/* Right - Product Details */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
+            <div
               className="space-y-6"
             >
               <div>
@@ -312,7 +318,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   CONNECT TO WHATSAPP
                 </motion.button>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>

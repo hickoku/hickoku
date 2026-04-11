@@ -30,14 +30,6 @@ export function Header() {
   const isHomePage = pathname === "/";
   const hideHeader = isHomePage && !isScrolled;
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
     <>
       <motion.header
