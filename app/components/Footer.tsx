@@ -24,6 +24,7 @@ export function Footer() {
                 href="https://www.instagram.com/hickokuperfume"
                 whileHover={{ scale: 1.1 }}
                 className="p-2 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-colors"
+                aria-label="Follow us on Instagram"
               >
                 <Instagram className="w-4 h-4" />
               </motion.a>
@@ -31,6 +32,7 @@ export function Footer() {
                 href="https://www.facebook.com/hickoku/"
                 whileHover={{ scale: 1.1 }}
                 className="p-2 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-colors"
+                aria-label="Follow us on Facebook"
               >
                 <Facebook className="w-4 h-4" />
               </motion.a>

@@ -71,7 +71,7 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
         ) : (
           filteredProducts.map((product, index) => (
             <div key={product.id}>
-              <Link href={`/product/${product.id}`}>
+              <Link href={`/product/${product.slug}`}>
                 <ProductCard {...product} priority={index < 3} />
               </Link>
             </div>

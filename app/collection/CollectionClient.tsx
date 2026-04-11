@@ -50,7 +50,7 @@ export function CollectionClient({ initialProducts }: CollectionClientProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[400px]">
               {initialProducts.map((product, index) => (
                 <div key={product.id}>
-                  <Link href={`/product/${product.id}`}>
+                  <Link href={`/product/${product.slug}`}>
                     <ProductCard {...product} priority={index < 3} />
                   </Link>
                 </div>

@@ -19,6 +19,7 @@ interface ProductCardProps {
   defaultVariantId?: string;
   defaultSku?: string;
   priority?: boolean; // Added for LCP optimization
+  slug: string; // Added for slug-based routing
 }
 
 export function ProductSkeleton() {
@@ -51,6 +52,7 @@ export function ProductCard({
   id,
   defaultVariantId,
   defaultSku,
+  slug,
   priority = false, // Added
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
@@ -176,10 +178,10 @@ export function ProductCard({
         <div className="flex items-center justify-between gap-4 pt-4 border-t border-gray-100">
           <div className="flex flex-col items-start gap-1">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">50% OFF</span>
-              <p className="text-sm text-gray-400 line-through">₹{formatPrice(price)}</p>
+              <span className="text-xs font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded">50% OFF</span>
+              <p className="text-sm text-gray-600 line-through">₹{formatPrice(price)}</p>
             </div>
-            <p className="text-xl font-bold text-red-600">
+            <p className="text-xl font-bold text-red-700">
               ₹{formatPrice(Number(price.replace(/[^0-9.]/g, "")) * 0.5)}
             </p>
           </div>
@@ -197,6 +199,7 @@ export function ProductCard({
                 sku: defaultSku || `HICK-${id}`,
                 size: "Standard",
                 quantity: 1,
+                slug,
               });
             }}
             className="py-2.5 px-4 bg-gray-900 text-white rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-gray-800 transition-colors cursor-pointer text-center flex items-center justify-center gap-2 whitespace-nowrap"

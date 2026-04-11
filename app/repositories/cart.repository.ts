@@ -22,6 +22,7 @@ export interface CartItem {
     price: number;
     quantity: number;
     image: string;
+    slug: string;
     addedAt: string;
 }
 
@@ -48,16 +49,34 @@ export async function getCart(sessionId: string): Promise<Cart> {
         });
 
         const response = await docClient.send(queryCommand);
-        const items: CartItem[] = (response.Items || []).map((item) => ({
-            sku: item.sku,
-            productId: item.productId,
-            variantId: item.variantId || `${item.productId}01`, // Fallback for legacy items
-            productName: item.productName,
-            size: item.size,
-            price: item.price,
-            quantity: item.quantity,
-            image: item.image,
-            addedAt: item.addedAt,
+        
+        // Use Promise.all to fetch missing slugs concurrently (legacy repair)
+        const items: CartItem[] = await Promise.all((response.Items || []).map(async (item) => {
+            let slug = item.slug;
+            
+            // Self-healing: if slug is missing, fetch it from products repository
+            if (!slug) {
+                try {
+                    const product = await getProductWithVariant(item.productId);
+                    slug = product?.slug || '';
+                } catch (e) {
+                    console.error(`Failed to fetch slug for product ${item.productId}`, e);
+                    slug = '';
+                }
+            }
+
+            return {
+                sku: item.sku,
+                productId: item.productId,
+                variantId: item.variantId || `${item.productId}01`, // Fallback for legacy items
+                productName: item.productName,
+                size: item.size,
+                price: item.price,
+                quantity: item.quantity,
+                image: item.image,
+                slug: slug,
+                addedAt: item.addedAt,
+            };
         }));
 
         const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -93,8 +112,9 @@ export async function addToCart(
         price: number;
         quantity: number;
         image: string;
+        slug: string;
     }
-): Promise<Cart> {
+) {
     try {
         // Validate quantity
         if (item.quantity < 1 || item.quantity > 10) {
@@ -156,6 +176,7 @@ export async function addToCart(
                 price: currentPrice,
                 quantity: newQuantity,
                 image: item.image,
+                slug: item.slug,
                 addedAt: existingItem ? existingItem.addedAt : new Date().toISOString(),
                 expiresAt: calculateTTL(),
             },
@@ -228,6 +249,7 @@ export async function updateQuantity(
                 price: item.price,
                 quantity: quantity,
                 image: item.image,
+                slug: item.slug || product.slug, // Preserve slug
                 addedAt: item.addedAt,
                 expiresAt: calculateTTL(),
             },

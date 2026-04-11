@@ -1,10 +1,10 @@
-import { getProductWithVariant } from "../../repositories/products.repository";
+import { getProductBySlug } from "../../repositories/products.repository";
 import ProductDetailClient from "./ProductDetailClient";
 import { notFound } from "next/navigation";
 
-export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const product = await getProductWithVariant(id);
+export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     notFound();

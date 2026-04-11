@@ -23,6 +23,7 @@ interface Product {
   category: string;
   badge: string | null;
   images: string[];
+  slug: string;
   basePrice: number;
   variants: {
     id: string;
@@ -137,13 +138,15 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
                 <button
                   onClick={prevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
+                  aria-label="Previous image"
                 >
                   <ChevronLeft className="w-6 h-6" />
                 </button>
                 <button
                   onClick={nextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
+                  aria-label="Next image"
                 >
                   <ChevronRight className="w-6 h-6" />
                 </button>
@@ -167,6 +170,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                           ? "border-gray-900"
                           : "border-gray-200"
                       }`}
+                      aria-label={`View product image ${index + 1}`}
                     >
                       <Image
                         src={image}
@@ -189,7 +193,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                         onClick={() => {
                           if (thumbnailScrollRef.current) thumbnailScrollRef.current.scrollBy({ left: -200, behavior: 'smooth' });
                         }}
-                        className="absolute left-1 top-[48px] -translate-y-1/2 p-1.5 bg-white/90 shadow-md border border-gray-100 text-gray-800 rounded-full z-10 hover:bg-white cursor-pointer"
+                        className="absolute left-1 top-[48px] -translate-y-1/2 p-3 bg-white/90 shadow-md border border-gray-100 text-gray-800 rounded-full z-10 hover:bg-white cursor-pointer"
+                        aria-label="Scroll thumbnails left"
                       >
                         <ChevronLeft className="w-5 h-5 cursor-pointer" />
                       </button>
@@ -199,7 +204,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                         onClick={() => {
                           if (thumbnailScrollRef.current) thumbnailScrollRef.current.scrollBy({ left: 200, behavior: 'smooth' });
                         }}
-                        className="absolute right-1 top-[48px] -translate-y-1/2 p-1.5 bg-white/90 shadow-md border border-gray-100 text-gray-800 rounded-full z-10 hover:bg-white cursor-pointer"
+                        className="absolute right-1 top-[48px] -translate-y-1/2 p-3 bg-white/90 shadow-md border border-gray-100 text-gray-800 rounded-full z-10 hover:bg-white cursor-pointer"
+                        aria-label="Scroll thumbnails right"
                       >
                         <ChevronRight className="w-5 h-5 cursor-pointer" />
                       </button>
@@ -219,13 +225,13 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   {product.variants[0].shortDesc || product.highlight}
                 </p>
                 <div className="flex items-center gap-3">
-                  <p className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-orange-600">
+                  <p className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-700 to-orange-700">
                     ₹ {formatPrice(product.variants[0].price * 0.5)}
                   </p>
-                  <p className="text-xl text-gray-400 line-through">
+                  <p className="text-xl text-gray-600 line-through">
                     ₹ {formatPrice(product.variants[0].price)}
                   </p>
-                  <span className="px-3 py-1 text-sm font-bold text-red-600 bg-red-100 rounded-full shadow-sm">
+                  <span className="px-3 py-1 text-sm font-bold text-red-700 bg-red-100 rounded-full shadow-sm">
                     50% OFF
                   </span>
                 </div>
@@ -279,6 +285,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                         price: discountedPrice,
                         quantity: 1,
                         image: product.images[0],
+                        slug: product.slug,
                       });
 
                       toast.success("Added to cart!", {
