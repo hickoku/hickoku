@@ -39,10 +39,10 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { sku, productId, variantId, productName, size, price, quantity, image } = body;
+        const { sku, productId, variantId, productName, size, price, quantity, image, slug } = body;
 
         // Validate required fields
-        if (!sku || !productId || !variantId || !productName || !size || !price || !quantity || !image) {
+        if (!sku || !productId || !variantId || !productName || !size || !price || !quantity || !image || !slug) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
                 { status: 400 }
@@ -70,6 +70,7 @@ export async function POST(request: Request) {
             price,
             quantity,
             image,
+            slug,
         });
 
         return NextResponse.json({

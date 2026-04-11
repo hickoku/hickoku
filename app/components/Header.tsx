@@ -116,7 +116,8 @@ export function Header() {
                 onClick={openCart}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors relative cursor-pointer"
+                className="p-3 hover:bg-gray-100 rounded-full transition-colors relative cursor-pointer"
+                aria-label={t("cart.yourCart")}
               >
                 <ShoppingBag className="w-5 h-5" />
                 {cartCount > 0 && (
@@ -161,6 +162,7 @@ export function Header() {
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  aria-label="Close menu"
                 >
                   <X className="w-5 h-5" />
                 </button>
