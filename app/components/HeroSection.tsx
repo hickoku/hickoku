@@ -12,8 +12,8 @@ const getHeroSlides = (t: any) => [
     title: "",
     subtitle: "",
     description: "",
-    desktopImage: "/hickoku-assets/slider/Slider1.png",
-    mobileImage: "/hickoku-assets/slider/mobile/Slider1.png",
+    desktopImage: "/hickoku-assets/slider/Slider1.webp",
+    mobileImage: "/hickoku-assets/slider/mobile/Slider1.webp",
     bgColor: "none",
   },
   {
@@ -21,8 +21,8 @@ const getHeroSlides = (t: any) => [
     title: "",
     subtitle: "",
     description: "",
-    desktopImage: "/hickoku-assets/slider/Slider2.png",
-    mobileImage: "/hickoku-assets/slider/mobile/Slider2.png",
+    desktopImage: "/hickoku-assets/slider/Slider2.webp",
+    mobileImage: "/hickoku-assets/slider/mobile/Slider2.webp",
     bgColor: "none",
   },
   {
@@ -30,8 +30,8 @@ const getHeroSlides = (t: any) => [
     title: "",
     subtitle: "",
     description: "",
-    desktopImage: "/hickoku-assets/slider/Slider3.png",
-    mobileImage: "/hickoku-assets/slider/mobile/Slider5.png",
+    desktopImage: "/hickoku-assets/slider/Slider3.webp",
+    mobileImage: "/hickoku-assets/slider/mobile/Slider5.webp",
     bgColor: "none",
   },
 ];
@@ -80,19 +80,12 @@ export function HeroSection() {
             : "102px"
           : "0px",
       }}
-      className="relative w-full aspect-[4/5] sm:aspect-auto overflow-hidden block bg-white"
+      className="relative w-full aspect-[2/3] sm:aspect-[3/2] overflow-hidden block bg-white"
     >
-      {/* Invisible placeholder dynamically tracks the specific image's native aspect ratio only on Desktop! */}
-      <img
-        src={slide.desktopImage}
-        className="w-full h-auto invisible pointer-events-none hidden sm:block -mb-[180px]"
-        alt=""
-      />
-
       <AnimatePresence mode="wait">
         <motion.div
           key={slide.id}
-          initial={{ opacity: 0, scale: 1.1 }}
+          initial={false} // Disable initial animation for LCP stability
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.6 }}
