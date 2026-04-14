@@ -254,7 +254,7 @@ export const OrderConfirmationEmail = ({
               Follow us on social media for exclusive drops and updates.
             </Text>
             <Section style={socialContainer}>
-              <Link href="https://instagram.com/hickoku" style={socialIconLink}>
+              <Link href="https://instagram.com/hickokuperfume" style={socialIconLink}>
                 <Img
                   width={24}
                   src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png"
