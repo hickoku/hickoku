@@ -240,7 +240,9 @@ export default function OrderConfirmationPage() {
                       <div>
                          <p className="text-xs text-gray-500">
                           Changed your mind? Cancel until{" "}
-                          {expiry.toLocaleTimeString("en-IN", {
+                           {expiry.toLocaleString("en-IN", {
+                            day: "numeric",
+                            month: "short",
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
