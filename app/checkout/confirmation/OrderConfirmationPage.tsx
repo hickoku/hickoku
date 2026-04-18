@@ -240,7 +240,9 @@ export default function OrderConfirmationPage() {
                       <div>
                          <p className="text-xs text-gray-500">
                           Changed your mind? Cancel until{" "}
-                          {expiry.toLocaleTimeString("en-IN", {
+                           {expiry.toLocaleString("en-IN", {
+                            day: "numeric",
+                            month: "short",
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
@@ -360,15 +362,7 @@ export default function OrderConfirmationPage() {
                 <div className="flex justify-between text-gray-600">
                   <span>Actual Cost</span>
                   <span>
-                    ₹
-                    {formatPrice(
-                      Number(
-                        (
-                          (order.subtotal - (order.surpriseDiscount || 0)) /
-                          1.18
-                        ).toFixed(2),
-                      ),
-                    )}
+                    ₹{formatPrice(Number((order.total / 1.18).toFixed(2)))}
                   </span>
                 </div>
                 <div className="flex justify-between text-gray-600">
@@ -376,14 +370,7 @@ export default function OrderConfirmationPage() {
                   <span>
                     ₹
                     {formatPrice(
-                      Number(
-                        (
-                          order.subtotal -
-                          (order.surpriseDiscount || 0) -
-                          (order.subtotal - (order.surpriseDiscount || 0)) /
-                            1.18
-                        ).toFixed(2),
-                      ),
+                      Number((order.total - order.total / 1.18).toFixed(2)),
                     )}
                   </span>
                 </div>

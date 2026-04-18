@@ -224,9 +224,14 @@ export function Footer() {
 
         {/* Bottom */}
         <div className="border-t border-gray-200 pt-8 flex flex-col sm:flex-row justify-between items-center">
-          <p className="text-sm text-gray-600">
-            © 2026 HICKOKU. All rights reserved.
-          </p>
+          <div className="text-center sm:text-left">
+            <p className="text-sm text-gray-600">
+              © 2026 HICKOKU. All rights reserved.
+            </p>
+            <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-widest">
+              Powered by Zaviyar Corporation
+            </p>
+          </div>
           <div className="flex gap-6 mt-4 sm:mt-0">
             <a
               href="/privacy-policy"

@@ -49,11 +49,11 @@ export async function getCart(sessionId: string): Promise<Cart> {
         });
 
         const response = await docClient.send(queryCommand);
-        
+
         // Use Promise.all to fetch missing slugs concurrently (legacy repair)
         const items: CartItem[] = await Promise.all((response.Items || []).map(async (item) => {
             let slug = item.slug;
-            
+
             // Self-healing: if slug is missing, fetch it from products repository
             if (!slug) {
                 try {
@@ -94,7 +94,7 @@ export async function getCart(sessionId: string): Promise<Cart> {
         };
     } catch (error) {
         console.error('Error fetching cart:', error);
-        throw new Error('Failed to fetch cart');
+        throw error;
     }
 }
 
