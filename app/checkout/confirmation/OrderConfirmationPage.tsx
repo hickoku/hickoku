@@ -362,15 +362,7 @@ export default function OrderConfirmationPage() {
                 <div className="flex justify-between text-gray-600">
                   <span>Actual Cost</span>
                   <span>
-                    ₹
-                    {formatPrice(
-                      Number(
-                        (
-                          (order.subtotal - (order.surpriseDiscount || 0)) /
-                          1.18
-                        ).toFixed(2),
-                      ),
-                    )}
+                    ₹{formatPrice(Number((order.total / 1.18).toFixed(2)))}
                   </span>
                 </div>
                 <div className="flex justify-between text-gray-600">
@@ -378,14 +370,7 @@ export default function OrderConfirmationPage() {
                   <span>
                     ₹
                     {formatPrice(
-                      Number(
-                        (
-                          order.subtotal -
-                          (order.surpriseDiscount || 0) -
-                          (order.subtotal - (order.surpriseDiscount || 0)) /
-                            1.18
-                        ).toFixed(2),
-                      ),
+                      Number((order.total - order.total / 1.18).toFixed(2)),
                     )}
                   </span>
                 </div>

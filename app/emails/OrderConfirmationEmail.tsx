@@ -160,9 +160,7 @@ export const OrderConfirmationEmail = ({
               </Column>
               <Column>
                 <Text style={totalValue}>
-                  {formatPrice(
-                    Number(((total - shippingCost) / 1.18).toFixed(2)),
-                  )}
+                  {formatPrice(Number((total / 1.18).toFixed(2)))}
                 </Text>
               </Column>
             </Row>
@@ -172,15 +170,7 @@ export const OrderConfirmationEmail = ({
               </Column>
               <Column>
                 <Text style={totalValue}>
-                  {formatPrice(
-                    Number(
-                      (
-                        total -
-                        shippingCost -
-                        (total - shippingCost) / 1.18
-                      ).toFixed(2),
-                    ),
-                  )}
+                  {formatPrice(Number((total - total / 1.18).toFixed(2)))}
                 </Text>
               </Column>
             </Row>
