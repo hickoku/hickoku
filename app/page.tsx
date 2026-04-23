@@ -1,4 +1,16 @@
+import { Metadata } from 'next';
 import { getAllProductsWithVariants } from "./repositories/products.repository";
+
+export const metadata: Metadata = {
+  title: "Hickoku Perfumes | Premium Fragrances",
+  description: "Discover our exclusive collection of affordable luxury perfumes.",
+  openGraph: {
+    title: "Hickoku Perfumes | Premium Fragrances",
+    description: "Discover our exclusive collection of affordable luxury perfumes.",
+    url: "/",
+  },
+};
+
 import { HomeClient } from "./HomeClient";
 import "./styles/tailwind.css";
 import "./styles/fonts.css";

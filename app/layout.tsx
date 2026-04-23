@@ -8,10 +8,37 @@ import { ProductProvider } from "./context/ProductContext";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.APP_URL || "https://hickoku.com"),
   title: "Hickoku Perfumes",
   description: "Affordable Premium Perfume Brands for Everyone",
   icons: {
     icon: "/images/logo.png",
+  },
+  openGraph: {
+    title: "Hickoku Perfumes",
+    description: "Affordable Premium Perfume Brands for Everyone",
+    url: "/",
+    siteName: "Hickoku Perfumes",
+    images: [
+      {
+        url: "/images/logo.png",
+        width: 800,
+        height: 600,
+        alt: "Hickoku Perfumes Logo",
+      },
+    ],
+    locale: "en_IN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Hickoku Perfumes",
+    description: "Affordable Premium Perfume Brand for Everyone",
+    images: ["/images/logo.png"],
+  },
+  other: {
+    ...(process.env.FB_APP_ID && { "fb:app_id": process.env.FB_APP_ID }),
+    ...(process.env.PINTEREST_VERIFY && { "p:domain_verify": process.env.PINTEREST_VERIFY }),
   },
 };
 
