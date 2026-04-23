@@ -1,4 +1,16 @@
+import { Metadata } from 'next';
 import { getAllProductsWithVariants } from "../repositories/products.repository";
+
+export const metadata: Metadata = {
+  title: "All Collections | Hickoku Perfumes",
+  description: "Browse our complete collection of premium original fragrances.",
+  openGraph: {
+    title: "All Collections | Hickoku Perfumes",
+    description: "Browse our complete collection of premium original fragrances.",
+    url: "/collection",
+  },
+};
+
 import { CollectionClient } from "./CollectionClient";
 
 export default async function CollectionPage() {
