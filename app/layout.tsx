@@ -10,13 +10,14 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL || "https://hickoku.com"),
   title: "Hickoku Perfumes",
-  description: "Affordable Premium Perfume Brands for Everyone",
+  description: "Affordable Premium Perfume Brand for Everyone",
+  keywords: ["alcohol free perfumes", "attar under 250","rose flavour attar","rose flavour perfume", "perfume under 250","premium perfumes", "affordable luxury fragrances", "Hickoku perfumes", "buy original attars online India","buy original perfumes online India", "long lasting attars", "long lasting attar"],
   icons: {
     icon: "/images/logo.png",
   },
   openGraph: {
     title: "Hickoku Perfumes",
-    description: "Affordable Premium Perfume Brands for Everyone",
+    description: "Affordable Premium Perfume Brand for Everyone",
     url: "/",
     siteName: "Hickoku Perfumes",
     images: [
