@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "../context/LocaleContext";
 import { formatPrice } from "../utils/currency";
+import Image from "next/image";
 
 export function CartDrawer() {
   const {
@@ -67,6 +68,7 @@ export function CartDrawer() {
                 whileHover={{ rotate: 90 }}
                 onClick={closeCart}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                aria-label="Close cart"
               >
                 <X className="w-6 h-6" />
               </motion.button>
@@ -116,45 +118,58 @@ export function CartDrawer() {
                     className="flex gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                   >
                     {/* Product Image */}
-                    <div className="w-20 h-20 flex-shrink-0 bg-white rounded-lg overflow-hidden border border-gray-200">
-                      <img
+                    <Link 
+                      href={`/product/${item.slug}`} 
+                      onClick={closeCart}
+                      className="w-20 h-20 relative flex-shrink-0 bg-white rounded-lg overflow-hidden border border-gray-200 cursor-pointer"
+                    >
+                      <Image
                         src={item.image}
                         alt={item.productName}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
-                    </div>
+                    </Link>
 
                     {/* Product Details */}
                     <div className="flex-1 flex flex-col justify-between">
                       <div>
-                        <h3 className="font-semibold text-gray-900 line-clamp-2">
+                        <Link 
+                          href={`/product/${item.slug}`}
+                          onClick={closeCart}
+                          className="font-semibold text-gray-900 line-clamp-2 hover:text-blue-600 transition-colors cursor-pointer"
+                        >
                           {item.productName}
-                        </h3>
+                        </Link>
                         <p className="text-xs text-gray-500 mt-1">
                           {t("cart.sku")}: {item.sku}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
-                          <p className="text-lg font-bold text-red-600">
-                            ₹{formatPrice(item.price)}
-                          </p>
-                          <p className="text-sm text-gray-400 line-through">
-                            ₹{formatPrice(item.price * 2)}
-                          </p>
-                          <span className="text-xs font-bold text-red-600">
+                         <span className="text-xs font-bold text-red-700">
                             50% OFF
                           </span>
+                          <p className="text-sm text-gray-600 line-through">
+                            ₹{formatPrice(item.price * 2)}
+                          </p>
                         </div>
+                         <p className="text-lg font-bold text-red-700">
+                            ₹{formatPrice(item.price)}
+                          </p>
                       </div>
 
                       {/* Quantity Controls */}
                       <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 w-fit">
                         <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
+                          disabled={item.quantity <= 1}
+                          whileHover={item.quantity > 1 ? { scale: 1.05 } : {}}
+                          whileTap={item.quantity > 1 ? { scale: 0.95 } : {}}
                           onClick={() =>
-                            updateQuantity(item.sku, item.quantity - 1)
+                            item.quantity > 1 && updateQuantity(item.sku, item.quantity - 1)
                           }
-                          className="p-1 hover:bg-gray-100 transition-colors"
+                          className={`p-3 hover:bg-gray-100 transition-colors ${
+                            item.quantity <= 1 ? "opacity-30 cursor-not-allowed pointer-events-none" : ""
+                          }`}
+                          aria-label={`Decrease quantity of ${item.productName}`}
                         >
                           <Minus className="w-4 h-4" />
                         </motion.button>
@@ -162,12 +177,16 @@ export function CartDrawer() {
                           {item.quantity}
                         </span>
                         <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
+                          disabled={item.quantity >= 10}
+                          whileHover={item.quantity < 10 ? { scale: 1.05 } : {}}
+                          whileTap={item.quantity < 10 ? { scale: 0.95 } : {}}
                           onClick={() =>
                             updateQuantity(item.sku, item.quantity + 1)
                           }
-                          className="p-1 hover:bg-gray-100 transition-colors"
+                          className={`p-3 hover:bg-gray-100 transition-colors ${
+                            item.quantity >= 10 ? "opacity-30 cursor-not-allowed pointer-events-none" : ""
+                          }`}
+                          aria-label={`Increase quantity of ${item.productName}`}
                         >
                           <Plus className="w-4 h-4" />
                         </motion.button>
@@ -179,7 +198,8 @@ export function CartDrawer() {
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => removeFromCart(item.sku)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-3 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      aria-label={`Remove ${item.productName} from cart`}
                     >
                       <Trash2 className="w-5 h-5" />
                     </motion.button>

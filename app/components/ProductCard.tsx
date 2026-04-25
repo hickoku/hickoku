@@ -1,13 +1,14 @@
 "use client";
 
 import { motion } from "motion/react";
+import Image from "next/image";
 import { Heart, ShoppingBag, Eye } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useCart } from "../hooks/useCart";
 import { formatPrice } from "../utils/currency";
 
 interface ProductCardProps {
-  id: string; // Changed to string
+  id: string;
   name: string;
   description: string;
   highlight: string;
@@ -15,8 +16,29 @@ interface ProductCardProps {
   image: string;
   badge?: string;
   category: "For Her" | "For Him";
-  defaultVariantId?: string; // New prop
-  defaultSku?: string; // New prop
+  defaultVariantId?: string;
+  defaultSku?: string;
+  priority?: boolean; // Added for LCP optimization
+  slug: string; // Added for slug-based routing
+}
+
+export function ProductSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl overflow-hidden shadow-sm h-full animate-pulse">
+      <div className="aspect-[3/4] bg-gray-200" />
+      <div className="p-6 space-y-4">
+        <div className="h-6 bg-gray-200 rounded w-3/4" />
+        <div className="h-4 bg-gray-200 rounded w-full" />
+        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-200 rounded w-16" />
+            <div className="h-6 bg-gray-200 rounded w-24" />
+          </div>
+          <div className="h-10 bg-gray-200 rounded w-28" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function ProductCard({
@@ -28,48 +50,37 @@ export function ProductCard({
   badge,
   category,
   id,
-  defaultVariantId, // Added
-  defaultSku, // Added
+  defaultVariantId,
+  defaultSku,
+  slug,
+  priority = false, // Added
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
-  const [currentSrc, setCurrentSrc] = useState(image);
   const { addToCart } = useCart();
 
-  useEffect(() => {
-    const isMobile = window.matchMedia("(max-width: 768px)").matches;
-    if (isMobile && image.includes("/mobile")) {
-      setCurrentSrc(image);
-    } else {
-      // Load existing path (without /mobile if it was there)
-      setCurrentSrc(image.replace("/mobile/", "/"));
-    }
-  }, [image]);
-
-  const handleImageError = () => {
-    setCurrentSrc(image.replace("/mobile/", "/"));
-  };
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.5 }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300"
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 h-full"
     >
       {/* Image Container */}
       <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
-        <motion.img
-          src={currentSrc}
-          alt={name}
-          onError={handleImageError}
-          className="w-full h-full object-cover"
+        <motion.div
           animate={{ scale: isHovered ? 1.08 : 1 }}
           transition={{ duration: 0.6 }}
-        />
+          className="w-full h-full"
+        >
+          <Image
+            src={image}
+            alt={name}
+            fill
+            priority={priority}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover"
+          />
+        </motion.div>
 
         {/* Badge */}
         {badge && (
@@ -162,22 +173,22 @@ export function ProductCard({
       {/* Product Info */}
       <div className="p-6">
         <h3 className="text-xl font-bold mb-2">{name}</h3>
-        <p className="text-sm text-gray-600 mb-4 line-clamp-2">{description}</p>
+        <p className="text-sm text-gray-900 font-medium mb-4 line-clamp-2 capitalize">{description}</p>
 
         <div className="flex items-center justify-between gap-4 pt-4 border-t border-gray-100">
           <div className="flex flex-col items-start gap-1">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">50% OFF</span>
-              <p className="text-sm text-gray-400 line-through">₹{formatPrice(price)}</p>
+              <span className="text-xs font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded">50% OFF</span>
+              <p className="text-sm text-gray-600 line-through">₹{formatPrice(price)}</p>
             </div>
-            <p className="text-xl font-bold text-red-600">
+            <p className="text-xl font-bold text-red-700">
               ₹{formatPrice(Number(price.replace(/[^0-9.]/g, "")) * 0.5)}
             </p>
           </div>
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={(e) => {
+            onClick={(e: React.MouseEvent) => {
               e.preventDefault();
               addToCart({
                 productId: id,
@@ -188,6 +199,7 @@ export function ProductCard({
                 sku: defaultSku || `HICK-${id}`,
                 size: "Standard",
                 quantity: 1,
+                slug,
               });
             }}
             className="py-2.5 px-4 bg-gray-900 text-white rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-gray-800 transition-colors cursor-pointer text-center flex items-center justify-center gap-2 whitespace-nowrap"
@@ -197,6 +209,6 @@ export function ProductCard({
           </motion.button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

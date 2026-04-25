@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, Variants } from "framer-motion";
-import { Mail, Clock, MapPin, Headphones, Phone, Instagram, Facebook, Twitter, Share2, ArrowLeft } from "lucide-react";
+import { Mail, Clock, MapPin, Headphones, Phone, Instagram, Facebook, Share2, ArrowLeft } from "lucide-react";
 import { Header } from "../components/Header";
 import Link from "next/link";
 
@@ -81,9 +81,6 @@ export default function ContactUsPage() {
           </a>
           <a href="#" className="p-2 bg-amber-50 rounded-full text-amber-700 hover:bg-amber-100 hover:scale-110 transition-all duration-300">
             <Facebook className="w-5 h-5" />
-          </a>
-          <a href="#" className="p-2 bg-amber-50 rounded-full text-amber-700 hover:bg-amber-100 hover:scale-110 transition-all duration-300">
-            <Twitter className="w-5 h-5" />
           </a>
         </div>
       ),

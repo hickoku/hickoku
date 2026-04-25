@@ -34,6 +34,8 @@ export interface OrderConfirmationEmailProps {
   shippingCost: number;
   total: number;
   trackingUrl: string;
+  awb?: string;
+  cancelUrl?: string;
 }
 
 const formatPrice = (amount: number) => {
@@ -50,6 +52,8 @@ export const OrderConfirmationEmail = ({
   shippingCost = 0,
   total = 0,
   trackingUrl = "https://hickoku.com/order-tracking",
+  awb = "",
+  cancelUrl = "",
 }: OrderConfirmationEmailProps) => {
   const baseUrl = process.env.APP_URL || "https://hickoku.com";
 
@@ -70,14 +74,20 @@ export const OrderConfirmationEmail = ({
               Hi {customerFirstName},<br />
               <br />
               We are thrilled to confirm that your order{" "}
-              <strong>{orderNumber}</strong> has been successfully received and
-              is currently being prepared by our artisans.
+              <strong>{orderNumber}</strong> {awb ? `(AWB: ${awb})` : ""} has been
+              successfully received and is currently being prepared by our
+              artisans.
             </Text>
 
             <Section style={buttonContainer}>
               <Link href={trackingUrl} style={button}>
                 Track Your Order
               </Link>
+              {awb && (
+                <Text style={awbText}>
+                  AWB Tracking ID: <strong>{awb}</strong>
+                </Text>
+              )}
             </Section>
           </Section>
 
@@ -149,7 +159,9 @@ export const OrderConfirmationEmail = ({
                 <Text style={totalLabel}>Actual Cost</Text>
               </Column>
               <Column>
-                <Text style={totalValue}>{formatPrice(Number((total / 1.18).toFixed(2)))}</Text>
+                <Text style={totalValue}>
+                  {formatPrice(Number((total / 1.18).toFixed(2)))}
+                </Text>
               </Column>
             </Row>
             <Row style={totalRow}>
@@ -157,7 +169,9 @@ export const OrderConfirmationEmail = ({
                 <Text style={totalLabel}>GST (18%)</Text>
               </Column>
               <Column>
-                <Text style={totalValue}>{formatPrice(Number((total - total / 1.18).toFixed(2)))}</Text>
+                <Text style={totalValue}>
+                  {formatPrice(Number((total - total / 1.18).toFixed(2)))}
+                </Text>
               </Column>
             </Row>
             <Row style={totalRow}>
@@ -166,7 +180,16 @@ export const OrderConfirmationEmail = ({
               </Column>
               <Column>
                 <Text style={freeValue}>
-                  <span style={{ textDecoration: "line-through", color: "#9ca3af", marginRight: "4px" }}>₹20.00</span>{" "}FREE
+                  <span
+                    style={{
+                      textDecoration: "line-through",
+                      color: "#9ca3af",
+                      marginRight: "4px",
+                    }}
+                  >
+                    ₹20.00
+                  </span>{" "}
+                  FREE
                 </Text>
               </Column>
             </Row>
@@ -176,7 +199,16 @@ export const OrderConfirmationEmail = ({
               </Column>
               <Column>
                 <Text style={freeValue}>
-                  <span style={{ textDecoration: "line-through", color: "#9ca3af", marginRight: "4px" }}>₹50.00</span>{" "}FREE
+                  <span
+                    style={{
+                      textDecoration: "line-through",
+                      color: "#9ca3af",
+                      marginRight: "4px",
+                    }}
+                  >
+                    {formatPrice(shippingCost > 0 ? shippingCost : 50.0)}
+                  </span>{" "}
+                  FREE
                 </Text>
               </Column>
             </Row>
@@ -199,38 +231,36 @@ export const OrderConfirmationEmail = ({
               <Link href="mailto:support@hickoku.com" style={supportLink}>
                 support@hickoku.com
               </Link>
-              <br />
+            </Text>
+            {cancelUrl && (
+              <Text style={footerText}>
+                Want to cancel your order?{" "}
+                <Link href={cancelUrl} style={supportLink}>
+                  Click Here
+                </Link>
+              </Text>
+            )}
+            <Text style={legalText}>
               Follow us on social media for exclusive drops and updates.
             </Text>
-            <Row style={socialContainer}>
-              <Column align="right" style={socialIconCol}>
-                <Link href="https://instagram.com/hickoku">
-                  <Img
-                    width={24}
-                    src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png"
-                    alt="Instagram"
-                  />
-                </Link>
-              </Column>
-              <Column align="center" style={socialIconCol}>
-                <Link href="https://facebook.com/hickoku">
-                  <Img
-                    width={24}
-                    src="https://cdn-icons-png.flaticon.com/512/1384/1384053.png"
-                    alt="Facebook"
-                  />
-                </Link>
-              </Column>
-              <Column align="left" style={socialIconCol}>
-                <Link href="https://x.com/hickoku">
-                  <Img
-                    width={24}
-                    src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png"
-                    alt="X"
-                  />
-                </Link>
-              </Column>
-            </Row>
+            <Section style={socialContainer}>
+              <Link href="https://instagram.com/hickokuperfume" style={socialIconLink}>
+                <Img
+                  width={24}
+                  src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png"
+                  alt="Instagram"
+                  style={socialIcon}
+                />
+              </Link>
+              <Link href="https://facebook.com/hickoku" style={socialIconLink}>
+                <Img
+                  width={24}
+                  src="https://cdn-icons-png.flaticon.com/512/1384/1384053.png"
+                  alt="Facebook"
+                  style={socialIcon}
+                />
+              </Link>
+            </Section>
             <Text style={legalText}>
               © {new Date().getFullYear()} Hickoku Perfumes. All rights
               reserved.
@@ -459,11 +489,31 @@ const supportLink = {
 };
 
 const socialContainer = {
+  textAlign: "center" as const,
   marginBottom: "20px",
+  padding: "0",
 };
 
-const socialIconCol = {
-  padding: "0 10px",
+const socialIconLink = {
+  display: "inline-block",
+  margin: "0 12px",
+};
+
+const socialIcon = {
+  display: "inline-block",
+};
+
+const awbText = {
+  fontSize: "14px",
+  color: "#4b5563",
+  marginTop: "16px",
+  marginBottom: "0",
+};
+
+const cancelLink = {
+  fontSize: "13px",
+  color: "#9ca3af",
+  textDecoration: "underline",
 };
 
 const legalText = {

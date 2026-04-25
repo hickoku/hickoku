@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { useCart } from "../hooks/useCart";
 import { useLocale } from "../context/LocaleContext";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import Image from "next/image";
 
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -32,15 +33,15 @@ export function Header() {
   return (
     <>
       <motion.header
-        initial={{ y: -150, opacity: 0 }}
         animate={{ y: hideHeader ? -150 : 0, opacity: hideHeader ? 0 : 1 }}
         transition={{ duration: 0.6, type: "spring", bounce: 0.15 }}
         className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 flex flex-col"
+        initial={{ y: -150, opacity: 0 }}
       >
         <div className="bg-gray-900 text-white text-xs sm:text-sm font-medium py-2 px-4 text-center tracking-wide w-full">
-          🎉 Surprise{" "}
+          🎉 Enjoy{" "}
           <span className="text-amber-400 font-bold ml-1">₹25 OFF</span> on each
-          item when you buy 2 or more items!
+          item when you purchase 2 or more items!
         </div>
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 w-full">
           <div className="flex items-center justify-between h-full">
@@ -89,10 +90,13 @@ export function Header() {
                 // whileHover={{ scale: 1.08 }}
                 className="flex items-center justify-center px-2 sm:px-4 lg:px-6  transition-colors"
               >
-                <img
-                  src={"/images/logo.png"}
+                <Image
+                  src="/images/logo.png"
                   alt="HK Logo"
-                  className="h-12 sm:h-16 lg:h-20 object-contain"
+                  width={160}
+                  height={80}
+                  priority
+                  className="h-12 sm:h-16 lg:h-20 w-auto object-contain"
                 />
               </motion.div>
             </Link>
@@ -112,7 +116,8 @@ export function Header() {
                 onClick={openCart}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors relative cursor-pointer"
+                className="p-3 hover:bg-gray-100 rounded-full transition-colors relative cursor-pointer"
+                aria-label={t("cart.yourCart")}
               >
                 <ShoppingBag className="w-5 h-5" />
                 {cartCount > 0 && (
@@ -157,16 +162,19 @@ export function Header() {
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  aria-label="Close menu"
                 >
                   <X className="w-5 h-5" />
                 </button>
 
                 {/* Logo */}
                 <div className="mb-8 mt-2">
-                  <img
-                    src={"/images/logo.png"}
+                  <Image
+                    src="/images/logo.png"
                     alt="HK Logo"
-                    className="h-16 object-contain"
+                    width={128}
+                    height={64}
+                    className="h-16 w-auto object-contain"
                   />
                 </div>
 

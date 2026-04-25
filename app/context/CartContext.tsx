@@ -13,6 +13,7 @@ export interface CartItem {
   price: number;
   quantity: number;
   image: string;
+  slug: string;
   addedAt: string;
 }
 
@@ -24,6 +25,7 @@ interface CartState {
   totalPrice: number;
   isOpen: boolean;
   loading: boolean;
+  isCartLoaded: boolean;
   error: string | null;
   sessionId: string | null;
   stockWarnings: Array<{
@@ -51,7 +53,8 @@ const initialState: CartState = {
   surpriseDiscount: 0,
   totalPrice: 0,
   isOpen: false,
-  loading: false,
+  loading: true, // Start with loading true
+  isCartLoaded: false,
   error: null,
   sessionId: null,
   stockWarnings: [],
@@ -123,12 +126,14 @@ export function CartProvider({ children }: CartProviderProps) {
         sessionId: data.sessionId,
         stockWarnings,
         loading: false,
+        isCartLoaded: true,
       }));
     } catch (error: any) {
       console.error('Error fetching cart:', error);
       setState((prev) => ({
         ...prev,
         loading: false,
+        isCartLoaded: true,
         error: error.message,
       }));
     }
@@ -155,9 +160,18 @@ export function CartProvider({ children }: CartProviderProps) {
             )
           : [...prev.items, { ...item, addedAt: new Date().toISOString() }];
 
+        const optimisticSubtotal = optimisticItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const totalItemsCount = optimisticItems.reduce((sum, item) => sum + item.quantity, 0);
+        const optimisticSurpriseDiscount = totalItemsCount > 1 ? totalItemsCount * 25 : 0;
+        const optimisticTotalPrice = Math.max(0, optimisticSubtotal - optimisticSurpriseDiscount);
+
         return {
           ...prev,
           items: optimisticItems,
+          subtotal: optimisticSubtotal,
+          surpriseDiscount: optimisticSurpriseDiscount,
+          totalPrice: optimisticTotalPrice,
+          totalItems: totalItemsCount,
           isOpen: true,
           error: null,
         };
@@ -207,7 +221,19 @@ export function CartProvider({ children }: CartProviderProps) {
 
       // Optimistic update
       const optimisticItems = state.items.filter((i) => i.sku !== sku);
-      setState((prev) => ({ ...prev, items: optimisticItems }));
+      const optimisticSubtotal = optimisticItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const totalItemsCount = optimisticItems.reduce((sum, item) => sum + item.quantity, 0);
+      const optimisticSurpriseDiscount = totalItemsCount > 1 ? totalItemsCount * 25 : 0;
+      const optimisticTotalPrice = Math.max(0, optimisticSubtotal - optimisticSurpriseDiscount);
+
+      setState((prev) => ({ 
+        ...prev, 
+        items: optimisticItems,
+        subtotal: optimisticSubtotal,
+        surpriseDiscount: optimisticSurpriseDiscount,
+        totalPrice: optimisticTotalPrice,
+        totalItems: totalItemsCount
+      }));
 
       const response = await fetch(`/api/cart/${sku}`, {
         method: 'DELETE',
@@ -247,7 +273,23 @@ export function CartProvider({ children }: CartProviderProps) {
       const optimisticItems = state.items.map((i) =>
         i.sku === sku ? { ...i, quantity } : i
       );
-      setState((prev) => ({ ...prev, items: optimisticItems }));
+      
+      // Calculate local subtotal and total for immediate reflection
+      const optimisticSubtotal = optimisticItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const totalItemsCount = optimisticItems.reduce((sum, item) => sum + item.quantity, 0);
+      
+      // Match backend logic: ₹25 discount per item if 2+ items total
+      const optimisticSurpriseDiscount = totalItemsCount > 1 ? totalItemsCount * 25 : 0;
+      const optimisticTotalPrice = Math.max(0, optimisticSubtotal - optimisticSurpriseDiscount);
+
+      setState((prev) => ({ 
+        ...prev, 
+        items: optimisticItems,
+        subtotal: optimisticSubtotal,
+        surpriseDiscount: optimisticSurpriseDiscount,
+        totalPrice: optimisticTotalPrice,
+        totalItems: totalItemsCount
+      }));
 
       const response = await fetch(`/api/cart/${sku}`, {
         method: 'PUT',

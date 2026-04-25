@@ -41,6 +41,7 @@ export function useCart() {
     items: state.items,
     isOpen: state.isOpen,
     loading: state.loading,
+    isCartLoaded: state.isCartLoaded,
     error: state.error,
     sessionId: state.sessionId,
     stockWarnings: state.stockWarnings,

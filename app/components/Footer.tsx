@@ -24,6 +24,7 @@ export function Footer() {
                 href="https://www.instagram.com/hickokuperfume"
                 whileHover={{ scale: 1.1 }}
                 className="p-2 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-colors"
+                aria-label="Follow us on Instagram"
               >
                 <Instagram className="w-4 h-4" />
               </motion.a>
@@ -31,6 +32,7 @@ export function Footer() {
                 href="https://www.facebook.com/hickoku/"
                 whileHover={{ scale: 1.1 }}
                 className="p-2 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-colors"
+                aria-label="Follow us on Facebook"
               >
                 <Facebook className="w-4 h-4" />
               </motion.a>
@@ -188,9 +190,15 @@ export function Footer() {
               onSubmit={(e) => {
                 e.preventDefault();
                 const formData = new FormData(e.currentTarget);
-                const orderId = formData.get("orderId") as string;
-                if (orderId.trim()) {
-                  window.location.href = `/order-tracking/${orderId.trim()}`;
+                const query = (formData.get("orderId") as string).trim();
+                
+                if (query) {
+                  // If it looks like a Delhivery AWB (numeric and length ~14, or generic > 10 chars)
+                  if (/^\d+$/.test(query) && query.length >= 10) {
+                    window.open(`https://www.delhivery.com/track-v2/package/${query}`, "_blank");
+                  } else {
+                    window.location.href = `/order-tracking/${query}`;
+                  }
                 }
               }}
               className="space-y-2"
@@ -198,7 +206,7 @@ export function Footer() {
               <input
                 type="text"
                 name="orderId"
-                placeholder="Order ID"
+                placeholder="Order ID or AWB"
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -216,9 +224,14 @@ export function Footer() {
 
         {/* Bottom */}
         <div className="border-t border-gray-200 pt-8 flex flex-col sm:flex-row justify-between items-center">
-          <p className="text-sm text-gray-600">
-            © 2026 HICKOKU. All rights reserved.
-          </p>
+          <div className="text-center sm:text-left">
+            <p className="text-sm text-gray-600">
+              © 2026 HICKOKU. All rights reserved.
+            </p>
+            <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-widest">
+              Powered by Zaviyar Corporation
+            </p>
+          </div>
           <div className="flex gap-6 mt-4 sm:mt-0">
             <a
               href="/privacy-policy"

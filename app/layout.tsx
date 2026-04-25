@@ -5,7 +5,8 @@ import { CartProvider } from "./context/CartContext";
 import { CartDrawer } from "./components/CartDrawer";
 import { LocaleProvider } from "./context/LocaleContext";
 import { ProductProvider } from "./context/ProductContext";
-
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 export const metadata: Metadata = {
   title: "Hickoku Perfumes",
   description: "Affordable Premium Perfume Brands for Everyone",
@@ -17,8 +18,6 @@ export const metadata: Metadata = {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({
@@ -28,9 +27,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-      </head>
+      <head />
       <body>
         <LocaleProvider>
           <ProductProvider>
@@ -41,6 +38,8 @@ export default function RootLayout({
             </CartProvider>
           </ProductProvider>
         </LocaleProvider>
+        <Analytics/>
+        <SpeedInsights/>
       </body>
     </html>
   );

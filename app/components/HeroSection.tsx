@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocale } from "../context/LocaleContext";
+import Image from "next/image";
 
 const getHeroSlides = (t: any) => [
   {
@@ -11,8 +12,8 @@ const getHeroSlides = (t: any) => [
     title: "",
     subtitle: "",
     description: "",
-    desktopImage: "/hickoku-assets/slider/Slider1.png",
-    mobileImage: "/hickoku-assets/slider/mobile/Slider1.png",
+    desktopImage: "/hickoku-assets/slider/Slider1.webp",
+    mobileImage: "/hickoku-assets/slider/mobile/Slider1.webp",
     bgColor: "none",
   },
   {
@@ -20,8 +21,8 @@ const getHeroSlides = (t: any) => [
     title: "",
     subtitle: "",
     description: "",
-    desktopImage: "/hickoku-assets/slider/Slider2.jpeg",
-    mobileImage: "/hickoku-assets/slider/mobile/Slider2.png",
+    desktopImage: "/hickoku-assets/slider/Slider2.webp",
+    mobileImage: "/hickoku-assets/slider/mobile/Slider2.webp",
     bgColor: "none",
   },
   {
@@ -29,10 +30,10 @@ const getHeroSlides = (t: any) => [
     title: "",
     subtitle: "",
     description: "",
-    desktopImage: "/hickoku-assets/slider/Slider3.jpeg",
-    mobileImage: "/hickoku-assets/slider/mobile/Slider5.png",
+    desktopImage: "/hickoku-assets/slider/Slider3.webp",
+    mobileImage: "/hickoku-assets/slider/mobile/Slider5.webp",
     bgColor: "none",
-  }
+  },
 ];
 
 export function HeroSection() {
@@ -69,27 +70,22 @@ export function HeroSection() {
   const slide = heroSlides[currentSlide];
 
   return (
-    <motion.section 
+    <motion.section
       layout
       transition={{ duration: 0.6, type: "spring", bounce: 0.15 }}
       style={{
         marginTop: isScrolled
-          ? (typeof window !== 'undefined' && window.innerWidth >= 640 ? '118px' : '102px')
-          : "0px"
+          ? typeof window !== "undefined" && window.innerWidth >= 640
+            ? "118px"
+            : "102px"
+          : "0px",
       }}
-      className="relative w-full aspect-[4/5] sm:aspect-auto overflow-hidden block bg-white"
+      className="relative w-full aspect-[2/3] sm:aspect-[3/2] overflow-hidden block bg-white"
     >
-      {/* Invisible placeholder dynamically tracks the specific image's native aspect ratio only on Desktop! */}
-      <img
-        src={slide.desktopImage}
-        className="w-full h-auto invisible pointer-events-none hidden sm:block -mb-[180px]"
-        alt=""
-      />
-
       <AnimatePresence mode="wait">
         <motion.div
           key={slide.id}
-          initial={{ opacity: 0, scale: 1.1 }}
+          initial={false} // Disable initial animation for LCP stability
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.6 }}
@@ -97,25 +93,33 @@ export function HeroSection() {
         >
           <div className="absolute inset-0">
             {/* Mobile Image */}
-            <img
-              src={slide.mobileImage}
-              alt={slide.title || "Hero banner"}
-              className={`w-full h-full object-cover sm:hidden ${
+            <div className={`relative w-full h-full sm:hidden ${
                 slide.title || slide.subtitle || slide.description
                   ? "mix-blend-overlay opacity-40"
                   : "opacity-100"
-              }`}
-            />
+              }`}>
+              <Image
+                src={slide.mobileImage}
+                alt={slide.title || "Hero banner"}
+                fill
+                priority
+                className="object-cover"
+              />
+            </div>
             {/* Desktop Image */}
-            <img
-              src={slide.desktopImage}
-              alt={slide.title || "Hero banner"}
-              className={`w-full h-full object-cover hidden sm:block ${
+            <div className={`relative w-full h-full hidden sm:block ${
                 slide.title || slide.subtitle || slide.description
                   ? "mix-blend-overlay opacity-40"
                   : "opacity-100"
-              }`}
-            />
+              }`}>
+              <Image
+                src={slide.desktopImage}
+                alt={slide.title || "Hero banner"}
+                fill
+                priority
+                className="object-cover"
+              />
+            </div>
           </div>
 
           {(slide.title || slide.subtitle || slide.description) && (
@@ -148,7 +152,7 @@ export function HeroSection() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="text-lg mb-8 opacity-90"
+                  className="text-lg mb-8 opacity-90 capitalize"
                 >
                   {slide.description}
                 </motion.p>
@@ -175,27 +179,32 @@ export function HeroSection() {
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
+        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
+        aria-label="Previous slide"
       >
         <ChevronLeft className="w-6 h-6 text-white" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
+        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
+        aria-label="Next slide"
       >
         <ChevronRight className="w-6 h-6 text-white" />
       </button>
 
       {/* Slide Indicators */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4">
         {heroSlides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-2 h-2 rounded-full transition-all ${
-              index === currentSlide ? "bg-white w-8" : "bg-white/50"
-            }`}
-          />
+            className="p-3 -m-3 transition-all"
+            aria-label={`Go to slide ${index + 1}`}
+          >
+            <div className={`h-2 rounded-full transition-all ${
+              index === currentSlide ? "bg-white w-8" : "bg-white/50 w-2"
+            }`} />
+          </button>
         ))}
       </div>
     </motion.section>

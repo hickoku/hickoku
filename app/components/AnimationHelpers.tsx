@@ -1,5 +1,6 @@
 import { motion, useScroll, useTransform } from 'motion/react';
 import { Sparkles } from 'lucide-react';
+import Image from 'next/image';
 
 export function ScrollIndicator() {
   return (
@@ -32,7 +33,12 @@ export function ParallaxImage({ src, alt, speed = 0.5 }: { src: string; alt: str
 
   return (
     <motion.div style={{ y }} className="absolute inset-0">
-      <img src={src} alt={alt} className="w-full h-full object-cover" />
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        className="object-cover"
+      />
     </motion.div>
   );
 }
