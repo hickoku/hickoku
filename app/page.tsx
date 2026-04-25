@@ -4,6 +4,10 @@ import { getAllProductsWithVariants } from "./repositories/products.repository";
 export const metadata: Metadata = {
   title: "Hickoku Perfumes | Premium Fragrances",
   description: "Discover our exclusive collection of affordable luxury perfumes.",
+  keywords: ["Hickoku", "best affordable perfumes", "luxury fragrance collection", "attar", "EDP", "perfume shop online", "original perfumes"],
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: "Hickoku Perfumes | Premium Fragrances",
     description: "Discover our exclusive collection of affordable luxury perfumes.",
@@ -37,5 +41,21 @@ export default async function HomePage() {
       defaultSku: p.variants?.find(v => (v.status as any) !== false)?.sku || `HICK-${p.id}`,
     }));
 
-  return <HomeClient initialProducts={products} />;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Hickoku Perfumes",
+    "url": "https://hickoku.com",
+    "logo": "https://hickoku.com/images/logo.png"
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <HomeClient initialProducts={products} />
+    </>
+  );
 }
