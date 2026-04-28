@@ -8,7 +8,7 @@ import { ProductProvider } from "./context/ProductContext";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.APP_URL || "https://hickoku.com"),
+  metadataBase: new URL(process.env.APP_URL || "https://www.hickoku.com"),
   title: "Hickoku Perfumes",
   description: "Affordable Premium Perfume Brand for Everyone",
   keywords: ["alcohol free perfumes", "attar under 250","rose flavour attar","rose flavour perfume", "perfume under 250","premium perfumes", "affordable luxury fragrances", "Hickoku perfumes", "buy original attars online India","buy original perfumes online India", "long lasting attars", "long lasting attar"],

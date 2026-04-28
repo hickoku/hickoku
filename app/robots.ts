@@ -11,7 +11,7 @@ export default function robots(): MetadataRoute.Robots {
         '/checkout/confirmation',
       ],
     },
-    sitemap: 'https://hickoku.com/sitemap.xml',
-    host: 'https://hickoku.com',
+    sitemap: 'https://www.hickoku.com/sitemap.xml',
+    host: 'https://www.hickoku.com',
   };
 }

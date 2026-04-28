@@ -19,7 +19,7 @@ export interface PaymentFailureEmailProps {
 
 export const PaymentFailureEmail = ({
   customerFirstName = "Valued Customer",
-  checkoutUrl = "https://hickoku.com/cart",
+  checkoutUrl = "https://www.hickoku.com/cart",
 }: PaymentFailureEmailProps) => {
   return (
     <Html>

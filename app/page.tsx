@@ -45,8 +45,8 @@ export default async function HomePage() {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Hickoku Perfumes",
-    "url": "https://hickoku.com",
-    "logo": "https://hickoku.com/images/logo.png"
+    "url": "https://www.hickoku.com",
+    "logo": "https://www.hickoku.com/images/logo.png"
   };
 
   return (
