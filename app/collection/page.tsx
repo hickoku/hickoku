@@ -46,13 +46,13 @@ export default async function CollectionPage() {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://hickoku.com"
+        "item": "https://www.hickoku.com"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Collection",
-        "item": "https://hickoku.com/collection"
+        "item": "https://www.hickoku.com/collection"
       }
     ]
   };

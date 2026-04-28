@@ -80,7 +80,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     },
     offers: {
       '@type': 'Offer',
-      url: `https://hickoku.com/product/${product.slug}`,
+      url: `https://www.hickoku.com/product/${product.slug}`,
       priceCurrency: 'INR',
       price: (product.variants?.[0]?.price || product.basePrice || 0) * 0.5,
       itemCondition: 'https://schema.org/NewCondition',
@@ -103,19 +103,19 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://hickoku.com"
+        "item": "https://www.hickoku.com"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Collection",
-        "item": "https://hickoku.com/collection"
+        "item": "https://www.hickoku.com/collection"
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": product.name,
-        "item": `https://hickoku.com/product/${product.slug}`
+        "item": `https://www.hickoku.com/product/${product.slug}`
       }
     ]
   };

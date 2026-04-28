@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { getAllProductsWithVariants } from './repositories/products.repository';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://hickoku.com';
+  const baseUrl = 'https://www.hickoku.com';
 
   // Fetch all products
   let productUrls: MetadataRoute.Sitemap = [];
@@ -27,6 +27,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/privacy-policy',
     '/tnc',
     '/why-choose-us',
+    'shipping-policy',
+    'return-policy',
+    'faq'
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),

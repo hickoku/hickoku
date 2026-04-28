@@ -103,30 +103,30 @@ export function Footer() {
                 </a>
               </li>
 
-              {/* <li>
+              <li>
                 <a
-                  href="#"
+                  href="/shipping-policy"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
-                  {t("footer.shippingInfo")}
+                  Shipping Info
                 </a>
               </li> 
               <li>
                 <a
-                  href="#"
+                  href="/return-policy"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
-                  {t("footer.returns")}
+                  Returns & Refunds
                 </a>
               </li> 
               <li>
                 <a
-                  href="#"
+                  href="/faq"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
-                  {t("footer.faq")}
+                  FAQ
                 </a>
-              </li>*/}
+              </li>
             </ul>
           </div>
 
@@ -234,6 +234,18 @@ export function Footer() {
             </p>
           </div>
           <div className="flex gap-6 mt-4 sm:mt-0">
+             <a
+              href="/shipping-policy"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              {t("footer.shippingInfo")}
+            </a>
+             <a
+              href="/return-policy"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              {t("footer.returnAndRefund")}
+            </a>
             <a
               href="/privacy-policy"
               className="text-sm text-gray-600 hover:text-gray-900"
@@ -245,6 +257,12 @@ export function Footer() {
               className="text-sm text-gray-600 hover:text-gray-900"
             >
               {t("footer.terms")}
+            </a>
+             <a
+              href="/faq"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              {t("footer.faq")}
             </a>
             {/* <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
               Cookies
