@@ -102,23 +102,6 @@ export function Footer() {
                   {t("footer.contactUs")}
                 </a>
               </li>
-
-              <li>
-                <a
-                  href="/shipping-policy"
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Shipping Info
-                </a>
-              </li> 
-              <li>
-                <a
-                  href="/return-policy"
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Returns & Refunds
-                </a>
-              </li> 
               <li>
                 <a
                   href="/faq"
