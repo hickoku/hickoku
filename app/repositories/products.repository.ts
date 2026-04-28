@@ -32,6 +32,7 @@ export interface ProductVariant {
   shortDesc?: string;
   desc?: string;
   status?: boolean; // true = visible, false = hidden
+  characterstics?: string[];
 }
 
 export interface Product {
@@ -88,6 +89,7 @@ export async function getAllProductsWithVariants(
         isAvailable: v.stock > 0, // Simple logic
         shortDesc: v.shortDesc,
         desc: v.desc,
+        characterstics: Array.from(v.characterstics || v.characteristics || []),
         status: v.status !== undefined ? v.status : true,
       };
       if (!variantsMap.has(v.productId)) {
@@ -182,6 +184,7 @@ export async function getProductWithVariant(
       isAvailable: v.stock > 0,
       shortDesc: v.shortDesc,
       desc: v.desc,
+      characterstics: Array.from(v.characterstics || v.characteristics || []),
     }));
 
     return {
@@ -200,6 +203,77 @@ export async function getProductWithVariant(
   } catch (error) {
     console.error("Error fetching product:", error);
     throw new Error("Failed to fetch product");
+  }
+}
+
+/**
+ * Get a single product by its slug
+ * @param slug - Product slug (e.g., "cool-perfume")
+ */
+export async function getProductBySlug(
+  slug: string,
+): Promise<Product | null> {
+  try {
+    // 1. Scan for Parent with matching slug
+    const productResponse = await docClient.send(
+      new ScanCommand({
+        TableName: PRODUCTS_TABLE,
+        FilterExpression: "slug = :slug",
+        ExpressionAttributeValues: {
+          ":slug": slug,
+        },
+      }),
+    );
+
+    if (!productResponse.Items || productResponse.Items.length === 0)
+      return null;
+    const parent = productResponse.Items[0];
+    const productId = parent.id;
+
+    // 2. Get Variants (Query GSI)
+    const variantsResponse = await docClient.send(
+      new QueryCommand({
+        TableName: VARIANTS_TABLE,
+        IndexName: "productId-index",
+        KeyConditionExpression: "productId = :pid",
+        ExpressionAttributeValues: {
+          ":pid": productId,
+        },
+      }),
+    );
+
+    const variantItems = variantsResponse.Items || [];
+    const variants: ProductVariant[] = variantItems.map((v: any) => ({
+      id: v.PK?.replace("VARIANT#", "") || v.id,
+      sku: v.sku,
+      size: v.size,
+      price: v.price,
+      stock: v.stock,
+      inventoryStatus: v.inventoryStatus,
+      weight: v.weight,
+      isAvailable: v.stock > 0,
+      shortDesc: v.shortDesc,
+      desc: v.desc,
+      characterstics: Array.from(v.characterstics || v.characteristics || []),
+      status: v.status !== undefined ? v.status : true,
+    }));
+
+    return {
+      id: parent.id,
+      name: parent.name,
+      description: parent.description,
+      highlight: parent.highlight,
+      category: parent.category,
+      badge: parent.badge,
+      images: parent.images,
+      slug: parent.slug,
+      status: parent.status || "active",
+      basePrice: parent.basePrice,
+      variants: variants,
+    };
+  } catch (error) {
+    console.error("Error fetching product by slug:", error);
+    throw new Error("Failed to fetch product by slug");
   }
 }
 

@@ -7,16 +7,21 @@ import Link from "next/link";
 import { useLocale } from "../context/LocaleContext";
 import { useProducts } from "../context/ProductContext";
 
-export function ProductGrid() {
-  const { products, isLoading } = useProducts();
-  console.log("products", products);
-  // if (isLoading) return <p>Loading products...</p>;
-  // if (error) return <p>Error: {error}</p>;
+interface ProductGridProps {
+  initialProducts?: any[];
+}
 
+export function ProductGrid({ initialProducts }: ProductGridProps) {
+  const { products, isLoading } = useProducts();
+  
   const [filter, setFilter] = useState<"All" | "For Her" | "For Him">("All");
   const { t } = useLocale();
+  
+  const displayProducts = initialProducts || products;
   const filteredProducts =
-    filter === "All" ? products : products.filter((p) => p.category === filter);
+    filter === "All" ? displayProducts : displayProducts.filter((p: any) => p.category === filter);
+  
+  const showLoading = !initialProducts && isLoading;
   
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -59,14 +64,14 @@ export function ProductGrid() {
 
       {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[400px]">
-        {isLoading ? (
+        {showLoading ? (
           [...Array(6)].map((_, i) => (
             <ProductSkeleton key={`skeleton-${i}`} />
           ))
         ) : (
           filteredProducts.map((product, index) => (
             <div key={product.id}>
-              <Link href={`/product/${product.id}`}>
+              <Link href={`/product/${product.slug}`}>
                 <ProductCard {...product} priority={index < 3} />
               </Link>
             </div>

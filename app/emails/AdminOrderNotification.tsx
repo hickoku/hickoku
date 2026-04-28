@@ -78,9 +78,8 @@ export const AdminOrderNotification = ({
   orderDate = "",
   awb = "",
 }: AdminOrderNotificationProps) => {
-  const discountedSubtotal = total - shippingCost;
-  const actualCost = Number((discountedSubtotal / 1.18).toFixed(2));
-  const gst = Number((discountedSubtotal - actualCost).toFixed(2));
+  const actualCost = Number((total / 1.18).toFixed(2));
+  const gst = Number((total - actualCost).toFixed(2));
 
   return (
     <Html>

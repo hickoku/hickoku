@@ -15,6 +15,7 @@ import Link from "next/link";
 import { Order } from "@/lib/repositories/orderRepository";
 import { formatPrice } from "@/app/utils/currency";
 import { Header } from "@/app/components/Header";
+import Image from "next/image";
 
 export default function OrderConfirmationPage() {
   const searchParams = useSearchParams();
@@ -239,7 +240,9 @@ export default function OrderConfirmationPage() {
                       <div>
                          <p className="text-xs text-gray-500">
                           Changed your mind? Cancel until{" "}
-                          {expiry.toLocaleTimeString("en-IN", {
+                           {expiry.toLocaleString("en-IN", {
+                            day: "numeric",
+                            month: "short",
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
@@ -287,11 +290,14 @@ export default function OrderConfirmationPage() {
                     key={index}
                     className="flex gap-4 p-3 bg-gray-50 rounded-lg"
                   >
-                    <img
-                      src={item.image}
-                      alt={item.productName}
-                      className="w-16 h-16 object-cover rounded-lg"
-                    />
+                    <div className="w-16 h-16 relative flex-shrink-0">
+                      <Image
+                        src={item.image}
+                        alt={item.productName}
+                        fill
+                        className="object-cover rounded-lg"
+                      />
+                    </div>
                     <div className="flex-1">
                       <p className="font-semibold text-gray-900">
                         {item.productName}
@@ -356,15 +362,7 @@ export default function OrderConfirmationPage() {
                 <div className="flex justify-between text-gray-600">
                   <span>Actual Cost</span>
                   <span>
-                    ₹
-                    {formatPrice(
-                      Number(
-                        (
-                          (order.subtotal - (order.surpriseDiscount || 0)) /
-                          1.18
-                        ).toFixed(2),
-                      ),
-                    )}
+                    ₹{formatPrice(Number((order.total / 1.18).toFixed(2)))}
                   </span>
                 </div>
                 <div className="flex justify-between text-gray-600">
@@ -372,14 +370,7 @@ export default function OrderConfirmationPage() {
                   <span>
                     ₹
                     {formatPrice(
-                      Number(
-                        (
-                          order.subtotal -
-                          (order.surpriseDiscount || 0) -
-                          (order.subtotal - (order.surpriseDiscount || 0)) /
-                            1.18
-                        ).toFixed(2),
-                      ),
+                      Number((order.total - order.total / 1.18).toFixed(2)),
                     )}
                   </span>
                 </div>

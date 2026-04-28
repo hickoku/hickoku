@@ -1,79 +1,69 @@
-"use client";
+import { Metadata } from 'next';
+import { getAllProductsWithVariants } from "../repositories/products.repository";
 
-import { motion } from "motion/react";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
-import { Header } from "../components/Header";
-import { ProductCard, ProductSkeleton } from "../components/ProductCard";
-import { useProducts } from "../context/ProductContext";
-import { useLocale } from "../context/LocaleContext";
+export const metadata: Metadata = {
+  title: "All Collections | Hickoku Perfumes",
+  description: "Browse our complete collection of premium original fragrances.",
+  keywords: ["perfume collection", "shop all perfumes", "best fragrance brands", "Hickoku collection"],
+  alternates: {
+    canonical: '/collection',
+  },
+  openGraph: {
+    title: "All Collections | Hickoku Perfumes",
+    description: "Browse our complete collection of premium original fragrances.",
+    url: "/collection",
+  },
+};
 
-export default function CollectionPage() {
-  const { products, isLoading, error } = useProducts();
-  const { t } = useLocale();
+import { CollectionClient } from "./CollectionClient";
+
+export default async function CollectionPage() {
+  // Fetch products server-side for SEO
+  const rawProducts = await getAllProductsWithVariants();
+  
+  // Map raw data to the format expected by the frontend components
+  const products = rawProducts
+    .filter(p => (p.status as any) !== false && Array.isArray(p.variants) && p.variants.some(v => (v.status as any) !== false))
+    .map(p => ({
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      highlight: p.highlight,
+      category: p.category,
+      badge: p.badge,
+      price: String(p.basePrice || p.variants?.find(v => (v.status as any) !== false)?.price || 0),
+      image: p.images?.[0] || "",
+      slug: p.slug,
+      defaultVariantId: p.variants?.find(v => (v.status as any) !== false)?.id || `${p.id}01`,
+      defaultSku: p.variants?.find(v => (v.status as any) !== false)?.sku || `HICK-${p.id}`,
+    }));
+
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://www.hickoku.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Collection",
+        "item": "https://www.hickoku.com/collection"
+      }
+    ]
+  };
 
   return (
     <>
-      <Header />
-      <div className="min-h-screen flex flex-col bg-gray-50 pt-30">
-        <main className="flex-grow">
-          {/* Header */}
-          <div className="bg-white border-b border-gray-200 py-3">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex items-center justify-between mb-4">
-                <Link href="/">
-                  <motion.button
-                    whileHover={{ x: -5 }}
-                    className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-                  >
-                    <ArrowLeft className="w-5 h-5" />
-                    <span className="text-sm cursor-pointer">Back</span>
-                  </motion.button>
-                </Link>
-              </div>
-
-              <div className="flex items-center justify-center">
-                <div>
-                  <motion.h1
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl mb-2"
-                  >
-                    COLLECTIONS
-                  </motion.h1>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Collection Grid */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            {error && (
-              <div className="text-center py-12">
-                <p className="text-red-600">Error: {error}</p>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[400px]">
-              {isLoading ? (
-                [...Array(6)].map((_, i) => (
-                  <ProductSkeleton key={`skeleton-${i}`} />
-                ))
-              ) : (
-                !error && (
-                  products.map((product, index) => (
-                    <div key={product.id}>
-                      <Link href={`/product/${product.id}`}>
-                        <ProductCard {...product} priority={index < 3} />
-                      </Link>
-                    </div>
-                  ))
-                )
-              )}
-            </div>
-          </div>
-        </main>
-      </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <CollectionClient initialProducts={products} />
     </>
   );
 }

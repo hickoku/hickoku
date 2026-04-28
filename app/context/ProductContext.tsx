@@ -18,6 +18,7 @@ interface Product {
   price: string;
   image: string;
   badge?: string;
+  slug: string; // Added for routing
   defaultVariantId?: string; // Added for cart
   defaultSku?: string; // Added for cart
 }
@@ -64,6 +65,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
             ),
             image: p.images?.[0] || "",
             badge: p.badge,
+            slug: p.slug,
             defaultVariantId:
               p.variants?.find((v: any) => v.status !== false)?.id ||
               `${p.id}01`,

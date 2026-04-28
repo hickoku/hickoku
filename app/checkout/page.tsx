@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useContext } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "motion/react";
 import { CheckoutProvider, CheckoutContext } from "../context/CheckoutContext";
 import { CheckoutFlow } from "../components/checkout/CheckoutFlow";
@@ -9,6 +10,7 @@ import { Header } from "../components/Header";
 import { useCart } from "../hooks/useCart";
 import { ShoppingBag, Trash2, Plus, Minus } from "lucide-react";
 import { formatPrice } from "../utils/currency";
+import Image from "next/image";
 
 function CartSummary({
   defaultExpanded = true,
@@ -67,24 +69,31 @@ function CartSummary({
               className="flex gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
             >
               {/* Image */}
-              <div className="w-16 h-16 rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0">
-                <img
+              <Link
+                href={`/product/${item.slug}`}
+                className="w-16 h-16 relative rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0 cursor-pointer"
+              >
+                <Image
                   src={item.image}
                   alt={item.productName}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                 />
-              </div>
+              </Link>
 
               {/* Details */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900 truncate">
+                <Link
+                  href={`/product/${item.slug}`}
+                  className="text-sm font-semibold text-gray-900 truncate hover:text-blue-600 transition-colors block cursor-pointer"
+                >
                   {item.productName}
-                </p>
+                </Link>
                 <div className="flex items-center gap-2 mt-1">
-                  <p className="text-sm font-semibold text-red-600">
+                  <p className="text-sm font-semibold text-red-700">
                     ₹{formatPrice(item.price)}
                   </p>
-                  <p className="text-xs text-gray-400 line-through">
+                  <p className="text-xs text-gray-600 line-through">
                     ₹{formatPrice(item.price * 2)}
                   </p>
                 </div>
@@ -96,6 +105,7 @@ function CartSummary({
                     whileTap={{ scale: 0.9 }}
                     onClick={() => updateQuantity(item.sku, item.quantity - 1)}
                     className="p-1 hover:bg-gray-100 transition-colors"
+                    aria-label={`Decrease quantity of ${item.productName}`}
                   >
                     <Minus className="w-3 h-3 text-gray-600" />
                   </motion.button>
@@ -107,6 +117,7 @@ function CartSummary({
                     whileTap={{ scale: 0.9 }}
                     onClick={() => updateQuantity(item.sku, item.quantity + 1)}
                     className="p-1 hover:bg-gray-100 transition-colors"
+                    aria-label={`Increase quantity of ${item.productName}`}
                   >
                     <Plus className="w-3 h-3 text-gray-600" />
                   </motion.button>
@@ -119,6 +130,7 @@ function CartSummary({
                 whileTap={{ scale: 0.9 }}
                 onClick={() => removeFromCart(item.sku)}
                 className="text-gray-400 hover:text-red-600 transition-colors flex-shrink-0"
+                aria-label={`Remove ${item.productName} from cart`}
               >
                 <Trash2 className="w-4 h-4" />
               </motion.button>
