@@ -15,6 +15,8 @@ import { Header } from "../../components/Header";
 import { useCart } from "../../hooks/useCart";
 import { Breadcrumbs } from "../../components/Breadcrumbs";
 import { formatPrice } from "../../utils/currency";
+import * as fpixel from "@/lib/fpixel";
+
 
 interface Product {
   id: string;
@@ -74,6 +76,18 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
     return () => observer.disconnect();
   }, [product.images]);
+
+  useEffect(() => {
+    fpixel.event("ViewContent", {
+      content_name: product.name,
+      content_category: product.category,
+      content_ids: [product.id],
+      content_type: "product",
+      value: product.variants[0].price * 0.5,
+      currency: "INR",
+    });
+  }, [product]);
+
 
   // Auto-slide main image
   useEffect(() => {
@@ -392,6 +406,16 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                         image: product.images[0],
                         slug: product.slug,
                       });
+
+                      fpixel.event("AddToCart", {
+                        content_name: product.name,
+                        content_category: product.category,
+                        content_ids: [product.id],
+                        content_type: "product",
+                        value: discountedPrice,
+                        currency: "INR",
+                      });
+
 
                       toast.success("Added to cart!", {
                         description: `${variant.size} - ₹ ${formatPrice(discountedPrice)}`,
