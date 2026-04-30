@@ -16,6 +16,8 @@ import { Order } from "@/lib/repositories/orderRepository";
 import { formatPrice } from "@/app/utils/currency";
 import { Header } from "@/app/components/Header";
 import Image from "next/image";
+import * as fpixel from "@/lib/fpixel";
+
 
 export default function OrderConfirmationPage() {
   const searchParams = useSearchParams();
@@ -47,7 +49,16 @@ export default function OrderConfirmationPage() {
       .then((data) => {
         if (data.success) {
           setOrder(data.order);
+          // Track Purchase event
+          fpixel.event("Purchase", {
+            value: data.order.total,
+            currency: "INR",
+            content_ids: data.order.items.map((item: any) => item.productId),
+            content_type: "product",
+            num_items: data.order.items.length,
+          });
         } else {
+
           setError("Order not found");
         }
       })
