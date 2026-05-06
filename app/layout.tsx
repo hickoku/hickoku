@@ -7,6 +7,8 @@ import { LocaleProvider } from "./context/LocaleContext";
 import { ProductProvider } from "./context/ProductContext";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import FacebookPixel from "./components/FacebookPixel";
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL || "https://www.hickoku.com"),
   title: "Hickoku Perfumes",
@@ -68,6 +70,7 @@ export default function RootLayout({
         </LocaleProvider>
         <Analytics/>
         <SpeedInsights/>
+        <FacebookPixel />
       </body>
     </html>
   );
