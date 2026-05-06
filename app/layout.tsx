@@ -8,6 +8,8 @@ import { ProductProvider } from "./context/ProductContext";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import FacebookPixel from "./components/FacebookPixel";
+import GoogleAnalytics from "./components/GoogleAnalytics";
+
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL || "https://www.hickoku.com"),
@@ -59,7 +61,9 @@ export default function RootLayout({
     <html lang="en">
       <head />
       <body>
+        <GoogleAnalytics />
         <LocaleProvider>
+
           <ProductProvider>
             <CartProvider>
               {children}
@@ -72,6 +76,8 @@ export default function RootLayout({
         <SpeedInsights/>
         <FacebookPixel />
       </body>
+
+
     </html>
   );
 }
