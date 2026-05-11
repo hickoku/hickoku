@@ -22,7 +22,7 @@ export async function getOrCreateSessionId(): Promise<string> {
     // Set cookie
     cookieStore.set(SESSION_COOKIE_NAME, newSessionId, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: process.env.APP_ENV === 'prod',
         sameSite: 'lax',
         maxAge: SESSION_MAX_AGE,
         path: '/',

@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { getAllProductsWithVariants } from './repositories/products.repository';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://www.hickoku.com';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.hickoku.com';
 
   // Fetch all products
   let productUrls: MetadataRoute.Sitemap = [];

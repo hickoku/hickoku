@@ -57,7 +57,7 @@ export const PaymentFailureEmail = ({
               Need help? Contact our support team instantly at <Link href="mailto:support@hickoku.com" style={supportLink}>support@hickoku.com</Link>.
             </Text>
             <Text style={legalText}>
-              © {new Date().getFullYear()} Hickoku Perfumes.<br />
+              © {new Date().getFullYear()} Hickoku by Zaviyar Corporation.<br />
               Gujri Bazar, Kirana Market, Kamptee, Nagpur-441002, Maharashtra, India
             </Text>
           </Section>

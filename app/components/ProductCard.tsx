@@ -177,13 +177,13 @@ export function ProductCard({
         <h3 className="text-xl font-bold mb-2">{name}</h3>
         <p className="text-sm text-gray-900 font-medium mb-4 line-clamp-2 capitalize">{description}</p>
 
-        <div className="flex items-center justify-between gap-4 pt-4 border-t border-gray-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-gray-100">
           <div className="flex flex-col items-start gap-1">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded">50% OFF</span>
-              <p className="text-sm text-gray-600 line-through">₹{formatPrice(price)}</p>
+              <span className="text-[10px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded">50% OFF</span>
+              <p className="text-xs text-gray-400 line-through">₹{formatPrice(price)}</p>
             </div>
-            <p className="text-xl font-bold text-red-700">
+            <p className="text-lg font-bold text-red-700">
               ₹{formatPrice(Number(price.replace(/[^0-9.]/g, "")) * 0.5)}
             </p>
           </div>
@@ -213,10 +213,10 @@ export function ProductCard({
               });
             }}
 
-            className="py-2.5 px-4 bg-gray-900 text-white rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-gray-800 transition-colors cursor-pointer text-center flex items-center justify-center gap-2 whitespace-nowrap"
+            className="py-2.5 px-3 bg-gray-900 text-white rounded-lg text-[11px] font-bold uppercase tracking-wider hover:bg-gray-800 transition-colors cursor-pointer text-center flex items-center justify-center gap-2"
           >
-            <ShoppingBag className="w-4 h-4" />
-            Add to Cart
+            <ShoppingBag className="w-3.5 h-3.5" />
+            Add to Bag
           </motion.button>
         </div>
       </div>

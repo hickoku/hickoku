@@ -55,12 +55,12 @@ export const OrderConfirmationEmail = ({
   awb = "",
   cancelUrl = "",
 }: OrderConfirmationEmailProps) => {
-  const baseUrl = process.env.APP_URL || "https://www.hickoku.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.hickoku.com";
 
   return (
     <Html>
       <Head />
-      <Preview>Your Hickoku Perfumes order {orderNumber} is confirmed!</Preview>
+      <Preview>Your Hickoku order {orderNumber} is confirmed!</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={headerSection}>
@@ -262,7 +262,7 @@ export const OrderConfirmationEmail = ({
               </Link>
             </Section>
             <Text style={legalText}>
-              © {new Date().getFullYear()} Hickoku Perfumes. All rights
+              © {new Date().getFullYear()} Hickoku Powered by Zaviyar Corporation. All rights
               reserved.
               <br />
               Gujri Bazar, Kirana Market, Kamptee, Nagpur-441002, Maharashtra,
