@@ -10,8 +10,14 @@ const FacebookPixelComponent = () => {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    fpixel.pageview();
+    if (process.env.APP_ENV === "prod") {
+      fpixel.pageview();
+    }
   }, [pathname, searchParams]);
+
+  if (process.env.APP_ENV !== "prod" || !fpixel.FB_PIXEL_ID) {
+    return null;
+  }
 
   return (
     <>

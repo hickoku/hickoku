@@ -331,7 +331,7 @@ export const AdminOrderNotification = ({
             <Row>
               <Column style={{ paddingRight: "8px" }}>
                 <a
-                  href={`${process.env.APP_URL || "http://localhost:3000"}/api/admin/shipment/pickup?orderId=${orderId}&token=${process.env.ADMIN_ACTION_TOKEN || "secret"}`}
+                  href={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/admin/shipment/pickup?orderId=${orderId}&token=${process.env.ADMIN_ACTION_TOKEN || "secret"}`}
                   style={buttonPrimary}
                 >
                   Initiate Pickup
@@ -339,7 +339,7 @@ export const AdminOrderNotification = ({
               </Column>
               <Column style={{ paddingLeft: "8px" }}>
                 <a
-                  href={`${process.env.APP_URL || "http://localhost:3000"}/api/admin/shipment/cancel?orderId=${orderId}&awb=${awb || ""}&token=${process.env.ADMIN_ACTION_TOKEN || "secret"}`}
+                  href={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/admin/shipment/cancel?orderId=${orderId}&awb=${awb || ""}&token=${process.env.ADMIN_ACTION_TOKEN || "secret"}`}
                   style={buttonSecondary}
                 >
                   Cancel Order & Shipment

@@ -2,14 +2,14 @@ import { Metadata } from 'next';
 import { getAllProductsWithVariants } from "./repositories/products.repository";
 
 export const metadata: Metadata = {
-  title: "Hickoku Perfumes | Premium Fragrances",
+  title: "Hickoku – The Fragrance of Timeless Elegance",
   description: "Discover our exclusive collection of affordable luxury perfumes.",
-  keywords: ["Hickoku", "best affordable perfumes", "luxury fragrance collection", "attar", "EDP", "perfume shop online", "original perfumes"],
+  keywords: ["best perfume for men", "best perfume for women", "Hickoku", "best affordable perfumes", "luxury fragrance collection", "attar", "EDP", "perfume shop online", "original perfumes", "long-lasting perfumes", "unisex fragrances"],
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: "Hickoku Perfumes | Premium Fragrances",
+    title: "Hickoku – The Fragrance of Timeless Elegance",
     description: "Discover our exclusive collection of affordable luxury perfumes.",
     url: "/",
   },

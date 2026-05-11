@@ -1,12 +1,18 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
   MessageCircle,
+  Tag,
+  Timer,
+  Plane,
+  Heart,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -16,6 +22,11 @@ import { useCart } from "../../hooks/useCart";
 import { Breadcrumbs } from "../../components/Breadcrumbs";
 import { formatPrice } from "../../utils/currency";
 import * as fpixel from "@/lib/fpixel";
+import ProductPageSections from "./ProductPageSections";
+import RelatedProductsCarousel from "./RelatedProductsCarousel";
+import HowToUse from "./HowToUse";
+import { ShieldCheck, RotateCcw, Truck } from "lucide-react";
+
 
 
 interface Product {
@@ -43,9 +54,11 @@ interface Product {
 
 interface ProductDetailClientProps {
   product: Product;
+  relatedProducts?: any[];
+  initialReviews?: any[];
 }
 
-export default function ProductDetailClient({ product }: ProductDetailClientProps) {
+export default function ProductDetailClient({ product, relatedProducts = [], initialReviews = [] }: ProductDetailClientProps) {
   const [currentImage, setCurrentImage] = useState(0);
   const { addToCart } = useCart();
   const thumbnailScrollRef = useRef<HTMLDivElement>(null);
@@ -55,6 +68,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [isOffersOpen, setIsOffersOpen] = useState(true);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -130,7 +144,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 lg:pb-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             {/* Left - Image Gallery */}
             <div className="space-y-4 lg:sticky lg:top-32 lg:self-start">
@@ -229,11 +243,36 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             </div>
 
             {/* Right - Product Details */}
-            <div
-              className="space-y-6"
-            >
+            <div className="space-y-6">
               <div>
-                <h1 className="text-3xl mb-2">{product.name}</h1>
+                <h1 className="text-3xl mb-1">{product.name}</h1>
+
+                {/* Star Rating Summary */}
+                {(() => {
+                  const hasReviews = initialReviews.length > 0;
+                  const avg = hasReviews ? initialReviews.reduce((s: number, r: any) => s + r.rating, 0) / initialReviews.length : 0;
+                  const rounded = Math.round(avg);
+                  return (
+                    hasReviews ? <div className="flex items-center gap-2 mb-2">
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <svg key={s} viewBox="0 0 20 20" className={`w-4 h-4 ${s <= rounded ? "text-amber-400" : "text-gray-200"}`} fill="currentColor">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        ))}
+                      </div>
+                      {hasReviews ? (
+                        <>
+                          <span className="text-sm font-semibold text-amber-600">{avg.toFixed(1)}</span>
+                          <span className="text-sm text-gray-400">({initialReviews.length} review{initialReviews.length !== 1 ? "s" : ""})</span>
+                        </>
+                      ) : (
+                        <span className="text-xs text-gray-400 font-medium">No reviews yet</span>
+                      )}
+                    </div> : null
+                  );
+                })()}
+
                 <p className="text-sm text-gray-900 font-medium mb-2 whitespace-pre-line capitalize">
                   {product.variants[0].shortDesc || product.highlight}
                 </p>
@@ -249,7 +288,6 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   </span>
                 </div>
               </div>
-
               <div>
                 <h3 className="text-sm font-semibold mb-3">Size</h3>
                 <div className="grid grid-cols-4 gap-3">
@@ -262,10 +300,51 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   </motion.button>
                 </div>
               </div>
+             
 
-              <div className="space-y-2 text-sm text-gray-600">
-                <p>100% Authentic Products</p>
+              {/* Exclusive Offers Accordion */}
+              <div className="mb-6 border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                <button 
+                  onClick={() => setIsOffersOpen(!isOffersOpen)}
+                  className="w-full px-5 py-4 flex items-center justify-between bg-gray-50/50 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Tag className="w-5 h-5 text-amber-600" />
+                    <span className="text-sm font-black tracking-widest uppercase text-gray-900">Exclusive Offers</span>
+                  </div>
+                  {isOffersOpen ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+                </button>
+                <AnimatePresence>
+                  {isOffersOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-5 py-4 space-y-4 border-t border-gray-100">
+                        <div className="flex gap-3">
+                          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                          <p className="text-[13px] text-gray-700 leading-relaxed">
+                            <span className="font-bold">Flat 50% OFF</span> on all products. (Auto-applied)
+                          </p>
+                        </div>
+                        <div className="flex gap-3">
+                          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                          <p className="text-[13px] text-gray-700 leading-relaxed">
+                            <span className="font-bold">Multi-Buy Bonus:</span> Buy minimum 2 products and get <span className="font-bold text-amber-700">Flat ₹25 OFF</span> on each item in cart.
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
+
+              {/* <div className="space-y-2 text-sm text-gray-600">
+                <p>100% Authentic Products</p>
+              </div> */}
+
 
               {product.variants[0].characterstics && product.variants[0].characterstics.length > 0 && (
                 <motion.div 
@@ -349,6 +428,27 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   </div>
                 </motion.div>
               )}
+               {/* Product Highlights Row */}
+              <div className="grid grid-cols-3 gap-2 py-4 border-y border-gray-100 my-4">
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center mb-1.5 border border-gray-100">
+                    <Timer className="w-5 h-5 text-gray-700" />
+                  </div>
+                  <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Long Lasting</span>
+                </div>
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center mb-1.5 border border-gray-100">
+                    <Plane className="w-5 h-5 text-gray-700" />
+                  </div>
+                  <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Imported Oils</span>
+                </div>
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center mb-1.5 border border-gray-100">
+                    <Heart className="w-5 h-5 text-gray-700" />
+                  </div>
+                  <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Skin Friendly</span>
+                </div>
+              </div>
 
               {product.variants[0].desc && (
                 <motion.div
@@ -416,18 +516,17 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                         currency: "INR",
                       });
 
-
-                      toast.success("Added to cart!", {
+                      toast.success("Added to bag!", {
                         description: `${variant.size} - ₹ ${formatPrice(discountedPrice)}`,
                       });
                     } catch (error: any) {
-                      toast.error(error.message || 'Failed to add to cart');
+                      toast.error(error.message || 'Failed to add to bag');
                     }
                   }}
                   disabled={product.variants[0].inventoryStatus !== 'IN_STOCK'}
                   className="w-full py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
-                  {product.variants[0].inventoryStatus === 'IN_STOCK' ? 'ADD TO CART' : 'OUT OF STOCK'}
+                  {product.variants[0].inventoryStatus === 'IN_STOCK' ? 'ADD TO BAG' : 'OUT OF STOCK'}
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -456,7 +555,112 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               </div>
             </div>
           </div>
+
+          {/* Trust Bar - Highlighted */}
+          <div className="mt-16 py-10 px-4 sm:px-10 bg-gray-100/50 rounded-[2rem] border border-gray-200/50">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-10">
+              <div className="flex items-center gap-5 p-6 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:translate-y-[-2px] transition-transform duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-6 h-6 text-amber-600" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-black tracking-widest uppercase mb-1 text-gray-900">100% Original</h4>
+                  <p className="text-[11px] text-gray-500 leading-tight">Quality checked for pure essence</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-5 p-6 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:translate-y-[-2px] transition-transform duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center shrink-0">
+                  <RotateCcw className="w-6 h-6 text-rose-600" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-black tracking-widest uppercase mb-1 text-gray-900">7 Day Return</h4>
+                  <p className="text-[11px] text-gray-500 leading-tight">Hassle-free exchange policy</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-5 p-6 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:translate-y-[-2px] transition-transform duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
+                  <Truck className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-black tracking-widest uppercase mb-1 text-gray-900">Free Shipping</h4>
+                  <p className="text-[11px] text-gray-500 leading-tight">All across India with tracking</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* How To Use Section */}
+          <HowToUse />
+
+          {/* Related Products Carousel */}
+          <RelatedProductsCarousel products={relatedProducts} />
+
+          {/* FAQ + Policies + Reviews */}
+          <ProductPageSections productId={product.id} initialReviews={initialReviews} />
+
         </div>
+        
+        {/* Mobile Sticky Action Bar */}
+        <motion.div 
+          initial={{ y: 100 }}
+          animate={{ y: 0 }}
+          transition={{ delay: 0.5, type: "spring", damping: 20 }}
+          className="fixed bottom-0 left-0 right-0 z-30 lg:hidden bg-white/90 backdrop-blur-xl border-t border-gray-200 px-4 py-3 pb-safe-area-inset-bottom shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.1)]"
+        >
+          <div className="flex gap-3 max-w-md mx-auto">
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                const phoneNumber = "9360922878"; 
+                let imageUrl = product.images?.[0] || "";
+                if (imageUrl && imageUrl.startsWith('/')) {
+                  imageUrl = `${window.location.origin}${imageUrl}`;
+                }
+                const discountedPrice = product.variants[0].price * 0.5;
+                const message = `Hi, I'm interested in the following product:\n\n*${product.name}*\nPrice: ₹ ${discountedPrice} (50% OFF)\nSize: ${product.variants[0].size}\n\nImage: ${imageUrl}\nLink: ${window.location.href}`;
+                const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl, '_blank');
+              }}
+              className="flex-none w-14 h-14 bg-green-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-green-200 active:bg-green-700 transition-colors"
+              aria-label="Connect via WhatsApp"
+            >
+              <MessageCircle className="w-6 h-6" />
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              disabled={product.variants[0].inventoryStatus !== 'IN_STOCK'}
+              onClick={async () => {
+                const variant = product.variants[0];
+                if (variant.inventoryStatus !== 'IN_STOCK') return;
+                
+                const discountedPrice = variant.price * 0.5;
+                await addToCart({
+                  sku: variant.sku,
+                  productId: product.id,
+                  variantId: variant.id, 
+                  productName: product.name,
+                  size: variant.size,
+                  price: discountedPrice,
+                  quantity: 1,
+                  image: product.images[0],
+                  slug: product.slug,
+                });
+                toast.success("Added to bag!");
+              }}
+              className="flex-1 bg-gray-900 text-white font-bold tracking-wider rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-gray-200 disabled:bg-gray-400 active:bg-black transition-colors"
+            >
+              {product.variants[0].inventoryStatus === 'IN_STOCK' ? (
+                <>
+                  ADD TO BAG
+                  <span className="text-[10px] opacity-60 ml-1">| ₹{formatPrice(product.variants[0].price * 0.5)}</span>
+                </>
+              ) : 'OUT OF STOCK'}
+            </motion.button>
+          </div>
+        </motion.div>
       </div>
     </>
   );

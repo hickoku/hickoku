@@ -46,7 +46,7 @@ function rawPost(url: string, token: string, body: string): Promise<any> {
  * Helper to get site-wide Delhivery configuration based on environment.
  */
 const getDelhiveryConfig = () => {
-  const isProd = process.env.APP_ENV === "prod" || process.env.NODE_ENV === "production";
+  const isProd = process.env.APP_ENV === "prod";
   const apiKey = isProd
     ? process.env.DELHIVERY_API_KEY_PROD
     : process.env.DELHIVERY_API_KEY_STAGE;
@@ -112,14 +112,14 @@ export const createDelhiveryOrder = async (order: any) => {
       return_add: "Gujri Bazar, Kirana Market, Kamptee",
       return_state: "Maharashtra",
       return_country: "India",
-      return_name: "Hickoku Perfumes",
+      return_name: "Zaviyar Corporation",
       products_desc: order.items.map((i: any) => i.productName).join(", "),
       hsn_code: "",
       cod_amount: "0",
       order_date: new Date().toISOString(),
       total_amount: order.total?.toString() || "0",
       seller_add: "Gujri Bazar, Kirana Market, Kamptee",
-      seller_name: "Hickoku Perfumes",
+      seller_name: "Zaviyar Corporation",
       seller_inv: order.orderNumber,
       quantity: totalQty.toString(),
       waybill: "",

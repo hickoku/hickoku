@@ -24,16 +24,22 @@ export function CollectionClient({ initialProducts }: CollectionClientProps) {
                 <Breadcrumbs items={[{ label: "Collection" }]} />
               </div>
 
-              <div className="flex items-center justify-center">
-                <div>
-                  <motion.h1
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl mb-2"
-                  >
-                    COLLECTIONS
-                  </motion.h1>
-                </div>
+              <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto pb-4">
+                <motion.h1
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-4xl mb-4 tracking-wide text-gray-900"
+                >
+                  COLLECTIONS
+                </motion.h1>
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-gray-600 text-sm md:text-base leading-relaxed"
+                >
+                  Discover Hickoku's exclusive collection of premium, alcohol-free perfumes and attars. Expertly crafted with high-quality imported oils, our long-lasting fragrances offer an affordable luxury experience designed for elegance and sophistication.
+                </motion.p>
               </div>
             </div>
           </div>

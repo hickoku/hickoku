@@ -41,12 +41,12 @@
   },
   "products": {
     "viewAll": "View All Collection",
-    "addToCart": "Add to Cart",
+    "addToCart": "Add to Bag",
     "viewDetails": "View Details"
   },
   "cart": {
-    "yourCart": "Your Cart",
-    "emptyCart": "Your cart is empty",
+    "yourCart": "Your Bag",
+    "emptyCart": "Your bag is empty",
     "addProducts": "Add some products to get started",
     "sku": "SKU",
     "total": "Total",

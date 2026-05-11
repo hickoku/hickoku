@@ -8,7 +8,11 @@ export const pageview = () => {
 
 // https://developers.facebook.com/docs/facebook-pixel/reference
 export const event = (name: string, options = {}) => {
-  if (typeof window !== "undefined" && (window as any).fbq) {
+  if (
+    process.env.APP_ENV === "prod" &&
+    typeof window !== "undefined" &&
+    (window as any).fbq
+  ) {
     (window as any).fbq("track", name, options);
   }
 };
