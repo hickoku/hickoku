@@ -24,6 +24,7 @@ export function HomeClient({ initialProducts }: HomeClientProps) {
       </AnimatePresence>
       <Header />
       <main>
+        <h1 className="sr-only">Hickoku Perfumes - Affordable Premium Perfumes</h1>
         <HeroSection />
         <ProductGrid initialProducts={initialProducts} />
       </main>

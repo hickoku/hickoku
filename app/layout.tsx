@@ -7,11 +7,43 @@ import { LocaleProvider } from "./context/LocaleContext";
 import { ProductProvider } from "./context/ProductContext";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import FacebookPixel from "./components/FacebookPixel";
+import GoogleAnalytics from "./components/GoogleAnalytics";
+
+
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.APP_URL || "https://www.hickoku.com"),
   title: "Hickoku Perfumes",
-  description: "Affordable Premium Perfume Brands for Everyone",
+  description: "Affordable Premium Perfume Brand for Everyone",
+  keywords: ["alcohol free perfumes", "attar under 250","rose flavour attar","rose flavour perfume", "perfume under 250","premium perfumes", "affordable luxury fragrances", "Hickoku perfumes", "buy original attars online India","buy original perfumes online India", "long lasting attars", "long lasting attar"],
   icons: {
     icon: "/images/logo.png",
+  },
+  openGraph: {
+    title: "Hickoku Perfumes",
+    description: "Affordable Premium Perfume Brand for Everyone",
+    url: "/",
+    siteName: "Hickoku Perfumes",
+    images: [
+      {
+        url: "/images/logo.png",
+        width: 800,
+        height: 600,
+        alt: "Hickoku Perfumes Logo",
+      },
+    ],
+    locale: "en_IN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Hickoku Perfumes",
+    description: "Affordable Premium Perfume Brand for Everyone",
+    images: ["/images/logo.png"],
+  },
+  other: {
+    ...(process.env.FB_APP_ID && { "fb:app_id": process.env.FB_APP_ID }),
+    ...(process.env.PINTEREST_VERIFY && { "p:domain_verify": process.env.PINTEREST_VERIFY }),
   },
 };
 
@@ -29,7 +61,9 @@ export default function RootLayout({
     <html lang="en">
       <head />
       <body>
+        <GoogleAnalytics />
         <LocaleProvider>
+
           <ProductProvider>
             <CartProvider>
               {children}
@@ -40,7 +74,10 @@ export default function RootLayout({
         </LocaleProvider>
         <Analytics/>
         <SpeedInsights/>
+        <FacebookPixel />
       </body>
+
+
     </html>
   );
 }

@@ -1,4 +1,20 @@
+import { Metadata } from 'next';
 import { getAllProductsWithVariants } from "../repositories/products.repository";
+
+export const metadata: Metadata = {
+  title: "All Collections | Hickoku Perfumes",
+  description: "Browse our complete collection of premium original fragrances.",
+  keywords: ["perfume collection", "shop all perfumes", "best fragrance brands", "Hickoku collection"],
+  alternates: {
+    canonical: '/collection',
+  },
+  openGraph: {
+    title: "All Collections | Hickoku Perfumes",
+    description: "Browse our complete collection of premium original fragrances.",
+    url: "/collection",
+  },
+};
+
 import { CollectionClient } from "./CollectionClient";
 
 export default async function CollectionPage() {
@@ -22,5 +38,32 @@ export default async function CollectionPage() {
       defaultSku: p.variants?.find(v => (v.status as any) !== false)?.sku || `HICK-${p.id}`,
     }));
 
-  return <CollectionClient initialProducts={products} />;
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://www.hickoku.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Collection",
+        "item": "https://www.hickoku.com/collection"
+      }
+    ]
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <CollectionClient initialProducts={products} />
+    </>
+  );
 }

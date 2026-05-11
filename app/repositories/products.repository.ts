@@ -32,6 +32,7 @@ export interface ProductVariant {
   shortDesc?: string;
   desc?: string;
   status?: boolean; // true = visible, false = hidden
+  characterstics?: string[];
 }
 
 export interface Product {
@@ -88,6 +89,7 @@ export async function getAllProductsWithVariants(
         isAvailable: v.stock > 0, // Simple logic
         shortDesc: v.shortDesc,
         desc: v.desc,
+        characterstics: Array.from(v.characterstics || v.characteristics || []),
         status: v.status !== undefined ? v.status : true,
       };
       if (!variantsMap.has(v.productId)) {
@@ -182,6 +184,7 @@ export async function getProductWithVariant(
       isAvailable: v.stock > 0,
       shortDesc: v.shortDesc,
       desc: v.desc,
+      characterstics: Array.from(v.characterstics || v.characteristics || []),
     }));
 
     return {
@@ -251,6 +254,7 @@ export async function getProductBySlug(
       isAvailable: v.stock > 0,
       shortDesc: v.shortDesc,
       desc: v.desc,
+      characterstics: Array.from(v.characterstics || v.characteristics || []),
       status: v.status !== undefined ? v.status : true,
     }));
 

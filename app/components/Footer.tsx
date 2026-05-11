@@ -1,6 +1,6 @@
 "use client";
 
-import { Instagram, Facebook } from "lucide-react";
+import { Instagram, Facebook, Twitter } from "lucide-react";
 import { motion } from "motion/react";
 import { useLocale } from "../context/LocaleContext";
 
@@ -36,13 +36,14 @@ export function Footer() {
               >
                 <Facebook className="w-4 h-4" />
               </motion.a>
-              {/* <motion.a
-                href="#"
+              <motion.a
+                href="https://x.com/hickokoperfumes"
                 whileHover={{ scale: 1.1 }}
                 className="p-2 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-colors"
               >
                 <Twitter className="w-4 h-4" />
-              </motion.a> */}
+              </motion.a>
+              
             </div>
           </div>
 
@@ -101,31 +102,14 @@ export function Footer() {
                   {t("footer.contactUs")}
                 </a>
               </li>
-
-              {/* <li>
-                <a
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  {t("footer.shippingInfo")}
-                </a>
-              </li> 
               <li>
                 <a
-                  href="#"
+                  href="/faq"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
-                  {t("footer.returns")}
+                  FAQ
                 </a>
-              </li> 
-              <li>
-                <a
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  {t("footer.faq")}
-                </a>
-              </li>*/}
+              </li>
             </ul>
           </div>
 
@@ -233,6 +217,18 @@ export function Footer() {
             </p>
           </div>
           <div className="flex gap-6 mt-4 sm:mt-0">
+             <a
+              href="/shipping-policy"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              {t("footer.shippingInfo")}
+            </a>
+             <a
+              href="/return-policy"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              {t("footer.returnAndRefund")}
+            </a>
             <a
               href="/privacy-policy"
               className="text-sm text-gray-600 hover:text-gray-900"
@@ -244,6 +240,12 @@ export function Footer() {
               className="text-sm text-gray-600 hover:text-gray-900"
             >
               {t("footer.terms")}
+            </a>
+             <a
+              href="/faq"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              {t("footer.faq")}
             </a>
             {/* <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
               Cookies

@@ -198,7 +198,7 @@ export const checkPincodeServiceability = async (pincode: string) => {
     if (data.delivery_codes && data.delivery_codes.length > 0) {
       // Check if any of the entries allow delivery
       return data.delivery_codes.some((code: any) =>
-        code.postal_code.pre_paid === "Y" && code.postal_code.cash === "Y" &&
+        (code.postal_code.pre_paid === "Y" || code.postal_code.cash === "Y") &&
         code.postal_code.pin === parseInt(pincode)
       );
     }

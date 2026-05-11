@@ -6,6 +6,8 @@ import { Heart, ShoppingBag, Eye } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "../hooks/useCart";
 import { formatPrice } from "../utils/currency";
+import * as fpixel from "@/lib/fpixel";
+
 
 interface ProductCardProps {
   id: string;
@@ -201,7 +203,16 @@ export function ProductCard({
                 quantity: 1,
                 slug,
               });
+              fpixel.event("AddToCart", {
+                content_name: name,
+                content_category: category,
+                content_ids: [id],
+                content_type: "product",
+                value: Number(price.replace(/[^0-9.]/g, "")) * 0.5,
+                currency: "INR",
+              });
             }}
+
             className="py-2.5 px-4 bg-gray-900 text-white rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-gray-800 transition-colors cursor-pointer text-center flex items-center justify-center gap-2 whitespace-nowrap"
           >
             <ShoppingBag className="w-4 h-4" />
