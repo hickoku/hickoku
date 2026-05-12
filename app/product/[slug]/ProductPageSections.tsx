@@ -13,15 +13,7 @@ interface Review {
   createdAt: string;
 }
 
-// ── FAQ Data ───────────────────────────────────────────────────────────────
-const PDP_FAQS = [
-  { q: "How long does this fragrance last?", a: "Our fragrances are formulated with high oil concentrations that typically last 6–10 hours on skin and even longer on fabric. A little goes a long way!" },
-  { q: "Is this perfume alcohol-free?", a: "Please refer to the product description above. All our attar and perfume range is 100% alcohol-free concentrated oil." },
-  { q: "What is your return policy?", a: "We offer a 2-3 days return window for unopened, unused products in original packaging. Please contact us via the Contact Us page with your order ID to initiate a return." },
-  { q: "How long will delivery take?", a: "Orders are processed within 24–48 hours. Standard delivery takes 3–7 business days depending on your location." },
-  { q: "Is it safe for sensitive skin?", a: "Our products are crafted with skin-safe ingredients. However, we recommend doing a patch test before full application if you have very sensitive skin." },
-  { q: "How should I apply it for best results?", a: "Apply on pulse points — wrists, neck, and behind the ears. For attars, use 1–2 drops. Avoid rubbing after application to preserve the scent molecules." },
-];
+import { getPDPFaqs } from "./pdpData";
 
 // ── Small Accordion ────────────────────────────────────────────────────────
 function SmallAccordion({ title, children }: { title: string; children: React.ReactNode }) {
@@ -108,11 +100,14 @@ function ReviewCard({ review }: { review: Review }) {
 // ── Main Export ────────────────────────────────────────────────────────────
 export default function ProductPageSections({
   productId,
+  productName,
   initialReviews,
 }: {
   productId: string;
+  productName: string;
   initialReviews: Review[];
 }) {
+  const pdpFaqs = getPDPFaqs(productName);
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [form, setForm] = useState({ name: "", rating: 0, comment: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -160,7 +155,7 @@ export default function ProductPageSections({
           <span>❓</span> Frequently Asked Questions
         </h2>
         <div className="space-y-3">
-          {PDP_FAQS.map((faq, i) => (
+          {pdpFaqs.map((faq, i) => (
             <SmallAccordion key={i} title={faq.q}>{faq.a}</SmallAccordion>
           ))}
         </div>
