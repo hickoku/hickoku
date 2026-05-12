@@ -85,7 +85,7 @@ export function RazorpayPayment() {
         key: orderData.keyId,
         amount: convertToPaiseForRazorpay(total),
         currency: "INR",
-        name: "Hickoku Perfumes",
+        name: "Hickoku",
         description: `Order ${orderData.orderNumber}`,
         order_id: orderData.razorpayOrderId,
         prefill: {

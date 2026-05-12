@@ -162,7 +162,11 @@ export function CartProvider({ children }: CartProviderProps) {
 
         const optimisticSubtotal = optimisticItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         const totalItemsCount = optimisticItems.reduce((sum, item) => sum + item.quantity, 0);
-        const optimisticSurpriseDiscount = totalItemsCount > 1 ? totalItemsCount * 25 : 0;
+        
+        // Control discount with environment variable flag
+        const isDiscountEnabled = process.env.NEXT_PUBLIC_ENABLE_SURPRISE_DISCOUNT === 'true';
+        const optimisticSurpriseDiscount = (isDiscountEnabled && totalItemsCount > 1) ? totalItemsCount * 25 : 0;
+        
         const optimisticTotalPrice = Math.max(0, optimisticSubtotal - optimisticSurpriseDiscount);
 
         return {
@@ -223,7 +227,11 @@ export function CartProvider({ children }: CartProviderProps) {
       const optimisticItems = state.items.filter((i) => i.sku !== sku);
       const optimisticSubtotal = optimisticItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const totalItemsCount = optimisticItems.reduce((sum, item) => sum + item.quantity, 0);
-      const optimisticSurpriseDiscount = totalItemsCount > 1 ? totalItemsCount * 25 : 0;
+      
+      // Control discount with environment variable flag
+      const isDiscountEnabled = process.env.NEXT_PUBLIC_ENABLE_SURPRISE_DISCOUNT === 'true';
+      const optimisticSurpriseDiscount = (isDiscountEnabled && totalItemsCount > 1) ? totalItemsCount * 25 : 0;
+      
       const optimisticTotalPrice = Math.max(0, optimisticSubtotal - optimisticSurpriseDiscount);
 
       setState((prev) => ({ 
@@ -279,7 +287,9 @@ export function CartProvider({ children }: CartProviderProps) {
       const totalItemsCount = optimisticItems.reduce((sum, item) => sum + item.quantity, 0);
       
       // Match backend logic: ₹25 discount per item if 2+ items total
-      const optimisticSurpriseDiscount = totalItemsCount > 1 ? totalItemsCount * 25 : 0;
+      const isDiscountEnabled = process.env.NEXT_PUBLIC_ENABLE_SURPRISE_DISCOUNT === 'true';
+      const optimisticSurpriseDiscount = (isDiscountEnabled && totalItemsCount > 1) ? totalItemsCount * 25 : 0;
+      
       const optimisticTotalPrice = Math.max(0, optimisticSubtotal - optimisticSurpriseDiscount);
 
       setState((prev) => ({ 
