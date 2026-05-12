@@ -598,7 +598,11 @@ export default function ProductDetailClient({ product, relatedProducts = [], ini
           <RelatedProductsCarousel products={relatedProducts} />
 
           {/* FAQ + Policies + Reviews */}
-          <ProductPageSections productId={product.id} initialReviews={initialReviews} />
+          <ProductPageSections 
+            productId={product.id} 
+            productName={product.name} 
+            initialReviews={initialReviews} 
+          />
 
         </div>
         

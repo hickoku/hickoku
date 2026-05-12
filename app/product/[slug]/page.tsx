@@ -3,6 +3,7 @@ import { getProductBySlug, getAllProductsWithVariants } from "../../repositories
 import { getApprovedReviewsByProduct } from "../../models/review-dynamo";
 import ProductDetailClient from "./ProductDetailClient";
 import { notFound } from "next/navigation";
+import { getPDPFaqs } from "./pdpData";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -155,10 +156,24 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     ],
   };
 
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": getPDPFaqs(product.name).map(faq => ({
+      "@type": "Question",
+      "name": faq.q,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.a
+      }
+    }))
+  };
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <ProductDetailClient
         product={typedProduct}
         relatedProducts={relatedProducts}
