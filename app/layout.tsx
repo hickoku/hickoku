@@ -62,7 +62,7 @@ export default function RootLayout({
     <html lang="en">
       <head />
       <body>
-        <GoogleAnalytics />
+        <GoogleAnalytics env={process.env.APP_ENV} />
         <LocaleProvider>
 
           <ProductProvider>
@@ -76,7 +76,7 @@ export default function RootLayout({
         </LocaleProvider>
         <Analytics/>
         <SpeedInsights/>
-        <FacebookPixel />
+        <FacebookPixel env={process.env.APP_ENV} />
       </body>
 
 
