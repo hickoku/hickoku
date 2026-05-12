@@ -5,17 +5,17 @@ import Script from "next/script";
 import { useEffect, Suspense } from "react";
 import * as fpixel from "@/lib/fpixel";
 
-const FacebookPixelComponent = () => {
+const FacebookPixelComponent = ({ env }: { env?: string }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (process.env.APP_ENV === "prod") {
+    if (env === "prod") {
       fpixel.pageview();
     }
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, env]);
 
-  if (process.env.APP_ENV !== "prod" || !fpixel.FB_PIXEL_ID) {
+  if (env !== "prod" || !fpixel.FB_PIXEL_ID) {
     return null;
   }
 
@@ -43,10 +43,10 @@ const FacebookPixelComponent = () => {
   );
 };
 
-export default function FacebookPixel() {
+export default function FacebookPixel({ env }: { env?: string }) {
   return (
     <Suspense fallback={null}>
-      <FacebookPixelComponent />
+      <FacebookPixelComponent env={env} />
     </Suspense>
   );
 }
