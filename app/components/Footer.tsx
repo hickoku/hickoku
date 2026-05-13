@@ -90,10 +90,10 @@ export function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="mb-4 tracking-wider uppercase text-sm">
+            <h4 className="mb-4 tracking-wider uppercase text-sm font-bold">
               {t("footer.support")}
             </h4>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               <li>
                 <a
                   href="/contact-us"
@@ -102,48 +102,44 @@ export function Footer() {
                   {t("footer.contactUs")}
                 </a>
               </li>
-              <li>
-                <a
-                  href="/faq"
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  FAQ
-                </a>
+              <li className="text-sm text-gray-600">
+                <p className="font-semibold text-gray-900 mb-1">Email:</p>
+                <a href={`mailto:${t("footer.email")}`} className="hover:text-gray-900">{t("footer.email")}</a>
+              </li>
+              <li className="text-sm text-gray-600">
+                <p className="font-semibold text-gray-900 mb-1">WhatsApp:</p>
+                <a href={`https://wa.me/919360922878`} className="hover:text-gray-900">{t("footer.phone")}</a>
+              </li>
+              <li className="text-sm text-gray-600">
+                <p className="font-semibold text-gray-900 mb-1">Address:</p>
+                <p className="leading-relaxed">{t("footer.address")}</p>
               </li>
             </ul>
           </div>
 
           {/* Legal */}
           <div>
-            <h4 className="mb-4 tracking-wider uppercase text-sm">
+            <h4 className="mb-4 tracking-wider uppercase text-sm font-bold">
               {t("footer.legal")}
             </h4>
             <ul className="space-y-2">
               <li>
                 <a
-                  href="/why-choose-us"
+                  href="/shipping-policy"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
-                  {t("footer.whyChooseUs")}
+                  {t("footer.shippingInfo")}
                 </a>
               </li>
               <li>
                 <a
-                  href="/about-us"
+                  href="/return-policy"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
-                  About Us
+                  {t("footer.returnAndRefund")}
                 </a>
               </li>
-              {/* <li>
-                <a
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Careers
-                </a>
-              </li> */}
-              {/* <li>
+              <li>
                 <a
                   href="/privacy-policy"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
@@ -158,7 +154,15 @@ export function Footer() {
                 >
                   {t("footer.terms")}
                 </a>
-              </li> */}
+              </li>
+              <li>
+                <a
+                  href="/faq"
+                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  {t("footer.faq")}
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -217,39 +221,18 @@ export function Footer() {
             </p>
           </div>
           <div className="flex gap-6 mt-4 sm:mt-0">
-             <a
-              href="/shipping-policy"
+            <a
+              href="/about-us"
               className="text-sm text-gray-600 hover:text-gray-900"
             >
-              {t("footer.shippingInfo")}
-            </a>
-             <a
-              href="/return-policy"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              {t("footer.returnAndRefund")}
+              About Us
             </a>
             <a
-              href="/privacy-policy"
+              href="/why-choose-us"
               className="text-sm text-gray-600 hover:text-gray-900"
             >
-              {t("footer.privacy")}
+              Why Choose Us
             </a>
-            <a
-              href="/tnc"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              {t("footer.terms")}
-            </a>
-             <a
-              href="/faq"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              {t("footer.faq")}
-            </a>
-            {/* <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
-              Cookies
-            </a> */}
           </div>
         </div>
       </div>
