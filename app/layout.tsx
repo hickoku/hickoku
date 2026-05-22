@@ -10,6 +10,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import FacebookPixel from "./components/FacebookPixel";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import { WhatsAppStickyButton } from "./components/WhatsAppStickyButton";
+import { GoogleTagManager } from '@next/third-parties/google'
 
 
 export const metadata: Metadata = {
@@ -62,7 +63,18 @@ export default function RootLayout({
     <html lang="en">
       <head />
       <body>
+        {process.env.NEXT_PUBLIC_GTM_ID && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${process.env.NEXT_PUBLIC_GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        )}
         <GoogleAnalytics env={process.env.APP_ENV} />
+
         <LocaleProvider>
 
           <ProductProvider>
@@ -78,8 +90,10 @@ export default function RootLayout({
         <SpeedInsights/>
         <FacebookPixel env={process.env.APP_ENV} />
       </body>
-
-
+      {process.env.NEXT_PUBLIC_GTM_ID && (
+        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
+      )}
     </html>
+
   );
 }
