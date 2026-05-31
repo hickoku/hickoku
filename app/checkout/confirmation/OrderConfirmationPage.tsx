@@ -57,6 +57,20 @@ export default function OrderConfirmationPage() {
             content_type: "product",
             num_items: data.order.items.length,
           });
+
+          // GTM Purchase Tracking
+          if (typeof window !== "undefined") {
+            (window as any).dataLayer = (window as any).dataLayer || [];
+            (window as any).dataLayer.push({
+              event: "purchase",
+              ecommerce: {
+                transaction_id: data.order.orderNumber || data.order.orderId,
+                value: data.order.total,
+                currency: "INR",
+              },
+            });
+          }
+
         } else {
 
           setError("Order not found");
