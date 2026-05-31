@@ -231,7 +231,15 @@ function CheckoutPageContent() {
 
   useEffect(() => {
     setIsReady(true);
+
+    if (typeof window !== "undefined") {
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      (window as any).dataLayer.push({
+        event: "begin_checkout",
+      });
+    }
   }, []);
+
 
   // Redirect if cart is empty and component is ready and cart metadata is loaded
   useEffect(() => {

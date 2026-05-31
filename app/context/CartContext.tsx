@@ -193,8 +193,24 @@ export function CartProvider({ children }: CartProviderProps) {
       }
 
       const data = await response.json();
+
+      if (typeof window !== "undefined") {
+        (window as any).dataLayer = (window as any).dataLayer || [];
+        (window as any).dataLayer.push({
+          event: "add_to_cart",
+          ecommerce: {
+            items: [
+              {
+                item_name: item.productName,
+                price: item.price,
+              },
+            ],
+          },
+        });
+      }
       
       setState((prev) => ({
+
         ...prev,
         items: data.cart.items,
         totalItems: data.cart.totalItems,
