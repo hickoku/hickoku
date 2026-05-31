@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import {
   ShoppingBag, Truck, RotateCcw, Clock,
- ArrowRight, ShieldCheck
+ ArrowRight, ShieldCheck, ChevronDown
 } from "lucide-react";
 import { useCart } from "../hooks/useCart";
 import { formatPrice } from "../utils/currency";
@@ -203,8 +204,32 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
   const [selectedMood, setSelectedMood] = useState<string>("Romance");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [addedId, setAddedId] = useState<string | null>(null);
+  const [showStickyBar, setShowStickyBar] = useState(false);
   const { addToCart } = useCart();
   const touchStartX = useRef(0);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Use Intersection Observer sentinel to show/hide sticky bottom mobile CTA bar with 100% reliability
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // If sentinel is NOT visible/intersecting, the user has scrolled past the hero header fold!
+        setShowStickyBar(!entry.isIntersecting);
+      },
+      {
+        threshold: 0,
+        rootMargin: "-40px 0px 0px 0px" // triggers as soon as they scroll down 40px
+      }
+    );
+
+    observer.observe(sentinel);
+    return () => {
+      observer.unobserve(sentinel);
+    };
+  }, []);
 
   // Map dynamic database products passed from props, and pad the remaining slots up to 8 using fallbacks to ensure all sense categories are always active and functional
   const activeProducts: EnhancedProduct[] = Array.from({ length: 8 }).map((_, idx) => {
@@ -327,35 +352,43 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
     }
   };
 
+  const handleScrollToProducts = () => {
+    const nextSection = document.getElementById("products-grid");
+    if (nextSection) {
+      nextSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const currentMobileProduct = activeProducts[currentIndex];
 
   return (
-    <div className="w-full bg-[#FFF9F5] text-gray-900 overflow-hidden font-sans">
+    <div className="w-full bg-[#FFF9F5] text-gray-900 overflow-hidden font-sans relative">
+      <div ref={sentinelRef} className="absolute top-0 left-0 w-full h-1 pointer-events-none" />
       
       {/* ── Desktop Adaptive Layout (>= 1024px) ─────────────────── */}
-      <section className="hidden lg:block max-w-6xl mx-auto px-6 py-14">
+      <section className="hidden lg:block max-w-6xl mx-auto px-6 pt-4 pb-2">
         <div className="flex gap-12 items-start">
           
           {/* Left Sticky Sidebar (40% width) */}
-          <div className="w-[40%] sticky top-[100px] self-start space-y-6">
-            <div className="space-y-2">
+          <div className="w-[40%] sticky top-[80px] self-start space-y-3">
+            <div className="space-y-1">
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#B33D14] bg-orange-100/40 px-3 py-1 rounded-full inline-block">
                 The Senses Experience
               </span>
-              <h1 className="text-5xl font-serif font-black text-gray-900 tracking-tight leading-none">
+              <h1 className="text-4xl font-serif font-black text-gray-900 tracking-tight leading-none">
                 The Hickoku Collection
               </h1>
-              <p className="text-xs text-gray-500 max-w-xs leading-relaxed italic">
+              <p className="text-[11px] text-gray-500 max-w-xs leading-relaxed italic">
                 Artisanal luxury scents crafted with premium imported oils, designed to map directly to your emotional states.
               </p>
             </div>
 
             {/* Vertical Mood Senses Selector */}
-            <div className="space-y-2.5 pt-2">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+            <div className="space-y-1.5 pt-1">
+              <p className="text-[11px] font-black uppercase tracking-widest text-gray-400">
                 🔮 Select Your Desired Sense
               </p>
-              <div className="flex flex-col gap-1.5 pr-6">
+              <div className="flex flex-col gap-1 pr-6">
                 {([
                   { label: "Confidence", tag: "Confidence", desc: "Velvira Wood & Vetiver" },
                   { label: "Romance", tag: "Romance", desc: "Roselia Deluxe Rose" },
@@ -368,9 +401,9 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                     <button
                       key={mood.tag}
                       onClick={() => handleMoodSelect(mood.tag, "desktop")}
-                      className="w-full flex items-center justify-between px-4 py-3 rounded-xl border font-bold transition-all duration-300 text-left"
+                      className="w-full flex items-center justify-between px-4 py-2 rounded-xl border font-bold transition-all duration-300 text-left"
                       style={{
-                        minHeight: "48px",
+                        minHeight: "38px",
                         background: isActive ? "white" : "transparent",
                         borderColor: isActive ? "#B33D14" : "rgba(179,61,20,0.1)",
                         color: isActive ? "#B33D14" : "#4b5563",
@@ -379,7 +412,7 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                     >
                       <div>
                         <span className="text-xs block leading-none">{mood.label}</span>
-                        <span className="text-[9px] text-gray-400 font-medium mt-1 block leading-none">
+                        <span className="text-[10px] text-gray-400 font-semibold mt-1 block leading-none">
                           {mood.desc}
                         </span>
                       </div>
@@ -402,8 +435,11 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                 transition={{ duration: 0.45 }}
                 className="bg-white rounded-3xl border border-orange-100/30 overflow-hidden shadow-sm md:grid md:grid-cols-2 md:items-stretch"
               >
-                {/* Left Side: Product Image with 2% Hover Zoom */}
-                <div className="relative overflow-hidden bg-orange-50/15 group h-full min-h-[360px]">
+                {/* Left Side: Product Image with 2% Hover Zoom wrapped in Link */}
+                <Link
+                  href={`/product/${activeDesktopProduct.slug}`}
+                  className="relative overflow-hidden bg-orange-50/15 group h-full min-h-[360px] block cursor-pointer"
+                >
                   <Image
                     src={activeDesktopProduct.image}
                     alt={activeDesktopProduct.name}
@@ -415,7 +451,7 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                   <span className="absolute top-4 left-4 z-10 px-3 py-1.5 rounded-full text-[9px] font-black uppercase text-white shadow-md bg-[#B33D14]">
                     {activeDesktopProduct.badge}
                   </span>
-                </div>
+                </Link>
 
                 {/* Right Side: Product Details */}
                 <div className="p-6 flex flex-col justify-between space-y-6">
@@ -424,9 +460,11 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                       <span className="inline-block text-[8px] font-black uppercase tracking-widest text-[#B33D14] bg-orange-50 px-2.5 py-1 rounded">
                         Active Sense: {activeDesktopProduct.vibe}
                       </span>
-                      <h2 className="font-serif font-black text-3xl text-gray-900 leading-tight mt-2">
-                        {activeDesktopProduct.name}
-                      </h2>
+                      <Link href={`/product/${activeDesktopProduct.slug}`}>
+                        <h2 className="font-serif font-black text-3xl text-gray-900 leading-tight mt-2 hover:text-[#B33D14] transition-colors duration-300 cursor-pointer">
+                          {activeDesktopProduct.name}
+                        </h2>
+                      </Link>
                       <p className="text-xs text-gray-500 font-medium italic mt-1 leading-relaxed">
                         "{activeDesktopProduct.highlight}"
                       </p>
@@ -465,17 +503,22 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                   {/* Price & Primary CTA Row */}
                   <div className="space-y-3.5 pt-4 border-t border-dashed border-orange-50">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-2xl font-black text-[#B33D14]">
+                      <div className="flex flex-col">
+                        <span className="text-3xl font-black text-[#B33D14] leading-none">
                           ₹{formatPrice(activeDesktopProduct.salePrice)}
                         </span>
-                        <span className="text-xs text-gray-400 line-through">
-                          ₹{formatPrice(activeDesktopProduct.salePrice * 2)}
+                        <span className="text-[10px] text-gray-400 font-semibold line-through mt-1.5 leading-none">
+                          MRP: ₹{formatPrice(activeDesktopProduct.salePrice * 2)}
                         </span>
                       </div>
-                      <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase text-green-700 bg-green-100">
-                        Save 50% Automatically
-                      </span>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider text-green-800 bg-green-100 border border-green-200 animate-pulse">
+                          🔥 SAVE FLAT 50% TODAY
+                        </span>
+                        <span className="text-[9px] text-gray-400 font-semibold italic leading-none">
+                          ⚡ Free Express Shipping Included
+                        </span>
+                      </div>
                     </div>
 
                     <button
@@ -491,50 +534,69 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
               </motion.div>
             </AnimatePresence>
 
-            {/* High-Impact Modern Voucher Cards */}
-            <div className="space-y-3">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#B33D14] block">
-                🎁 Active Checkout Benefits
-              </span>
-              
-              {/* Voucher Box 1: Flat 50% Off */}
-              <div className="relative rounded-2xl overflow-hidden border border-[#B33D14]/20 bg-white flex items-stretch shadow-sm hover:shadow-md transition-all duration-300">
+          </div>
+        </div>
+
+        {/* High-Impact Modern Voucher Cards spanning full-width below the 2-column layout */}
+        <div className="mt-6 space-y-3 pt-4 border-t border-[#B33D14]/10">
+          <span className="text-[11px] font-black uppercase tracking-widest text-[#B33D14] flex items-center gap-1.5 justify-center">
+            🎁 Active Checkout Benefits (Automatically Applied For You)
+          </span>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Voucher Box 1: Flat 50% Off */}
+            <div className="relative rounded-2xl overflow-hidden border border-[#B33D14]/20 bg-white flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="flex items-center gap-5 flex-1">
                 {/* Left Tag Chip (Solid Terracotta Accent) */}
-                <div className="bg-[#B33D14] text-white px-4 flex flex-col justify-center items-center text-center shrink-0 w-24 border-r border-dashed border-[#FFF9F5]/30">
-                  <span className="text-xl font-black leading-none">50%</span>
-                  <span className="text-[8px] font-extrabold uppercase tracking-widest mt-1">OFF</span>
+                <div className="bg-[#B33D14] text-white px-6 py-4 flex flex-col justify-center items-center text-center shrink-0 w-24 border-r border-dashed border-[#FFF9F5]/30">
+                  <span className="text-2xl font-black leading-none">50%</span>
+                  <span className="text-[9px] font-extrabold uppercase tracking-widest mt-1">OFF</span>
                 </div>
-                {/* Right Details */}
-                <div className="p-4 flex-1 space-y-0.5">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] font-black uppercase text-[#B33D14] tracking-wider bg-orange-50 px-2 py-0.5 rounded">Launch Offer</span>
-                    <span className="text-[9px] font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded">Auto-Applied</span>
+                {/* Center Details */}
+                <div className="py-2 flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] font-black uppercase text-[#B33D14] bg-orange-50 px-2.5 py-0.5 rounded">Launch Offer</span>
+                    <span className="text-[10px] font-bold text-green-700 bg-green-50 px-2.5 py-0.5 rounded">Auto-Applied</span>
                   </div>
-                  <h4 className="text-xs font-black text-gray-900">Flat 50% Limited Launch Promo</h4>
-                  <p className="text-[10px] text-gray-500 leading-normal">
-                    Half price calculated automatically in your shopping cart. Free express delivery included.
+                  <h4 className="text-sm font-black text-gray-900 leading-tight">Flat 50% Limited Launch Promo</h4>
+                  <p className="text-xs text-gray-500 font-semibold mt-1 leading-snug">
+                    Half price automatically calculated in your shopping cart. Free express delivery included.
                   </p>
                 </div>
               </div>
+              {/* Right Action Badge */}
+              <div className="px-6 shrink-0 hidden sm:block">
+                <span className="text-[10px] font-black text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-full uppercase tracking-wider">
+                  ✓ Active Deal
+                </span>
+              </div>
+            </div>
 
-              {/* Voucher Box 2: Extra Rs 25 Off */}
-              <div className="relative rounded-2xl overflow-hidden border border-[#B33D14]/20 bg-white flex items-stretch shadow-sm hover:shadow-md transition-all duration-300">
+            {/* Voucher Box 2: Extra Rs 25 Off */}
+            <div className="relative rounded-2xl overflow-hidden border border-[#B33D14]/20 bg-white flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="flex items-center gap-5 flex-1">
                 {/* Left Tag Chip (Amber Filled Contrast Accent) */}
-                <div className="bg-orange-100 text-[#B33D14] px-4 flex flex-col justify-center items-center text-center shrink-0 w-24 border-r border-dashed border-[#B33D14]/20">
-                  <span className="text-lg font-black leading-none">₹25</span>
+                <div className="bg-orange-100 text-[#B33D14] px-6 py-4 flex flex-col justify-center items-center text-center shrink-0 w-24 border-r border-dashed border-[#B33D14]/20">
+                  <span className="text-xl font-black leading-none">₹25</span>
                   <span className="text-[8px] font-extrabold uppercase tracking-widest mt-1">EXTRA</span>
                 </div>
-                {/* Right Details */}
-                <div className="p-4 flex-1 space-y-0.5">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] font-black uppercase text-orange-800 tracking-wider bg-orange-200/30 px-2 py-0.5 rounded">Multi-Buy</span>
-                    <span className="text-[9px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded">Quantity Deal</span>
+                {/* Center Details */}
+                <div className="py-2 flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] font-black uppercase text-orange-800 bg-orange-200/30 px-2.5 py-0.5 rounded">Multi-Buy Benefit</span>
+                    <span className="text-[10px] font-bold text-gray-500 bg-gray-50 px-2.5 py-0.5 rounded">Quantity Deal</span>
                   </div>
-                  <h4 className="text-xs font-black text-gray-900">Buy More, Save More!</h4>
-                  <p className="text-[10px] text-gray-500 leading-normal">
+                  <h4 className="text-sm font-black text-gray-900 leading-tight">Buy More, Save More!</h4>
+                  <p className="text-xs text-gray-500 font-semibold mt-1 leading-snug">
                     Get an additional ₹25 discount per bottle automatically on purchasing 2 or more bottles.
                   </p>
                 </div>
+              </div>
+              {/* Right Action Badge */}
+              <div className="px-6 shrink-0 hidden sm:block">
+                <span className="text-[10px] font-black text-[#B33D14] bg-orange-50 border border-[#B33D14]/20 px-3 py-1.5 rounded-full uppercase tracking-wider">
+                  ✓ Eligible
+                </span>
               </div>
             </div>
           </div>
@@ -542,21 +604,21 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
       </section>
 
       {/* ── Mobile Adaptive Layout (< 1024px) ──────────────────── */}
-      <section className="block lg:hidden py-6 space-y-5">
+      <section className="block lg:hidden pt-2 pb-1 space-y-2">
         
         {/* Mobile headers */}
-        <div className="px-6 text-center space-y-1">
-          <span className="inline-block text-[9px] font-extrabold uppercase tracking-widest text-[#B33D14] bg-orange-100/40 px-2.5 py-0.5 rounded-full">
+        <div className="px-6 text-center space-y-0.5">
+          <span className="inline-block text-[8px] font-extrabold uppercase tracking-widest text-[#B33D14] bg-orange-100/30 px-2 py-0.5 rounded-full">
             The Hickoku Collection
           </span>
-          <h2 className="text-3xl font-serif font-black tracking-tight text-gray-900 leading-none">
+          <h2 className="text-lg font-serif font-black tracking-tight text-gray-900 leading-none">
             Empower Your Senses
           </h2>
         </div>
 
         {/* Mobile mood selection pills */}
-        <div className="w-full overflow-x-auto no-scrollbar py-1 border-b border-orange-50/50">
-          <div className="flex gap-2 px-6 min-w-max pb-1">
+        <div className="w-full overflow-x-auto no-scrollbar py-0.5 border-b border-orange-50/30">
+          <div className="flex gap-1.5 px-6 min-w-max pb-0.5">
             {([
               { label: "Confidence", tag: "Confidence" },
               { label: "Romance", tag: "Romance" },
@@ -569,12 +631,12 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                 <button
                   key={m.tag}
                   onClick={() => handleMoodSelect(m.tag, "mobile")}
-                  className={`px-4 py-1.5 text-[10px] font-black uppercase rounded-full border transition-all duration-300 ${
+                  className={`px-3 py-1 text-[9px] font-black uppercase rounded-full border transition-all duration-300 ${
                     isSelected
                       ? "bg-[#B33D14] text-white border-[#B33D14] shadow-md"
                       : "bg-white text-gray-500 border-orange-100/40 hover:bg-orange-50/20"
                   }`}
-                  style={{ minHeight: "36px" }}
+                  style={{ minHeight: "28px" }}
                 >
                   {m.label}
                 </button>
@@ -585,7 +647,7 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
 
         {/* Carousel card container with 10% next-card preview peeking */}
         <div
-          className="relative w-full overflow-x-hidden py-2 cursor-grab active:cursor-grabbing"
+          className="relative w-full overflow-x-hidden py-1 cursor-grab active:cursor-grabbing"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
@@ -604,8 +666,11 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                       : "border-orange-100/10 scale-95 opacity-55"
                   }`}
                 >
-                  {/* Card shot with overlay floating badge */}
-                  <div className="relative aspect-[4/5] w-full bg-orange-50/15">
+                  {/* Card shot with overlay floating badge wrapped in Link */}
+                  <Link
+                    href={`/product/${prod.slug}`}
+                    className="relative aspect-[4/5] w-full bg-orange-50/15 block cursor-pointer"
+                  >
                     <Image
                       src={prod.image}
                       alt={prod.name}
@@ -614,18 +679,20 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                       className="object-cover"
                       sizes="80vw"
                     />
-                    <div className="absolute top-3 left-3 z-10 px-3 py-1.5 rounded-full text-[8px] font-black uppercase text-white shadow-md bg-[#B33D14]">
+                    <div className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-full text-[8px] font-black uppercase text-white shadow-md bg-[#B33D14]">
                       {prod.badge}
                     </div>
-                  </div>
+                  </Link>
 
                   {/* Card core description */}
-                  <div className="p-4 space-y-3">
-                    <div className="space-y-1">
-                      <h3 className="font-serif font-black text-xl text-gray-900 leading-tight">
-                        {prod.name}
-                      </h3>
-                      <p className="text-xs text-gray-500 font-medium italic leading-relaxed">
+                  <div className="p-2.5 space-y-2">
+                    <div className="space-y-0.5">
+                      <Link href={`/product/${prod.slug}`}>
+                        <h3 className="font-serif font-black text-sm text-gray-900 leading-tight hover:text-[#B33D14] transition-colors duration-300 cursor-pointer">
+                          {prod.name}
+                        </h3>
+                      </Link>
+                      <p className="text-[10px] text-gray-500 font-semibold italic leading-normal">
                         "{prod.highlight}"
                       </p>
                     </div>
@@ -635,7 +702,7 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                       {prod.tags.map((t) => (
                         <span
                           key={t}
-                          className="text-[9px] font-bold px-2.5 py-0.5 rounded-full bg-orange-100/40 text-[#B33D14]"
+                          className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-orange-100/40 text-[#B33D14]"
                         >
                           {t}
                         </span>
@@ -643,13 +710,40 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                     </div>
 
                     {/* Scent longevity */}
-                    <div className="space-y-1">
-                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block leading-none">
+                    <div className="space-y-0.5">
+                      <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block leading-none">
                         Longevity: {prod.longevityLabel}
                       </span>
-                      <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-0.5 bg-gray-100 rounded-full overflow-hidden">
                         <div className="h-full bg-[#B33D14]" style={{ width: `${(prod.longevityHours / 12) * 100}%` }} />
                       </div>
+                    </div>
+
+                    {/* Pricing & Add to Bag inside mobile hero card */}
+                    <div className="pt-2 border-t border-dashed border-orange-100 flex items-center justify-between gap-2">
+                      <div className="flex flex-col">
+                        <span className="text-xs font-black text-[#B33D14] leading-none">
+                          ₹{formatPrice(prod.salePrice)}
+                        </span>
+                        <span className="text-[8px] text-gray-400 font-semibold line-through mt-0.5 leading-none">
+                          MRP: ₹{formatPrice(prod.salePrice * 2)}
+                        </span>
+                      </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddToCart(prod);
+                        }}
+                        className="flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-white font-bold text-[10px] shadow transition-all duration-300 cursor-pointer"
+                        style={{
+                          background: addedId === prod.id ? "#16a34a" : "#B33D14",
+                          minHeight: "30px",
+                        }}
+                      >
+                        <ShoppingBag className="w-3 h-3" />
+                        {addedId === prod.id ? "Added ✓" : "Add to Bag"}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -659,7 +753,7 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
         </div>
 
         {/* Dot indicators */}
-        <div className="flex justify-center items-center gap-1.5 pt-1">
+        <div className="flex justify-center items-center gap-1.5 pt-0.5">
           {activeProducts.map((_, dotIdx) => (
             <button
               key={dotIdx}
@@ -676,27 +770,31 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                   });
                 }
               }}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                dotIdx === currentIndex ? "w-6 bg-[#B33D14]" : "w-1.5 bg-[#B33D14]/25"
+              className={`h-1 rounded-full transition-all duration-300 ${
+                dotIdx === currentIndex ? "w-4 bg-[#B33D14]" : "w-1 bg-[#B33D14]/25"
               }`}
-              style={{ minHeight: "12px", minWidth: "12px" }}
+              style={{ minHeight: "8px", minWidth: "8px" }}
             />
           ))}
         </div>
 
         {/* Persistent Bottom Mobile CTA Bar */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-white/95 backdrop-blur-md border-t border-orange-100/50 shadow-[0_-8px_30px_rgba(0,0,0,0.06)]">
+        <div
+          className={`fixed bottom-0 left-0 right-0 z-50 p-4 bg-white/95 backdrop-blur-md border-t border-orange-100/50 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out ${
+            showStickyBar ? "translate-y-0 opacity-100 pointer-events-auto" : "translate-y-full opacity-0 pointer-events-none"
+          }`}
+        >
           <div className="max-w-md mx-auto flex items-center justify-between gap-4">
             <div className="shrink-0">
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
-                Checkout Roselia
+                Checkout {currentMobileProduct.name}
               </p>
-              <div className="flex items-baseline gap-1 leading-none">
-                <span className="text-xl font-black text-[#B33D14]">
+              <div className="flex flex-col">
+                <span className="text-lg font-black text-[#B33D14] leading-none">
                   ₹{formatPrice(currentMobileProduct.salePrice)}
                 </span>
-                <span className="text-[10px] text-gray-400 line-through">
-                  ₹{formatPrice(currentMobileProduct.salePrice * 2)}
+                <span className="text-[10px] text-gray-400 line-through mt-1 leading-none font-semibold">
+                  MRP: ₹{formatPrice(currentMobileProduct.salePrice * 2)}
                 </span>
               </div>
             </div>
@@ -715,6 +813,31 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
           </div>
         </div>
       </section>
+
+      {/* ── Scroll Indicator (Indicates there is content below) ──── */}
+      <div className="flex flex-col items-center justify-center pt-1 pb-2">
+        <button 
+          onClick={handleScrollToProducts}
+          className="flex flex-col items-center gap-1.5 cursor-pointer group bg-transparent border-0 outline-none"
+        >
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 group-hover:text-[#B33D14] transition-colors duration-300">
+            Discover The Collection
+          </span>
+          <motion.div
+            animate={{
+              y: [0, 4, 0],
+            }}
+            transition={{
+              duration: 1.6,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="text-gray-400 group-hover:text-[#B33D14] transition-colors duration-300"
+          >
+            <ChevronDown className="w-4 h-4" />
+          </motion.div>
+        </button>
+      </div>
 
       {/* ── Global Trust Ribbon (Bottom of the Section) ─────────── */}
       <footer className="w-full bg-[#B33D14]/5 border-t border-[#B33D14]/10 py-1 mt-1 mb-1 hidden">
