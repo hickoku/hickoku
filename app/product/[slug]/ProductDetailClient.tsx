@@ -100,7 +100,23 @@ export default function ProductDetailClient({ product, relatedProducts = [], ini
       value: product.variants[0].price * 0.5,
       currency: "INR",
     });
+
+    if (typeof window !== "undefined") {
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      (window as any).dataLayer.push({
+        event: "view_item",
+        ecommerce: {
+          items: [
+            {
+              item_name: product.name,
+              price: product.variants[0].price * 0.5,
+            },
+          ],
+        },
+      });
+    }
   }, [product]);
+
 
 
   // Auto-slide main image
