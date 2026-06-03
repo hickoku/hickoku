@@ -196,13 +196,18 @@ export function CartProvider({ children }: CartProviderProps) {
 
       if (typeof window !== "undefined") {
         (window as any).dataLayer = (window as any).dataLayer || [];
+        (window as any).dataLayer.push({ ecommerce: null }); // Clear the previous ecommerce object
         (window as any).dataLayer.push({
           event: "add_to_cart",
           ecommerce: {
+            currency: "INR",
+            value: item.price * (item.quantity || 1),
             items: [
               {
+                item_id: item.sku,
                 item_name: item.productName,
                 price: item.price,
+                quantity: item.quantity || 1,
               },
             ],
           },
