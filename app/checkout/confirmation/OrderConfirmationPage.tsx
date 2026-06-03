@@ -61,12 +61,19 @@ export default function OrderConfirmationPage() {
           // GTM Purchase Tracking
           if (typeof window !== "undefined") {
             (window as any).dataLayer = (window as any).dataLayer || [];
+            (window as any).dataLayer.push({ ecommerce: null }); // Clear the previous ecommerce object
             (window as any).dataLayer.push({
               event: "purchase",
               ecommerce: {
                 transaction_id: data.order.orderNumber || data.order.orderId,
                 value: data.order.total,
                 currency: "INR",
+                items: data.order.items.map((item: any) => ({
+                  item_id: item.sku,
+                  item_name: item.productName,
+                  price: item.price,
+                  quantity: item.quantity,
+                })),
               },
             });
           }

@@ -226,19 +226,36 @@ function CartSummary({
 
 function CheckoutPageContent() {
   const router = useRouter();
-  const { items, isCartLoaded } = useCart();
+  const { items, isCartLoaded, getTotalPrice } = useCart();
   const [isReady, setIsReady] = useState(false);
+  const [hasTrackedCheckout, setHasTrackedCheckout] = useState(false);
 
   useEffect(() => {
     setIsReady(true);
-
-    if (typeof window !== "undefined") {
-      (window as any).dataLayer = (window as any).dataLayer || [];
-      (window as any).dataLayer.push({
-        event: "begin_checkout",
-      });
-    }
   }, []);
+
+  useEffect(() => {
+    if (isReady && isCartLoaded && items.length > 0 && !hasTrackedCheckout) {
+      setHasTrackedCheckout(true);
+      if (typeof window !== "undefined") {
+        (window as any).dataLayer = (window as any).dataLayer || [];
+        (window as any).dataLayer.push({ ecommerce: null }); // Clear the previous ecommerce object
+        (window as any).dataLayer.push({
+          event: "begin_checkout",
+          ecommerce: {
+            currency: "INR",
+            value: getTotalPrice(),
+            items: items.map((item) => ({
+              item_id: item.sku,
+              item_name: item.productName,
+              price: item.price,
+              quantity: item.quantity,
+            })),
+          },
+        });
+      }
+    }
+  }, [isReady, isCartLoaded, items, hasTrackedCheckout, getTotalPrice]);
 
 
   // Redirect if cart is empty and component is ready and cart metadata is loaded
