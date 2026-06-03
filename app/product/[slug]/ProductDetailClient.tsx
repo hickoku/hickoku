@@ -103,13 +103,18 @@ export default function ProductDetailClient({ product, relatedProducts = [], ini
 
     if (typeof window !== "undefined") {
       (window as any).dataLayer = (window as any).dataLayer || [];
+      (window as any).dataLayer.push({ ecommerce: null }); // Clear the previous ecommerce object
       (window as any).dataLayer.push({
         event: "view_item",
         ecommerce: {
+          currency: "INR",
+          value: product.variants[0].price * 0.5,
           items: [
             {
+              item_id: product.variants[0].sku || product.id,
               item_name: product.name,
               price: product.variants[0].price * 0.5,
+              quantity: 1,
             },
           ],
         },
