@@ -18,6 +18,9 @@ const nextConfig: NextConfig = {
     return headers;
   },
   reactStrictMode: true,
+  env: {
+    APP_ENV: process.env.APP_ENV || 'stage',
+  },
 };
 
 export default nextConfig;
