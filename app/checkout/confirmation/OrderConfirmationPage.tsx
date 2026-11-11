@@ -17,6 +17,69 @@ import { formatPrice } from "@/app/utils/currency";
 import { Header } from "@/app/components/Header";
 import Image from "next/image";
 import * as fpixel from "@/lib/fpixel";
+import { purchaseEventId } from "@/lib/tracking/config";
+
+/**
+ * Browser Purchase for Meta Pixel + GTM (GA4).
+ * - Only for paid, non-cancelled orders.
+ * - Once per order per browser: the page is reopened via the cancel link in the
+ *   order email and on refresh, which previously re-sent Purchase every time.
+ * - Uses the same IDs as the server-side Purchase so Meta (event_id) and
+ *   GA4 (transaction_id) deduplicate the two.
+ */
+function trackBrowserPurchase(order: Order) {
+  if (typeof window === "undefined") return;
+  if (order.paymentStatus !== "paid" || order.status === "cancelled") return;
+
+  const storageKey = `hk_purchase_tracked_${order.orderId}`;
+  try {
+    if (window.localStorage.getItem(storageKey)) return;
+    window.localStorage.setItem(storageKey, new Date().toISOString());
+  } catch {
+    // Storage blocked (private mode): still send; Meta and GA4 dedupe by ID.
+  }
+
+  const items = order.items || [];
+
+  fpixel.event(
+    "Purchase",
+    {
+      value: order.total,
+      currency: "INR",
+      content_ids: items.map((item) => item.productId),
+      contents: items.map((item) => ({
+        id: item.productId,
+        quantity: item.quantity,
+        item_price: item.price,
+      })),
+      content_type: "product",
+      num_items: items.reduce((n, item) => n + (item.quantity || 0), 0),
+      order_id: order.orderNumber,
+    },
+    purchaseEventId(order.orderId)
+  );
+
+  // GTM -> GA4 purchase tag
+  (window as any).dataLayer = (window as any).dataLayer || [];
+  (window as any).dataLayer.push({ ecommerce: null }); // Clear the previous ecommerce object
+  (window as any).dataLayer.push({
+    event: "purchase",
+    ecommerce: {
+      transaction_id: order.orderNumber || order.orderId,
+      value: order.total,
+      tax: order.tax || 0,
+      shipping: order.shippingCost || 0,
+      currency: "INR",
+      items: items.map((item) => ({
+        item_id: item.sku,
+        item_name: item.productName,
+        item_variant: item.size,
+        price: item.price,
+        quantity: item.quantity,
+      })),
+    },
+  });
+}
 
 
 export default function OrderConfirmationPage() {
@@ -49,35 +112,7 @@ export default function OrderConfirmationPage() {
       .then((data) => {
         if (data.success) {
           setOrder(data.order);
-          // Track Purchase event
-          fpixel.event("Purchase", {
-            value: data.order.total,
-            currency: "INR",
-            content_ids: data.order.items.map((item: any) => item.productId),
-            content_type: "product",
-            num_items: data.order.items.length,
-          });
-
-          // GTM Purchase Tracking
-          if (typeof window !== "undefined") {
-            (window as any).dataLayer = (window as any).dataLayer || [];
-            (window as any).dataLayer.push({ ecommerce: null }); // Clear the previous ecommerce object
-            (window as any).dataLayer.push({
-              event: "purchase",
-              ecommerce: {
-                transaction_id: data.order.orderNumber || data.order.orderId,
-                value: data.order.total,
-                currency: "INR",
-                items: data.order.items.map((item: any) => ({
-                  item_id: item.sku,
-                  item_name: item.productName,
-                  price: item.price,
-                  quantity: item.quantity,
-                })),
-              },
-            });
-          }
-
+          trackBrowserPurchase(data.order);
         } else {
 
           setError("Order not found");

@@ -1,5 +1,6 @@
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
+import { trackServerPurchase } from "@/lib/tracking/serverPurchase";
 import { orderRepository } from "@/lib/repositories/orderRepository";
 import { updateStock } from "@/app/repositories/products.repository";
 import crypto from "crypto";
@@ -81,6 +82,8 @@ export async function POST(request: NextRequest) {
         // If webhook beat the frontend and already processed the payment
         if (order.paymentStatus === "paid") {
             console.log(`[Verify-Payment] Order ${body.orderId} already paid (likely via webhook). Returning early.`);
+            // No-op if the webhook already sent it
+            after(() => trackServerPurchase(body.orderId));
             return NextResponse.json({
                 success: true,
                 alreadyProcessed: true,
@@ -118,6 +121,9 @@ export async function POST(request: NextRequest) {
                 }
             }
         }
+
+        // Server-side Purchase (Meta CAPI + GA4), sent once per order, after the response
+        after(() => trackServerPurchase(body.orderId));
 
         // --- EMAIL COUPLING REMOVED ---
         // Email execution is now asynchronously handled via the dedicated /api/orders/send-email proxy route

@@ -8,9 +8,11 @@ import { ProductProvider } from "./context/ProductContext";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import FacebookPixel from "./components/FacebookPixel";
-import GoogleAnalytics from "./components/GoogleAnalytics";
 import { WhatsAppStickyButton } from "./components/WhatsAppStickyButton";
 import { GoogleTagManager } from '@next/third-parties/google'
+import { TRACKING_ENABLED } from "@/lib/tracking/config";
+
+const GTM_ID = TRACKING_ENABLED ? process.env.NEXT_PUBLIC_GTM_ID : undefined;
 
 
 export const metadata: Metadata = {
@@ -64,17 +66,17 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head />
       <body>
-        {process.env.NEXT_PUBLIC_GTM_ID && (
+        {GTM_ID && (
           <noscript>
             <iframe
-              src={`https://www.googletagmanager.com/ns.html?id=${process.env.NEXT_PUBLIC_GTM_ID}`}
+              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
               height="0"
               width="0"
               style={{ display: "none", visibility: "hidden" }}
             />
           </noscript>
         )}
-        <GoogleAnalytics env={process.env.APP_ENV} />
+        {/* GA4 is loaded through GTM (Google tag in the container), not directly */}
 
         <LocaleProvider>
 
@@ -89,11 +91,9 @@ export default function RootLayout({
         </LocaleProvider>
         <Analytics/>
         <SpeedInsights/>
-        <FacebookPixel env={process.env.APP_ENV} />
+        <FacebookPixel />
       </body>
-      {process.env.NEXT_PUBLIC_GTM_ID && (
-        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
-      )}
+      {GTM_ID && <GoogleTagManager gtmId={GTM_ID} />}
     </html>
 
   );
