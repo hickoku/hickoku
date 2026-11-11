@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { orderRepository, OrderItem, ShippingAddress } from "@/lib/repositories/orderRepository";
+import { getTrackingContext } from "@/lib/tracking/requestContext";
 
 // Use dynamic require for Razorpay to avoid TypeScript issues
 const Razorpay = require("razorpay");
@@ -86,6 +87,7 @@ export async function POST(request: NextRequest) {
             total: body.total,
             paymentStatus: "pending",
             status: "pending",
+            tracking: getTrackingContext(request),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         });

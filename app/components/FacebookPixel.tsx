@@ -4,18 +4,18 @@ import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
 import { useEffect, Suspense } from "react";
 import * as fpixel from "@/lib/fpixel";
+import { TRACKING_ENABLED } from "@/lib/tracking/config";
 
-const FacebookPixelComponent = ({ env }: { env?: string }) => {
+const FacebookPixelComponent = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // PageView on client-side navigations (the snippet below sends the first one)
   useEffect(() => {
-    if (env === "prod") {
-      fpixel.pageview();
-    }
-  }, [pathname, searchParams, env]);
+    fpixel.pageview();
+  }, [pathname, searchParams]);
 
-  if (env !== "prod" || !fpixel.FB_PIXEL_ID) {
+  if (!TRACKING_ENABLED || !fpixel.FB_PIXEL_ID) {
     return null;
   }
 
@@ -43,10 +43,10 @@ const FacebookPixelComponent = ({ env }: { env?: string }) => {
   );
 };
 
-export default function FacebookPixel({ env }: { env?: string }) {
+export default function FacebookPixel() {
   return (
     <Suspense fallback={null}>
-      <FacebookPixelComponent env={env} />
+      <FacebookPixelComponent />
     </Suspense>
   );
 }

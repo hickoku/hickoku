@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
+import { trackServerPurchase } from "@/lib/tracking/serverPurchase";
 import crypto from "crypto";
 import { orderRepository } from "@/lib/repositories/orderRepository";
 import { updateStock } from "@/app/repositories/products.repository";
@@ -56,6 +57,8 @@ export async function POST(request: NextRequest) {
         // If already paid (handled by client-side verification), ignore
         if (order.paymentStatus === "paid") {
             console.log(`Order ${orderId} already marked as paid. Ignoring webhook.`);
+            // No-op if verify-payment already sent it
+            after(() => trackServerPurchase(orderId));
             return NextResponse.json({ status: "already_processed" });
         }
 
@@ -86,6 +89,10 @@ export async function POST(request: NextRequest) {
                 }
             }
         }
+
+        // Server-side Purchase (Meta CAPI + GA4). Covers UPI payments where the
+        // customer never returns to the confirmation page.
+        after(() => trackServerPurchase(orderId));
 
         // Trigger Delhivery Sync & Email
         // VERY IMPORTANT: On Vercel, we MUST `await` these. If we fire them in the background
