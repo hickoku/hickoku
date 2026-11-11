@@ -16,7 +16,10 @@ const client = new DynamoDBClient({
 });
 
 const docClient = DynamoDBDocumentClient.from(client);
-const TABLE_NAME = process.env.DYNAMODB_ORDERS_TABLE || "orders";
+// Table is auto-selected by APP_ENV:
+//   APP_ENV=prod  → "orders"        (production table)
+//   APP_ENV=stage → "orders-stage"  (isolated staging table)
+const TABLE_NAME = process.env.APP_ENV === "prod" ? "orders" : "orders-stage";
 
 
 
@@ -92,6 +95,22 @@ export interface Order {
     refundId?: string;
     refundStatus?: string;
     updatedAt: string;
+
+    // Marketing attribution captured at checkout, used for server-side Purchase events
+    tracking?: OrderTrackingContext;
+    // Set once the server-side Purchase event has been sent (prevents duplicates)
+    purchaseTrackedAt?: string;
+}
+
+export interface OrderTrackingContext {
+    fbp?: string;          // Meta browser ID cookie (_fbp)
+    fbc?: string;          // Meta click ID cookie (_fbc)
+    visitorId?: string;    // our first-party visitor ID cookie (hk_vid), sent as Meta external_id
+    gaClientId?: string;   // GA4 client ID from the _ga cookie
+    gaSessionId?: string;  // GA4 session ID from the _ga_<stream> cookie
+    clientIp?: string;
+    userAgent?: string;
+    pageUrl?: string;      // page the order was placed from
 }
 
 export class OrderRepository {
@@ -192,6 +211,34 @@ export class OrderRepository {
                 ExpressionAttributeValues: expressionAttributeValues,
             })
         );
+    }
+
+    /**
+     * Atomically mark the server-side Purchase event as sent.
+     * Returns true only for the first caller, so verify-payment and the webhook
+     * can both call this without sending Purchase twice.
+     */
+    async claimPurchaseTracking(orderId: string): Promise<boolean> {
+        try {
+            await docClient.send(
+                new UpdateCommand({
+                    TableName: TABLE_NAME,
+                    Key: {
+                        PK: `ORDER#${orderId}`,
+                        SK: "METADATA",
+                    },
+                    UpdateExpression: "SET purchaseTrackedAt = :now",
+                    ConditionExpression: "attribute_exists(PK) AND attribute_not_exists(purchaseTrackedAt)",
+                    ExpressionAttributeValues: {
+                        ":now": new Date().toISOString(),
+                    },
+                })
+            );
+            return true;
+        } catch (error: any) {
+            if (error?.name === "ConditionalCheckFailedException") return false;
+            throw error;
+        }
     }
 
     /**

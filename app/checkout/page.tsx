@@ -11,6 +11,7 @@ import { useCart } from "../hooks/useCart";
 import { ShoppingBag, Trash2, Plus, Minus } from "lucide-react";
 import { formatPrice } from "../utils/currency";
 import Image from "next/image";
+import * as fpixel from "@/lib/fpixel";
 
 function CartSummary({
   defaultExpanded = true,
@@ -237,6 +238,21 @@ function CheckoutPageContent() {
   useEffect(() => {
     if (isReady && isCartLoaded && items.length > 0 && !hasTrackedCheckout) {
       setHasTrackedCheckout(true);
+
+      // Meta InitiateCheckout (replaces the Event Setup Tool click rule on prod)
+      fpixel.event("InitiateCheckout", {
+        currency: "INR",
+        value: getTotalPrice(),
+        content_type: "product",
+        content_ids: items.map((item) => item.productId),
+        contents: items.map((item) => ({
+          id: item.productId,
+          quantity: item.quantity,
+          item_price: item.price,
+        })),
+        num_items: items.reduce((n, item) => n + (item.quantity || 0), 0),
+      });
+
       if (typeof window !== "undefined") {
         (window as any).dataLayer = (window as any).dataLayer || [];
         (window as any).dataLayer.push({ ecommerce: null }); // Clear the previous ecommerce object

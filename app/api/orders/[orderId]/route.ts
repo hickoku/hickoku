@@ -24,9 +24,12 @@ export async function GET(
             );
         }
 
+        // Internal attribution data (IP, cookies) is not needed by the browser
+        const { tracking, purchaseTrackedAt, ...publicOrder } = order;
+
         return NextResponse.json({
             success: true,
-            order,
+            order: publicOrder,
         });
     } catch (error: any) {
         console.error("Error fetching order:", error);

@@ -4,18 +4,19 @@ import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
 import { useEffect, Suspense } from "react";
 import * as fpixel from "@/lib/fpixel";
+import { TRACKING_ENABLED } from "@/lib/tracking/config";
+import { VISITOR_COOKIE, MATCHING_STORAGE_KEY } from "@/lib/tracking/normalize";
 
-const FacebookPixelComponent = ({ env }: { env?: string }) => {
+const FacebookPixelComponent = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // PageView on client-side navigations (the snippet below sends the first one)
   useEffect(() => {
-    if (env === "prod") {
-      fpixel.pageview();
-    }
-  }, [pathname, searchParams, env]);
+    fpixel.pageview();
+  }, [pathname, searchParams]);
 
-  if (env !== "prod" || !fpixel.FB_PIXEL_ID) {
+  if (!TRACKING_ENABLED || !fpixel.FB_PIXEL_ID) {
     return null;
   }
 
@@ -34,7 +35,27 @@ const FacebookPixelComponent = ({ env }: { env?: string }) => {
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${fpixel.FB_PIXEL_ID}');
+            (function(){
+              // Visitor ID (external_id), see lib/tracking/identity.ts
+              var vid = null, m = document.cookie.match(/(?:^|; )${VISITOR_COOKIE}=([^;]+)/);
+              if (m) { vid = decodeURIComponent(m[1]); }
+              else {
+                vid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+                  : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+                document.cookie = '${VISITOR_COOKIE}=' + encodeURIComponent(vid) + '; Max-Age=63072000; Path=/; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+              }
+              // Returning customer: start with their hashed details. New visitors start
+              // empty so identifyCustomer() can add details at checkout (the pixel only
+              // accepts user data once per page load).
+              var am = null;
+              try { am = JSON.parse(localStorage.getItem('${MATCHING_STORAGE_KEY}') || 'null'); } catch (e) {}
+              if (am && (am.em || am.ph)) {
+                am.external_id = vid;
+                fbq('init', '${fpixel.FB_PIXEL_ID}', am);
+              } else {
+                fbq('init', '${fpixel.FB_PIXEL_ID}');
+              }
+            })();
             fbq('track', 'PageView');
           `,
         }}
@@ -43,10 +64,10 @@ const FacebookPixelComponent = ({ env }: { env?: string }) => {
   );
 };
 
-export default function FacebookPixel({ env }: { env?: string }) {
+export default function FacebookPixel() {
   return (
     <Suspense fallback={null}>
-      <FacebookPixelComponent env={env} />
+      <FacebookPixelComponent />
     </Suspense>
   );
 }
