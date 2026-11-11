@@ -3,6 +3,7 @@
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import * as fpixel from "@/lib/fpixel";
+import { newEventId } from "@/lib/tracking/config";
 
 export interface CartItem {
   id?: string; // Optional internal ID
@@ -204,7 +205,7 @@ export function CartProvider({ children }: CartProviderProps) {
         contents: [{ id: item.productId, quantity, item_price: item.price }],
         value: Number(item.price) * quantity,
         currency: "INR",
-      });
+      }, newEventId("atc")); // eventID lets Meta dedupe against the CAPI Gateway copy
 
       if (typeof window !== "undefined") {
         (window as any).dataLayer = (window as any).dataLayer || [];
