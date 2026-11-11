@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { orderRepository, type Order } from "@/lib/repositories/orderRepository";
 import { TRACKING_ENABLED, purchaseEventId } from "@/lib/tracking/config";
+import { normalizeCustomer } from "@/lib/tracking/normalize";
 
 /**
  * Server-side Purchase for Meta (Conversions API) and GA4 (Measurement Protocol).
@@ -25,20 +26,6 @@ const REQUEST_TIMEOUT_MS = 5000;
 const sha256 = (value: string) =>
   crypto.createHash("sha256").update(value.trim().toLowerCase()).digest("hex");
 
-/** Meta wants phone numbers with country code, digits only. */
-function normalizePhone(phone?: string): string | undefined {
-  if (!phone) return undefined;
-  const digits = phone.replace(/\D/g, "").replace(/^0+/, "");
-  if (!digits) return undefined;
-  return digits.length === 10 ? `91${digits}` : digits;
-}
-
-function normalizeCountry(country?: string): string {
-  if (!country) return "in";
-  const c = country.trim().toLowerCase();
-  return c === "india" || c === "in" || c === "ind" ? "in" : c.slice(0, 2);
-}
-
 const compact = <T extends Record<string, unknown>>(obj: T) =>
   Object.fromEntries(
     Object.entries(obj).filter(([, v]) => v !== undefined && v !== null && v !== "")
@@ -51,19 +38,28 @@ async function sendMetaPurchase(order: Order, eventTime: number) {
 
   const t = order.tracking || {};
   const addr = order.shippingAddress;
-  const phone = normalizePhone(order.customerPhone || addr?.phone);
-  const email = order.customerEmail || addr?.email;
+
+  // Same normalisation as the browser (lib/tracking/identity.ts) so hashes match
+  const normalized = normalizeCustomer({
+    email: order.customerEmail || addr?.email,
+    phone: order.customerPhone || addr?.phone,
+    firstName: order.customerFirstName || addr?.firstName,
+    lastName: order.customerLastName || addr?.lastName,
+    city: addr?.city,
+    state: addr?.state,
+    zipCode: addr?.zipCode,
+    country: addr?.country,
+  });
+  const hashed = Object.fromEntries(
+    Object.entries(normalized).map(([k, v]) => [k, [sha256(v)]])
+  );
+
+  // external_id: visitor ID (matches the browser pixel), plus email as a stable fallback
+  const externalIds = [t.visitorId, normalized.em].filter(Boolean).map((v) => sha256(v as string));
 
   const userData = compact({
-    em: email ? [sha256(email)] : undefined,
-    ph: phone ? [sha256(phone)] : undefined,
-    fn: order.customerFirstName ? [sha256(order.customerFirstName)] : undefined,
-    ln: order.customerLastName ? [sha256(order.customerLastName)] : undefined,
-    ct: addr?.city ? [sha256(addr.city.replace(/\s+/g, ""))] : undefined,
-    st: addr?.state ? [sha256(addr.state.replace(/\s+/g, ""))] : undefined,
-    zp: addr?.zipCode ? [sha256(addr.zipCode.replace(/\s+/g, ""))] : undefined,
-    country: [sha256(normalizeCountry(addr?.country))],
-    external_id: email ? [sha256(email)] : undefined,
+    ...hashed,
+    external_id: externalIds.length ? externalIds : undefined,
     client_ip_address: t.clientIp,
     client_user_agent: t.userAgent,
     fbp: t.fbp,

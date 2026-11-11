@@ -18,6 +18,7 @@ import { Header } from "@/app/components/Header";
 import Image from "next/image";
 import * as fpixel from "@/lib/fpixel";
 import { purchaseEventId } from "@/lib/tracking/config";
+import { identifyCustomer } from "@/lib/tracking/identity";
 
 /**
  * Browser Purchase for Meta Pixel + GTM (GA4).
@@ -27,7 +28,7 @@ import { purchaseEventId } from "@/lib/tracking/config";
  * - Uses the same IDs as the server-side Purchase so Meta (event_id) and
  *   GA4 (transaction_id) deduplicate the two.
  */
-function trackBrowserPurchase(order: Order) {
+async function trackBrowserPurchase(order: Order) {
   if (typeof window === "undefined") return;
   if (order.paymentStatus !== "paid" || order.status === "cancelled") return;
 
@@ -38,6 +39,18 @@ function trackBrowserPurchase(order: Order) {
   } catch {
     // Storage blocked (private mode): still send; Meta and GA4 dedupe by ID.
   }
+
+  // Make sure the pixel has the customer's details (e.g. if this page was a fresh load)
+  await identifyCustomer({
+    email: order.customerEmail,
+    phone: order.customerPhone,
+    firstName: order.customerFirstName,
+    lastName: order.customerLastName,
+    city: order.shippingAddress?.city,
+    state: order.shippingAddress?.state,
+    zipCode: order.shippingAddress?.zipCode,
+    country: order.shippingAddress?.country,
+  });
 
   const items = order.items || [];
 
@@ -112,7 +125,7 @@ export default function OrderConfirmationPage() {
       .then((data) => {
         if (data.success) {
           setOrder(data.order);
-          trackBrowserPurchase(data.order);
+          void trackBrowserPurchase(data.order);
         } else {
 
           setError("Order not found");
