@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import type { OrderTrackingContext } from "@/lib/repositories/orderRepository";
+import { VISITOR_COOKIE } from "@/lib/tracking/normalize";
 
 /** "GA1.1.1234567890.1700000000" -> "1234567890.1700000000" */
 function parseGaClientId(value?: string): string | undefined {
@@ -45,6 +46,7 @@ export function getTrackingContext(request: NextRequest): OrderTrackingContext {
   const context: OrderTrackingContext = {
     fbp: request.cookies.get("_fbp")?.value,
     fbc: request.cookies.get("_fbc")?.value,
+    visitorId: request.cookies.get(VISITOR_COOKIE)?.value,
     gaClientId: parseGaClientId(request.cookies.get("_ga")?.value),
     gaSessionId: parseGaSessionId(findGaSessionCookie(request)),
     clientIp,

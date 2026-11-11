@@ -5,6 +5,7 @@ import { useContext, useState, useEffect } from "react";
 import { CheckoutContext } from "../../context/CheckoutContext";
 import { useCart } from "../../hooks/useCart";
 import { ArrowRight, MapPin, Loader2, Check } from "lucide-react";
+import { identifyCustomer } from "@/lib/tracking/identity";
 
 export function AddressForm() {
   const context = useContext(CheckoutContext);
@@ -178,6 +179,8 @@ export function AddressForm() {
 
     if (validateForm()) {
       if (pincodeStatus === "invalid") return;
+      // Hashed customer details for Meta matching (not awaited; never blocks checkout)
+      void identifyCustomer(state.address);
       dispatch({ type: "MARK_STEP_COMPLETED", payload: "address" });
       dispatch({ type: "SET_STEP", payload: "payment" });
     }

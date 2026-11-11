@@ -105,6 +105,7 @@ export interface Order {
 export interface OrderTrackingContext {
     fbp?: string;          // Meta browser ID cookie (_fbp)
     fbc?: string;          // Meta click ID cookie (_fbc)
+    visitorId?: string;    // our first-party visitor ID cookie (hk_vid), sent as Meta external_id
     gaClientId?: string;   // GA4 client ID from the _ga cookie
     gaSessionId?: string;  // GA4 session ID from the _ga_<stream> cookie
     clientIp?: string;
