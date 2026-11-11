@@ -6,7 +6,6 @@ import { Heart, ShoppingBag, Eye } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "../hooks/useCart";
 import { formatPrice } from "../utils/currency";
-import * as fpixel from "@/lib/fpixel";
 
 
 interface ProductCardProps {
@@ -202,14 +201,6 @@ export function ProductCard({
                 size: "Standard",
                 quantity: 1,
                 slug,
-              });
-              fpixel.event("AddToCart", {
-                content_name: name,
-                content_category: category,
-                content_ids: [id],
-                content_type: "product",
-                value: Number(price.replace(/[^0-9.]/g, "")) * 0.5,
-                currency: "INR",
               });
             }}
 
