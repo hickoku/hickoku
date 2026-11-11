@@ -2,6 +2,7 @@
 
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { usePathname } from "next/navigation";
+import * as fpixel from "@/lib/fpixel";
 
 export interface CartItem {
   id?: string; // Optional internal ID
@@ -193,6 +194,17 @@ export function CartProvider({ children }: CartProviderProps) {
       }
 
       const data = await response.json();
+
+      // Meta AddToCart for every add-to-bag button (single place, always with price)
+      const quantity = item.quantity || 1;
+      fpixel.event("AddToCart", {
+        content_name: item.productName,
+        content_ids: [item.productId],
+        content_type: "product",
+        contents: [{ id: item.productId, quantity, item_price: item.price }],
+        value: Number(item.price) * quantity,
+        currency: "INR",
+      });
 
       if (typeof window !== "undefined") {
         (window as any).dataLayer = (window as any).dataLayer || [];

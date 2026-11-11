@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { useCart } from "../hooks/useCart";
 import { formatPrice } from "../utils/currency";
-import * as fpixel from "@/lib/fpixel";
 
 export interface SlideProduct {
   id: string;
@@ -286,15 +285,6 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
       size: "Standard",
       quantity: 1,
       slug: product.slug,
-    });
-
-    fpixel.event("AddToCart", {
-      content_name: product.name,
-      content_category: product.category || "Fragrance",
-      content_ids: [product.id],
-      content_type: "product",
-      value: product.salePrice,
-      currency: "INR",
     });
 
     setAddedId(product.id);

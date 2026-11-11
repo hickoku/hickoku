@@ -528,15 +528,6 @@ export default function ProductDetailClient({ product, relatedProducts = [], ini
                         slug: product.slug,
                       });
 
-                      fpixel.event("AddToCart", {
-                        content_name: product.name,
-                        content_category: product.category,
-                        content_ids: [product.id],
-                        content_type: "product",
-                        value: discountedPrice,
-                        currency: "INR",
-                      });
-
                       toast.success("Added to bag!", {
                         description: `${variant.size} - ₹ ${formatPrice(discountedPrice)}`,
                       });
