@@ -12,6 +12,7 @@ import { ShoppingBag, Trash2, Plus, Minus } from "lucide-react";
 import { formatPrice } from "../utils/currency";
 import Image from "next/image";
 import * as fpixel from "@/lib/fpixel";
+import { newEventId } from "@/lib/tracking/config";
 
 function CartSummary({
   defaultExpanded = true,
@@ -239,7 +240,8 @@ function CheckoutPageContent() {
     if (isReady && isCartLoaded && items.length > 0 && !hasTrackedCheckout) {
       setHasTrackedCheckout(true);
 
-      // Meta InitiateCheckout (replaces the Event Setup Tool click rule on prod)
+      // Meta InitiateCheckout (replaces the Event Setup Tool click rule on prod).
+      // eventID lets Meta dedupe this against the Conversions API Gateway copy.
       fpixel.event("InitiateCheckout", {
         currency: "INR",
         value: getTotalPrice(),
@@ -251,7 +253,7 @@ function CheckoutPageContent() {
           item_price: item.price,
         })),
         num_items: items.reduce((n, item) => n + (item.quantity || 0), 0),
-      });
+      }, newEventId("ic")); // one ID per checkout start; the CAPI Gateway reuses it for dedup
 
       if (typeof window !== "undefined") {
         (window as any).dataLayer = (window as any).dataLayer || [];
