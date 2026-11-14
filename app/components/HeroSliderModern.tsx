@@ -236,7 +236,10 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
   }, []);
 
   // Map dynamic database products passed from props, and pad the remaining slots up to 8 using fallbacks to ensure all sense categories are always active and functional
-  const activeProducts: EnhancedProduct[] = Array.from({ length: 8 }).map((_, idx) => {
+  // Only real products get a slot. Placeholders (STATIC_EIGHT_COLLECTION, Unsplash photos)
+  // are used only when no products load at all; they used to fill every empty slot, which
+  // broke the page (Unsplash isn't an allowed image host) as soon as a product was hidden.
+  const activeProducts: EnhancedProduct[] = Array.from({ length: products.length ? Math.min(8, products.length) : 8 }).map((_, idx) => {
     const fallback = STATIC_EIGHT_COLLECTION[idx];
     const product = products[idx];
     
