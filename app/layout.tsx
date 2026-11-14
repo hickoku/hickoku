@@ -5,6 +5,8 @@ import { CartProvider } from "./context/CartContext";
 import { CartDrawer } from "./components/CartDrawer";
 import { LocaleProvider } from "./context/LocaleContext";
 import { ProductProvider } from "./context/ProductContext";
+import { OffersProvider } from "./context/OffersContext";
+import { getOffersSafe } from "@/lib/offers/repository";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import FacebookPixel from "./components/FacebookPixel";
@@ -57,11 +59,14 @@ export const viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Offers set in the admin panel. Pages built at deploy time get this snapshot; the
+  // OffersProvider refreshes it in the browser.
+  const offers = await getOffersSafe();
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
@@ -81,12 +86,14 @@ export default function RootLayout({
         <LocaleProvider>
 
           <ProductProvider>
+            <OffersProvider initialOffers={offers}>
             <CartProvider>
               {children}
               <CartDrawer />
               <WhatsAppStickyButton />
               <Toaster position="top-right" />
             </CartProvider>
+            </OffersProvider>
           </ProductProvider>
         </LocaleProvider>
         <Analytics/>

@@ -17,8 +17,12 @@ const client = new DynamoDBClient({
 const docClient = DynamoDBDocumentClient.from(client);
 
 // Table Names from .env or default to new clean names
-const PRODUCTS_TABLE = "products";
-const VARIANTS_TABLE = "product_variants";
+// Table is auto-selected by APP_ENV (same rule as orders):
+//   APP_ENV=prod  → "products" / "product_variants"
+//   otherwise     → "products-stage" / "product_variants-stage"
+const IS_PROD = process.env.APP_ENV === "prod";
+const PRODUCTS_TABLE = IS_PROD ? "products" : "products-stage";
+const VARIANTS_TABLE = IS_PROD ? "product_variants" : "product_variants-stage";
 
 export interface ProductVariant {
   id: string; // Variant ID
@@ -45,6 +49,7 @@ export interface Product {
   images: string[];
   slug: string;
   status: string;
+  hidden?: boolean; // true when the product is switched off in the admin panel (status false)
   basePrice: number;
   variants: ProductVariant[]; // Changed from single 'variant' to array
 }
@@ -185,6 +190,7 @@ export async function getProductWithVariant(
       shortDesc: v.shortDesc,
       desc: v.desc,
       characterstics: Array.from(v.characterstics || v.characteristics || []),
+      status: v.status !== undefined ? v.status : true,
     }));
 
     return {
@@ -197,6 +203,7 @@ export async function getProductWithVariant(
       images: parent.images,
       slug: parent.slug,
       status: parent.status || "active",
+      hidden: parent.status === false,
       basePrice: parent.basePrice,
       variants: variants,
     };
@@ -228,6 +235,8 @@ export async function getProductBySlug(
     if (!productResponse.Items || productResponse.Items.length === 0)
       return null;
     const parent = productResponse.Items[0];
+    // Hidden in the admin panel → behaves as if it doesn't exist (product page shows 404)
+    if (parent.status === false) return null;
     const productId = parent.id;
 
     // 2. Get Variants (Query GSI)
@@ -254,9 +263,11 @@ export async function getProductBySlug(
       isAvailable: v.stock > 0,
       shortDesc: v.shortDesc,
       desc: v.desc,
-      characterstics: Array.from(v.characterstics || v.characteristics || []),
+      characterstics: Array.from<string>(v.characterstics || v.characteristics || []),
       status: v.status !== undefined ? v.status : true,
-    }));
+    })).filter((v) => v.status !== false); // hidden sizes are not shown
+
+    if (variants.length === 0) return null;
 
     return {
       id: parent.id,

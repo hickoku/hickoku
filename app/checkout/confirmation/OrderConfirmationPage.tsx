@@ -433,12 +433,17 @@ export default function OrderConfirmationPage() {
                   <span>Price</span>
                   <span>₹{formatPrice(order.subtotal)}</span>
                 </div>
-                {order.surpriseDiscount ? (
-                  <div className="flex justify-between text-sm font-semibold text-green-600 bg-green-50 p-2 rounded-lg -mx-2">
-                    <span>🎉 Surprise Discount</span>
-                    <span>-₹{formatPrice(order.surpriseDiscount)}</span>
-                  </div>
-                ) : null}
+                {order.surpriseDiscount
+                  ? (() => {
+                      const lines = (order.appliedOffers || []).filter((o: any) => o.level === "cart");
+                      return (lines.length ? lines : [{ id: "discount", name: "Surprise Discount", amount: order.surpriseDiscount }]).map((o: any) => (
+                        <div key={o.id} className="flex justify-between text-sm font-semibold text-green-600 bg-green-50 p-2 rounded-lg -mx-2">
+                          <span>🎉 {o.name}</span>
+                          <span>-₹{formatPrice(o.amount)}</span>
+                        </div>
+                      ));
+                    })()
+                  : null}
                 <div className="flex justify-between text-gray-600">
                   <span>Actual Cost</span>
                   <span>

@@ -6,6 +6,7 @@ import { Heart, ShoppingBag, Eye } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "../hooks/useCart";
 import { formatPrice } from "../utils/currency";
+import { useOffers } from "../context/OffersContext";
 
 
 interface ProductCardProps {
@@ -59,6 +60,7 @@ export function ProductCard({
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const { addToCart } = useCart();
+  const pr = useOffers().priceFor(id, price); // live offers from the admin panel
 
   return (
     <div
@@ -157,7 +159,7 @@ export function ProductCard({
                 productId: id,
                 variantId: defaultVariantId || `${id}01`,
                 productName: name,
-                price: Number(price.replace(/[^0-9.]/g, "")) * 0.5,
+                price: pr.price,
                 image,
                 sku: defaultSku || `HICK-${id}`,
                 size: "Standard",
@@ -178,12 +180,14 @@ export function ProductCard({
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-gray-100">
           <div className="flex flex-col items-start gap-1">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded">50% OFF</span>
-              <p className="text-xs text-gray-400 line-through">₹{formatPrice(price)}</p>
-            </div>
-            <p className="text-lg font-bold text-red-700">
-              ₹{formatPrice(Number(price.replace(/[^0-9.]/g, "")) * 0.5)}
+            {pr.savings > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded">{pr.percentOff}% OFF</span>
+                <p className="text-xs text-gray-400 line-through">₹{formatPrice(price)}</p>
+              </div>
+            )}
+            <p className={`text-lg font-bold ${pr.savings > 0 ? "text-red-700" : "text-gray-900"}`}>
+              ₹{formatPrice(pr.price)}
             </p>
           </div>
           <motion.button
@@ -195,7 +199,7 @@ export function ProductCard({
                 productId: id,
                 variantId: defaultVariantId || `${id}01`,
                 productName: name,
-                price: Number(price.replace(/[^0-9.]/g, "")) * 0.5,
+                price: pr.price,
                 image,
                 sku: defaultSku || `HICK-${id}`,
                 size: "Standard",

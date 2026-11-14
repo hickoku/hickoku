@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "../context/LocaleContext";
 import { formatPrice } from "../utils/currency";
+import { useOffers } from "../context/OffersContext";
 import Image from "next/image";
 
 export function CartDrawer() {
@@ -22,8 +23,12 @@ export function CartDrawer() {
     getSurpriseDiscount,
     stockWarnings,
     addToCart,
+    cartOffers,
   } = useCart();
   const { t } = useLocale();
+  const { priceFor, cartTotals } = useOffers();
+  // Next cart offer the shopper can unlock (e.g. "add 1 more for ₹25 off each"), from the admin Offers page
+  const nextOffer = cartTotals(items.map((i) => ({ productId: i.productId, price: i.price, quantity: i.quantity }))).nextOffer;
   const router = useRouter();
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isFetchingSuggestions, setIsFetchingSuggestions] = useState(false);
@@ -70,7 +75,6 @@ export function CartDrawer() {
     };
   }, [isOpen]);
 
-  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <AnimatePresence>
@@ -106,8 +110,8 @@ export function CartDrawer() {
               </motion.button>
             </div>
 
-            {/* Discount Alert - Only if 1 item & Flag Enabled */}
-            {process.env.NEXT_PUBLIC_ENABLE_SURPRISE_DISCOUNT === 'true' && totalQuantity === 1 && (
+            {/* Nudge towards the next cart offer (set in the admin Offers page) */}
+            {nextOffer && items.length > 0 && (
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -117,8 +121,14 @@ export function CartDrawer() {
                   <span className="text-xl">🎉</span>
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-amber-900">Unlock Surprise Discount!</p>
-                  <p className="text-xs text-amber-700">Add 1 more product to get <span className="font-bold">₹25 off</span> on each product.</p>
+                  <p className="text-sm font-bold text-amber-900">Unlock {nextOffer.offer.name}!</p>
+                  <p className="text-xs text-amber-700">
+                    Add {nextOffer.itemsNeeded} more product{nextOffer.itemsNeeded === 1 ? "" : "s"} to get{" "}
+                    <span className="font-bold">
+                      {nextOffer.offer.kind === "percent" ? `${nextOffer.offer.value}% off` : nextOffer.offer.kind === "per_item" ? `₹${nextOffer.offer.value} off on each product` : `₹${nextOffer.offer.value} off`}
+                    </span>
+                    .
+                  </p>
                 </div>
               </motion.div>
             )}
@@ -195,14 +205,16 @@ export function CartDrawer() {
                             <p className="text-xs text-gray-500 mt-1">
                               {t("cart.sku")}: {item.sku}
                             </p>
-                            <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs font-bold text-red-700">
-                                50% OFF
-                              </span>
-                              <p className="text-sm text-gray-600 line-through">
-                                ₹{formatPrice(item.price * 2)}
-                              </p>
-                            </div>
+                            {typeof item.basePrice === "number" && item.basePrice > item.price && (
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs font-bold text-red-700">
+                                  {Math.round(((item.basePrice - item.price) / item.basePrice) * 100)}% OFF
+                                </span>
+                                <p className="text-sm text-gray-600 line-through">
+                                  ₹{formatPrice(item.basePrice)}
+                                </p>
+                              </div>
+                            )}
                             <p className="text-lg font-bold text-red-700">
                                 ₹{formatPrice(item.price)}
                               </p>
@@ -259,7 +271,7 @@ export function CartDrawer() {
                   </div>
 
                   {/* Suggestions Section - Show if 1 item & Flag Enabled */}
-                  {process.env.NEXT_PUBLIC_ENABLE_SURPRISE_DISCOUNT === 'true' && totalQuantity === 1 && suggestions.length > 0 && (
+                  {nextOffer && suggestions.length > 0 && (
                     <motion.div 
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -275,8 +287,8 @@ export function CartDrawer() {
                             <div className="flex-1 min-w-0">
                               <p className="text-[13px] font-bold text-gray-900 line-clamp-1">{p.name}</p>
                               <div className="flex items-center gap-2 mt-1">
-                                <p className="text-sm font-bold text-red-600">₹{formatPrice(p.variants[0].price * 0.5)}</p>
-                                <p className="text-[10px] text-gray-400 line-through">₹{formatPrice(p.variants[0].price)}</p>
+                                <p className="text-sm font-bold text-red-600">₹{formatPrice(priceFor(p.id, p.variants[0].price).price)}</p>
+                                {priceFor(p.id, p.variants[0].price).savings > 0 && <p className="text-[10px] text-gray-400 line-through">₹{formatPrice(p.variants[0].price)}</p>}
                               </div>
                             </div>
                             <motion.button
@@ -290,7 +302,7 @@ export function CartDrawer() {
                                   variantId: variant.id,
                                   productName: p.name,
                                   size: variant.size,
-                                  price: variant.price * 0.5,
+                                  price: priceFor(p.id, variant.price).price,
                                   quantity: 1,
                                   image: p.images[0],
                                   slug: p.slug,
@@ -322,16 +334,13 @@ export function CartDrawer() {
                     <span>Price</span>
                     <span>₹{formatPrice(getSubtotal())}</span>
                   </div>
-                  {getSurpriseDiscount() > 0 && (
-                    <div className="flex justify-between text-sm font-semibold text-green-600 bg-green-50 p-2 rounded-lg -mx-2">
-                      <span>
-                        🎉 Surprise Discount (
-                        {totalQuantity} x
-                        ₹25)
-                      </span>
-                      <span>-₹{formatPrice(getSurpriseDiscount())}</span>
-                    </div>
-                  )}
+                  {getSurpriseDiscount() > 0 &&
+                    (cartOffers.length > 0 ? cartOffers : [{ id: "discount", name: "Surprise Discount", amount: getSurpriseDiscount() }]).map((o) => (
+                      <div key={o.id} className="flex justify-between text-sm font-semibold text-green-600 bg-green-50 p-2 rounded-lg -mx-2">
+                        <span>🎉 {o.name}</span>
+                        <span>-₹{formatPrice(o.amount)}</span>
+                      </div>
+                    ))}
                 </div>
 
                 {/* Total */}
