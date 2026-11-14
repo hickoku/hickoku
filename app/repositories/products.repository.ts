@@ -17,8 +17,12 @@ const client = new DynamoDBClient({
 const docClient = DynamoDBDocumentClient.from(client);
 
 // Table Names from .env or default to new clean names
-const PRODUCTS_TABLE = "products";
-const VARIANTS_TABLE = "product_variants";
+// Table is auto-selected by APP_ENV (same rule as orders):
+//   APP_ENV=prod  → "products" / "product_variants"
+//   otherwise     → "products-stage" / "product_variants-stage"
+const IS_PROD = process.env.APP_ENV === "prod";
+const PRODUCTS_TABLE = IS_PROD ? "products" : "products-stage";
+const VARIANTS_TABLE = IS_PROD ? "product_variants" : "product_variants-stage";
 
 export interface ProductVariant {
   id: string; // Variant ID

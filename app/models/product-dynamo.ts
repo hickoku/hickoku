@@ -28,7 +28,7 @@ export async function createProduct(product: Record<string, any>) {
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 
 const client = new DynamoDBClient({ region: process.env.AWS_REGION || "ap-southeast-2" });
-const TABLE_NAME = 'products';
+const TABLE_NAME = process.env.APP_ENV === 'prod' ? 'products' : 'products-stage';
 
 export async function getAllProducts({ category, name }: { category?: string; name?: string }) {
   const params: any = {
