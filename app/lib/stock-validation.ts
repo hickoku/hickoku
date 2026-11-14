@@ -28,7 +28,8 @@ export async function validateCartItemStock(
 
         const variant = product.variants.find(v => v.id === item.variantId);
 
-        if (!variant) {
+        // Hidden in the admin panel → treat as unavailable (cart shows "Out of stock")
+        if (!variant || product.hidden || variant.status === false) {
             return {
                 isValid: false,
                 availableQuantity: 0,

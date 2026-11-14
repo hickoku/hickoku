@@ -25,7 +25,7 @@ async function priceOrder(items: OrderItem[]) {
         if (!products.has(pid)) products.set(pid, await getProductWithVariant(pid));
         const product = products.get(pid);
         const variant = product?.variants.find((v) => v.sku === item.sku) || product?.variants.find((v) => String(v.id) === String(item.variantId));
-        if (!product || !variant) throw new PriceError(`${item.productName || item.sku} is no longer available`);
+        if (!product || !variant || product.hidden || variant.status === false) throw new PriceError(`${item.productName || item.sku} is no longer available`);
         const p = priceProduct(Number(variant.price), pid, offers);
         for (const a of p.applied) {
             const prev = productOffers.get(a.id);

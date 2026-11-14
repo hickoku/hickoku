@@ -49,6 +49,7 @@ export interface Product {
   images: string[];
   slug: string;
   status: string;
+  hidden?: boolean; // true when the product is switched off in the admin panel (status false)
   basePrice: number;
   variants: ProductVariant[]; // Changed from single 'variant' to array
 }
@@ -189,6 +190,7 @@ export async function getProductWithVariant(
       shortDesc: v.shortDesc,
       desc: v.desc,
       characterstics: Array.from(v.characterstics || v.characteristics || []),
+      status: v.status !== undefined ? v.status : true,
     }));
 
     return {
@@ -201,6 +203,7 @@ export async function getProductWithVariant(
       images: parent.images,
       slug: parent.slug,
       status: parent.status || "active",
+      hidden: parent.status === false,
       basePrice: parent.basePrice,
       variants: variants,
     };
@@ -232,6 +235,8 @@ export async function getProductBySlug(
     if (!productResponse.Items || productResponse.Items.length === 0)
       return null;
     const parent = productResponse.Items[0];
+    // Hidden in the admin panel → behaves as if it doesn't exist (product page shows 404)
+    if (parent.status === false) return null;
     const productId = parent.id;
 
     // 2. Get Variants (Query GSI)
@@ -260,7 +265,9 @@ export async function getProductBySlug(
       desc: v.desc,
       characterstics: Array.from(v.characterstics || v.characteristics || []),
       status: v.status !== undefined ? v.status : true,
-    }));
+    })).filter((v) => v.status !== false); // hidden sizes are not shown
+
+    if (variants.length === 0) return null;
 
     return {
       id: parent.id,

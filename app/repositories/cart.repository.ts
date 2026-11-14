@@ -138,6 +138,11 @@ export async function addToCart(
             throw new Error('Variant not found');
         }
 
+        // Hidden in the admin panel (whole product or this size) → can't be added
+        if (product.hidden || variant.status === false) {
+            throw new Error('Product not found');
+        }
+
         // Check stock
         if (variant.inventoryStatus !== 'IN_STOCK' && variant.inventoryStatus !== 'in_stock') {
             // Handle both cases because migration uses IN_STOCK (from string?) or boolean?
