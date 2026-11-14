@@ -78,6 +78,7 @@ export interface Order {
     items: OrderItem[];
 
     // Pricing
+    appliedOffers?: { id: string; name: string; amount: number; level?: "cart" }[]; // offers used, from the admin Offers page
     subtotal: number; // in paise
     surpriseDiscount?: number; // in paise
     tax: number; // in paise

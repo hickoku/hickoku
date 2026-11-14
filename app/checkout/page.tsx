@@ -24,6 +24,7 @@ function CartSummary({
     getTotalPrice,
     getSubtotal,
     getSurpriseDiscount,
+    cartOffers,
     removeFromCart,
     updateQuantity,
   } = useCart();
@@ -158,12 +159,13 @@ function CartSummary({
                   ₹{formatPrice(originalSubtotal)}
                 </span>
               </div>
-              {surpriseDiscount > 0 && (
-                <div className="flex justify-between text-sm font-semibold text-green-600 bg-green-50 p-2 rounded-lg -mx-2">
-                  <span>🎉 Surprise Discount</span>
-                  <span>-₹{formatPrice(surpriseDiscount)}</span>
-                </div>
-              )}
+              {surpriseDiscount > 0 &&
+                (cartOffers.length > 0 ? cartOffers : [{ id: "discount", name: "Surprise Discount", amount: surpriseDiscount }]).map((o) => (
+                  <div key={o.id} className="flex justify-between text-sm font-semibold text-green-600 bg-green-50 p-2 rounded-lg -mx-2">
+                    <span>🎉 {o.name}</span>
+                    <span>-₹{formatPrice(o.amount)}</span>
+                  </div>
+                ))}
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Actual Cost</span>
                 <span className="font-medium">₹{formatPrice(actualCost)}</span>

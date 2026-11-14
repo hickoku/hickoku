@@ -21,6 +21,7 @@ import { Header } from "../../components/Header";
 import { useCart } from "../../hooks/useCart";
 import { Breadcrumbs } from "../../components/Breadcrumbs";
 import { formatPrice } from "../../utils/currency";
+import { useOffers } from "../../context/OffersContext";
 import * as fpixel from "@/lib/fpixel";
 import ProductPageSections from "./ProductPageSections";
 import RelatedProductsCarousel from "./RelatedProductsCarousel";
@@ -61,6 +62,12 @@ interface ProductDetailClientProps {
 export default function ProductDetailClient({ product, relatedProducts = [], initialReviews = [] }: ProductDetailClientProps) {
   const [currentImage, setCurrentImage] = useState(0);
   const { addToCart } = useCart();
+  // Live offers from the admin panel; pr0 = price of the default size after offers
+  const { offers, priceFor } = useOffers();
+  const pr0 = priceFor(product.id, product.variants[0].price);
+  const productOffers = offers
+    .filter((o) => !o.productIds?.length || o.productIds.includes(String(product.id)))
+    .sort((a, b) => (a.level === b.level ? a.sequence - b.sequence : a.level === "product" ? -1 : 1));
   const thumbnailScrollRef = useRef<HTMLDivElement>(null);
   
   const leftSentinelRef = useRef<HTMLDivElement>(null);
@@ -97,7 +104,7 @@ export default function ProductDetailClient({ product, relatedProducts = [], ini
       content_category: product.category,
       content_ids: [product.id],
       content_type: "product",
-      value: product.variants[0].price * 0.5,
+      value: pr0.price,
       currency: "INR",
     });
 
@@ -108,12 +115,12 @@ export default function ProductDetailClient({ product, relatedProducts = [], ini
         event: "view_item",
         ecommerce: {
           currency: "INR",
-          value: product.variants[0].price * 0.5,
+          value: pr0.price,
           items: [
             {
               item_id: product.variants[0].sku || product.id,
               item_name: product.name,
-              price: product.variants[0].price * 0.5,
+              price: pr0.price,
               quantity: 1,
             },
           ],
@@ -299,14 +306,18 @@ export default function ProductDetailClient({ product, relatedProducts = [], ini
                 </p>
                 <div className="flex items-center gap-3">
                   <p className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-700 to-orange-700">
-                    ₹ {formatPrice(product.variants[0].price * 0.5)}
+                    ₹ {formatPrice(pr0.price)}
                   </p>
-                  <p className="text-xl text-gray-600 line-through">
-                    ₹ {formatPrice(product.variants[0].price)}
-                  </p>
-                  <span className="px-3 py-1 text-sm font-bold text-red-700 bg-red-100 rounded-full shadow-sm">
-                    50% OFF
-                  </span>
+                  {pr0.savings > 0 && (
+                    <>
+                      <p className="text-xl text-gray-600 line-through">
+                        ₹ {formatPrice(product.variants[0].price)}
+                      </p>
+                      <span className="px-3 py-1 text-sm font-bold text-red-700 bg-red-100 rounded-full shadow-sm">
+                        {pr0.percentOff}% OFF
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
               <div>
@@ -323,7 +334,8 @@ export default function ProductDetailClient({ product, relatedProducts = [], ini
               </div>
              
 
-              {/* Exclusive Offers Accordion */}
+              {/* Exclusive Offers Accordion (offers from the admin panel) */}
+              {productOffers.length > 0 && (
               <div className="mb-6 border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
                 <button 
                   onClick={() => setIsOffersOpen(!isOffersOpen)}
@@ -344,23 +356,21 @@ export default function ProductDetailClient({ product, relatedProducts = [], ini
                       className="overflow-hidden"
                     >
                       <div className="px-5 py-4 space-y-4 border-t border-gray-100">
-                        <div className="flex gap-3">
-                          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
-                          <p className="text-[13px] text-gray-700 leading-relaxed">
-                            <span className="font-bold">Flat 50% OFF</span> on all products. (Auto-applied)
-                          </p>
-                        </div>
-                        <div className="flex gap-3">
-                          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
-                          <p className="text-[13px] text-gray-700 leading-relaxed">
-                            <span className="font-bold">Multi-Buy Bonus:</span> Buy minimum 2 products and get <span className="font-bold text-amber-700">Flat ₹25 OFF</span> on each item in cart.
-                          </p>
-                        </div>
+                        {productOffers.map((o) => (
+                          <div key={o.id} className="flex gap-3">
+                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                            <p className="text-[13px] text-gray-700 leading-relaxed">
+                              <span className="font-bold">{o.title || o.name}</span>
+                              {o.message ? <>: {o.message}</> : "."} (Auto-applied)
+                            </p>
+                          </div>
+                        ))}
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
+              )}
 
               {/* <div className="space-y-2 text-sm text-gray-600">
                 <p>100% Authentic Products</p>
@@ -515,7 +525,7 @@ export default function ProductDetailClient({ product, relatedProducts = [], ini
                     }
 
                     try {
-                      const discountedPrice = variant.price * 0.5;
+                      const discountedPrice = priceFor(product.id, variant.price).price;
                       await addToCart({
                         sku: variant.sku,
                         productId: product.id,
@@ -549,8 +559,8 @@ export default function ProductDetailClient({ product, relatedProducts = [], ini
                     if (imageUrl && imageUrl.startsWith('/')) {
                       imageUrl = `${window.location.origin}${imageUrl}`;
                     }
-                    const discountedPrice = product.variants[0].price * 0.5;
-                    const message = `Hi, I'm interested in the following product:\n\n*${product.name}*\nPrice: ₹ ${discountedPrice} (50% OFF)\nSize: ${product.variants[0].size}\n\nImage: ${imageUrl}\nLink: ${window.location.href}`;
+                    const discountedPrice = pr0.price;
+                    const message = `Hi, I'm interested in the following product:\n\n*${product.name}*\nPrice: ₹ ${discountedPrice}${pr0.percentOff ? ` (${pr0.percentOff}% OFF)` : ""}\nSize: ${product.variants[0].size}\n\nImage: ${imageUrl}\nLink: ${window.location.href}`;
                     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
                     
                     toast.success("Opening WhatsApp...", {
@@ -634,8 +644,8 @@ export default function ProductDetailClient({ product, relatedProducts = [], ini
                 if (imageUrl && imageUrl.startsWith('/')) {
                   imageUrl = `${window.location.origin}${imageUrl}`;
                 }
-                const discountedPrice = product.variants[0].price * 0.5;
-                const message = `Hi, I'm interested in the following product:\n\n*${product.name}*\nPrice: ₹ ${discountedPrice} (50% OFF)\nSize: ${product.variants[0].size}\n\nImage: ${imageUrl}\nLink: ${window.location.href}`;
+                const discountedPrice = pr0.price;
+                const message = `Hi, I'm interested in the following product:\n\n*${product.name}*\nPrice: ₹ ${discountedPrice}${pr0.percentOff ? ` (${pr0.percentOff}% OFF)` : ""}\nSize: ${product.variants[0].size}\n\nImage: ${imageUrl}\nLink: ${window.location.href}`;
                 const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
                 window.open(whatsappUrl, '_blank');
               }}
@@ -652,7 +662,7 @@ export default function ProductDetailClient({ product, relatedProducts = [], ini
                 const variant = product.variants[0];
                 if (variant.inventoryStatus !== 'IN_STOCK') return;
                 
-                const discountedPrice = variant.price * 0.5;
+                const discountedPrice = priceFor(product.id, variant.price).price;
                 await addToCart({
                   sku: variant.sku,
                   productId: product.id,
@@ -671,7 +681,7 @@ export default function ProductDetailClient({ product, relatedProducts = [], ini
               {product.variants[0].inventoryStatus === 'IN_STOCK' ? (
                 <>
                   ADD TO BAG
-                  <span className="text-[10px] opacity-60 ml-1">| ₹{formatPrice(product.variants[0].price * 0.5)}</span>
+                  <span className="text-[10px] opacity-60 ml-1">| ₹{formatPrice(pr0.price)}</span>
                 </>
               ) : 'OUT OF STOCK'}
             </motion.button>

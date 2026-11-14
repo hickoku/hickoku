@@ -4,6 +4,8 @@ import { getApprovedReviewsByProduct } from "../../models/review-dynamo";
 import ProductDetailClient from "./ProductDetailClient";
 import { notFound } from "next/navigation";
 import { getPDPFaqs } from "./pdpData";
+import { getOffersSafe } from "@/lib/offers/repository";
+import { priceProduct } from "@/lib/offers/engine";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -53,10 +55,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
 
   // Fetch product, related products (with full variant data), and approved reviews in parallel
-  const [product, allProducts, reviews] = await Promise.all([
+  const [product, allProducts, reviews, offers] = await Promise.all([
     getProductBySlug(slug),
     getAllProductsWithVariants(),
     getProductBySlug(slug).then(p => p ? getApprovedReviewsByProduct(p.id) : []),
+    getOffersSafe(),
   ]);
 
   if (!product) notFound();
@@ -95,7 +98,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       '@type': 'Offer',
       url: `${baseUrl}/product/${product.slug}`,
       priceCurrency: 'INR',
-      price: (product.variants?.[0]?.price || product.basePrice || 0) * 0.5,
+      // Price after the offers live right now (Offers page in the admin panel)
+      price: priceProduct(product.variants?.[0]?.price || product.basePrice || 0, String(product.id), offers).price,
       itemCondition: 'https://schema.org/NewCondition',
       availability: product.variants?.some((v: any) => v.stock > 0 || v.inventoryStatus === 'IN_STOCK' || v.inventoryStatus === 'in_stock')
         ? 'https://schema.org/InStock'

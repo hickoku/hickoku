@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { useCart } from "../hooks/useCart";
 import { formatPrice } from "../utils/currency";
+import { useOffers } from "../context/OffersContext";
+import { offerChip } from "@/lib/offers/engine";
 
 export interface SlideProduct {
   id: string;
@@ -36,6 +38,8 @@ interface EnhancedProduct {
   highlight: string;
   price: string;
   salePrice: number;
+  mrp?: number; // price before offers
+  percentOff?: number;
   image: string;
   badge: string;
   tags: string[];
@@ -205,6 +209,7 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
   const [addedId, setAddedId] = useState<string | null>(null);
   const [showStickyBar, setShowStickyBar] = useState(false);
   const { addToCart } = useCart();
+  const { offers, priceFor } = useOffers(); // live offers from the admin panel
   const touchStartX = useRef(0);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -236,7 +241,8 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
     const product = products[idx];
     
     if (product) {
-      const val = Number(product.price.replace(/[^0-9.]/g, "")) * 0.5;
+      const pr = priceFor(product.id, product.price);
+      const val = pr.price;
       return {
         id: product.id,
         name: product.name,
@@ -244,6 +250,8 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
         highlight: product.highlight || fallback.highlight,
         price: product.price,
         salePrice: isNaN(val) || val === 0 ? fallback.salePrice : val,
+        mrp: isNaN(val) || val === 0 ? fallback.salePrice * 2 : pr.original,
+        percentOff: isNaN(val) || val === 0 ? 50 : pr.percentOff,
         image: product.image || fallback.image,
         badge: product.badge || fallback.badge,
         tags: fallback.tags,
@@ -260,7 +268,7 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
       };
     }
     
-    return fallback;
+    return { ...fallback, mrp: fallback.salePrice * 2, percentOff: 50 };
   });
 
   // Find the exact product matching the selected mood/sense
@@ -498,12 +506,12 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                           ₹{formatPrice(activeDesktopProduct.salePrice)}
                         </span>
                         <span className="text-[10px] text-gray-400 font-semibold line-through mt-1.5 leading-none">
-                          MRP: ₹{formatPrice(activeDesktopProduct.salePrice * 2)}
+                          MRP: ₹{formatPrice(activeDesktopProduct.mrp ?? activeDesktopProduct.salePrice)}
                         </span>
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider text-green-800 bg-green-100 border border-green-200 animate-pulse">
-                          🔥 SAVE FLAT 50% TODAY
+                          {activeDesktopProduct.percentOff ? `🔥 SAVE FLAT ${activeDesktopProduct.percentOff}% TODAY` : "⭐ Best seller"}
                         </span>
                         <span className="text-[9px] text-gray-400 font-semibold italic leading-none">
                           ⚡ Free Express Shipping Included
@@ -517,7 +525,7 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                       style={{ minHeight: "48px" }}
                     >
                       <ShoppingBag className="w-4 h-4" />
-                      {addedId === activeDesktopProduct.id ? "Added to Bag ✓" : "Add to Bag — Flat 50% Off"}
+                      {addedId === activeDesktopProduct.id ? "Added to Bag ✓" : activeDesktopProduct.percentOff ? `Add to Bag — Flat ${activeDesktopProduct.percentOff}% Off` : "Add to Bag"}
                     </button>
                   </div>
                 </div>
@@ -528,69 +536,46 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
         </div>
 
         {/* High-Impact Modern Voucher Cards spanning full-width below the 2-column layout */}
+        {offers.length > 0 && (
         <div className="mt-6 space-y-3 pt-4 border-t border-[#B33D14]/10">
           <span className="text-[11px] font-black uppercase tracking-widest text-[#B33D14] flex items-center gap-1.5 justify-center">
             🎁 Active Checkout Benefits (Automatically Applied For You)
           </span>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Voucher Box 1: Flat 50% Off */}
-            <div className="relative rounded-2xl overflow-hidden border border-[#B33D14]/20 bg-white flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-300">
-              <div className="flex items-center gap-5 flex-1">
-                {/* Left Tag Chip (Solid Terracotta Accent) */}
-                <div className="bg-[#B33D14] text-white px-6 py-4 flex flex-col justify-center items-center text-center shrink-0 w-24 border-r border-dashed border-[#FFF9F5]/30">
-                  <span className="text-2xl font-black leading-none">50%</span>
-                  <span className="text-[9px] font-extrabold uppercase tracking-widest mt-1">OFF</span>
-                </div>
-                {/* Center Details */}
-                <div className="py-2 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] font-black uppercase text-[#B33D14] bg-orange-50 px-2.5 py-0.5 rounded">Launch Offer</span>
-                    <span className="text-[10px] font-bold text-green-700 bg-green-50 px-2.5 py-0.5 rounded">Auto-Applied</span>
+            {/* One voucher card per live offer (Offers page in the admin panel) */}
+            {[...offers]
+              .sort((a, b) => (a.level === b.level ? a.sequence - b.sequence : a.level === "product" ? -1 : 1))
+              .map((o, i) => {
+                const chip = offerChip(o);
+                const solid = i % 2 === 0;
+                return (
+                  <div key={o.id} className="relative rounded-2xl overflow-hidden border border-[#B33D14]/20 bg-white flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-300">
+                    <div className="flex items-center gap-5 flex-1">
+                      <div className={`${solid ? "bg-[#B33D14] text-white border-[#FFF9F5]/30" : "bg-orange-100 text-[#B33D14] border-[#B33D14]/20"} px-6 py-4 flex flex-col justify-center items-center text-center shrink-0 w-24 border-r border-dashed`}>
+                        <span className={`${chip.big.length > 4 ? "text-xl" : "text-2xl"} font-black leading-none`}>{chip.big}</span>
+                        <span className="text-[8px] font-extrabold uppercase tracking-widest mt-1">{chip.small}</span>
+                      </div>
+                      <div className="py-2 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[10px] font-black uppercase text-[#B33D14] bg-orange-50 px-2.5 py-0.5 rounded">{o.name}</span>
+                          <span className="text-[10px] font-bold text-green-700 bg-green-50 px-2.5 py-0.5 rounded">Auto-Applied</span>
+                        </div>
+                        <h4 className="text-sm font-black text-gray-900 leading-tight">{o.title || o.name}</h4>
+                        {o.message && <p className="text-xs text-gray-500 font-semibold mt-1 leading-snug">{o.message}</p>}
+                      </div>
+                    </div>
+                    <div className="px-6 shrink-0 hidden sm:block">
+                      <span className="text-[10px] font-black text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-full uppercase tracking-wider">
+                        ✓ {o.level === "cart" && o.minItems ? `On ${o.minItems}+ bottles` : "Active Deal"}
+                      </span>
+                    </div>
                   </div>
-                  <h4 className="text-sm font-black text-gray-900 leading-tight">Flat 50% Limited Launch Promo</h4>
-                  <p className="text-xs text-gray-500 font-semibold mt-1 leading-snug">
-                    Half price automatically calculated in your shopping cart. Free express delivery included.
-                  </p>
-                </div>
-              </div>
-              {/* Right Action Badge */}
-              <div className="px-6 shrink-0 hidden sm:block">
-                <span className="text-[10px] font-black text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-full uppercase tracking-wider">
-                  ✓ Active Deal
-                </span>
-              </div>
-            </div>
-
-            {/* Voucher Box 2: Extra Rs 25 Off */}
-            <div className="relative rounded-2xl overflow-hidden border border-[#B33D14]/20 bg-white flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-300">
-              <div className="flex items-center gap-5 flex-1">
-                {/* Left Tag Chip (Amber Filled Contrast Accent) */}
-                <div className="bg-orange-100 text-[#B33D14] px-6 py-4 flex flex-col justify-center items-center text-center shrink-0 w-24 border-r border-dashed border-[#B33D14]/20">
-                  <span className="text-xl font-black leading-none">₹25</span>
-                  <span className="text-[8px] font-extrabold uppercase tracking-widest mt-1">EXTRA</span>
-                </div>
-                {/* Center Details */}
-                <div className="py-2 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] font-black uppercase text-orange-800 bg-orange-200/30 px-2.5 py-0.5 rounded">Multi-Buy Benefit</span>
-                    <span className="text-[10px] font-bold text-gray-500 bg-gray-50 px-2.5 py-0.5 rounded">Quantity Deal</span>
-                  </div>
-                  <h4 className="text-sm font-black text-gray-900 leading-tight">Buy More, Save More!</h4>
-                  <p className="text-xs text-gray-500 font-semibold mt-1 leading-snug">
-                    Get an additional ₹25 discount per bottle automatically on purchasing 2 or more bottles.
-                  </p>
-                </div>
-              </div>
-              {/* Right Action Badge */}
-              <div className="px-6 shrink-0 hidden sm:block">
-                <span className="text-[10px] font-black text-[#B33D14] bg-orange-50 border border-[#B33D14]/20 px-3 py-1.5 rounded-full uppercase tracking-wider">
-                  ✓ Eligible
-                </span>
-              </div>
-            </div>
+                );
+              })}
           </div>
         </div>
+        )}
       </section>
 
       {/* ── Mobile Adaptive Layout (< 1024px) ──────────────────── */}
@@ -716,7 +701,7 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                           ₹{formatPrice(prod.salePrice)}
                         </span>
                         <span className="text-[8px] text-gray-400 font-semibold line-through mt-0.5 leading-none">
-                          MRP: ₹{formatPrice(prod.salePrice * 2)}
+                          MRP: ₹{formatPrice(prod.mrp ?? prod.salePrice)}
                         </span>
                       </div>
 
@@ -784,7 +769,7 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                   ₹{formatPrice(currentMobileProduct.salePrice)}
                 </span>
                 <span className="text-[10px] text-gray-400 line-through mt-1 leading-none font-semibold">
-                  MRP: ₹{formatPrice(currentMobileProduct.salePrice * 2)}
+                  MRP: ₹{formatPrice(currentMobileProduct.mrp ?? currentMobileProduct.salePrice)}
                 </span>
               </div>
             </div>
@@ -798,7 +783,7 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
               }}
             >
               <ShoppingBag className="w-4 h-4 animate-bounce" />
-              {addedId === currentMobileProduct.id ? "Added to Bag ✓" : "Add to Bag — 50% Off"}
+              {addedId === currentMobileProduct.id ? "Added to Bag ✓" : currentMobileProduct.percentOff ? `Add to Bag — ${currentMobileProduct.percentOff}% Off` : "Add to Bag"}
             </motion.button>
           </div>
         </div>

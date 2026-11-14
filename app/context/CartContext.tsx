@@ -4,6 +4,8 @@ import React, { createContext, useState, useEffect, ReactNode, useCallback } fro
 import { usePathname } from "next/navigation";
 import * as fpixel from "@/lib/fpixel";
 import { newEventId } from "@/lib/tracking/config";
+import { useOffers } from "./OffersContext";
+import type { AppliedOffer } from "@/lib/offers/engine";
 
 export interface CartItem {
   id?: string; // Optional internal ID
@@ -23,7 +25,8 @@ interface CartState {
   items: CartItem[];
   totalItems: number;
   subtotal: number;
-  surpriseDiscount: number;
+  surpriseDiscount: number; // total of cart-level offers (name kept for older orders/emails)
+  cartOffers: AppliedOffer[]; // which cart offers make up surpriseDiscount
   totalPrice: number;
   isOpen: boolean;
   loading: boolean;
@@ -53,6 +56,7 @@ const initialState: CartState = {
   totalItems: 0,
   subtotal: 0,
   surpriseDiscount: 0,
+  cartOffers: [],
   totalPrice: 0,
   isOpen: false,
   loading: true, // Start with loading true
@@ -71,6 +75,7 @@ interface CartProviderProps {
 export function CartProvider({ children }: CartProviderProps) {
   const [state, setState] = useState<CartState>(initialState);
   const pathname = usePathname();
+  const { cartTotals } = useOffers();
 
   // Close cart on navigation
   useEffect(() => {
@@ -124,6 +129,7 @@ export function CartProvider({ children }: CartProviderProps) {
         totalItems: data.totalItems || 0,
         subtotal: data.subtotal || 0,
         surpriseDiscount: data.surpriseDiscount || 0,
+        cartOffers: data.cartOffers || [],
         totalPrice: data.totalPrice || 0,
         sessionId: data.sessionId,
         stockWarnings,
@@ -165,9 +171,9 @@ export function CartProvider({ children }: CartProviderProps) {
         const optimisticSubtotal = optimisticItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         const totalItemsCount = optimisticItems.reduce((sum, item) => sum + item.quantity, 0);
         
-        // Control discount with environment variable flag
-        const isDiscountEnabled = process.env.NEXT_PUBLIC_ENABLE_SURPRISE_DISCOUNT === 'true';
-        const optimisticSurpriseDiscount = (isDiscountEnabled && totalItemsCount > 1) ? totalItemsCount * 25 : 0;
+        // Same offer rules as the server (cart offers from the admin panel)
+        const optimisticTotals = cartTotals(optimisticItems.map((i) => ({ productId: i.productId, price: i.price, quantity: i.quantity })));
+        const optimisticSurpriseDiscount = optimisticTotals.discount;
         
         const optimisticTotalPrice = Math.max(0, optimisticSubtotal - optimisticSurpriseDiscount);
 
@@ -234,6 +240,7 @@ export function CartProvider({ children }: CartProviderProps) {
         totalItems: data.cart.totalItems,
         subtotal: data.cart.subtotal,
         surpriseDiscount: data.cart.surpriseDiscount,
+        cartOffers: data.cart.cartOffers || [],
         totalPrice: data.cart.totalPrice,
         sessionId: data.cart.sessionId,
         loading: false,
@@ -262,9 +269,9 @@ export function CartProvider({ children }: CartProviderProps) {
       const optimisticSubtotal = optimisticItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const totalItemsCount = optimisticItems.reduce((sum, item) => sum + item.quantity, 0);
       
-      // Control discount with environment variable flag
-      const isDiscountEnabled = process.env.NEXT_PUBLIC_ENABLE_SURPRISE_DISCOUNT === 'true';
-      const optimisticSurpriseDiscount = (isDiscountEnabled && totalItemsCount > 1) ? totalItemsCount * 25 : 0;
+      // Same offer rules as the server (cart offers from the admin panel)
+      const optimisticTotals = cartTotals(optimisticItems.map((i) => ({ productId: i.productId, price: i.price, quantity: i.quantity })));
+      const optimisticSurpriseDiscount = optimisticTotals.discount;
       
       const optimisticTotalPrice = Math.max(0, optimisticSubtotal - optimisticSurpriseDiscount);
 
@@ -291,6 +298,7 @@ export function CartProvider({ children }: CartProviderProps) {
         totalItems: data.cart.totalItems,
         subtotal: data.cart.subtotal,
         surpriseDiscount: data.cart.surpriseDiscount,
+        cartOffers: data.cart.cartOffers || [],
         totalPrice: data.cart.totalPrice,
         loading: false,
       }));
@@ -320,9 +328,9 @@ export function CartProvider({ children }: CartProviderProps) {
       const optimisticSubtotal = optimisticItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const totalItemsCount = optimisticItems.reduce((sum, item) => sum + item.quantity, 0);
       
-      // Match backend logic: ₹25 discount per item if 2+ items total
-      const isDiscountEnabled = process.env.NEXT_PUBLIC_ENABLE_SURPRISE_DISCOUNT === 'true';
-      const optimisticSurpriseDiscount = (isDiscountEnabled && totalItemsCount > 1) ? totalItemsCount * 25 : 0;
+      // Same offer rules as the server (cart offers from the admin panel)
+      const optimisticTotals = cartTotals(optimisticItems.map((i) => ({ productId: i.productId, price: i.price, quantity: i.quantity })));
+      const optimisticSurpriseDiscount = optimisticTotals.discount;
       
       const optimisticTotalPrice = Math.max(0, optimisticSubtotal - optimisticSurpriseDiscount);
 
@@ -354,6 +362,7 @@ export function CartProvider({ children }: CartProviderProps) {
         totalItems: data.cart.totalItems,
         subtotal: data.cart.subtotal,
         surpriseDiscount: data.cart.surpriseDiscount,
+        cartOffers: data.cart.cartOffers || [],
         totalPrice: data.cart.totalPrice,
         loading: false,
       }));
@@ -387,6 +396,7 @@ export function CartProvider({ children }: CartProviderProps) {
         totalItems: 0,
         subtotal: 0,
         surpriseDiscount: 0,
+        cartOffers: [],
         totalPrice: 0,
         loading: false,
       }));
