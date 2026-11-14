@@ -45,6 +45,7 @@ export function useCart() {
     error: state.error,
     sessionId: state.sessionId,
     stockWarnings: state.stockWarnings,
+    cartOffers: state.cartOffers, // cart-level offers applied (names + amounts)
     addToCart,
     removeFromCart,
     updateQuantity,

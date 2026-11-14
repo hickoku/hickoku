@@ -2,6 +2,8 @@ import { DynamoDBDocumentClient, QueryCommand, PutCommand, DeleteCommand, BatchW
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { calculateTTL } from '../lib/session';
 import { getProductWithVariant } from './products.repository';
+import { getOffersSafe } from '@/lib/offers/repository';
+import { priceProduct, priceCart, type AppliedOffer } from '@/lib/offers/engine';
 
 const client = new DynamoDBClient({
     region: process.env.AWS_REGION || 'ap-southeast-2',
@@ -19,7 +21,8 @@ export interface CartItem {
     variantId: string; // Added
     productName: string;
     size: string;
-    price: number;
+    price: number; // unit price after product offers
+    basePrice?: number; // variant price before offers (items added before offers moved to the admin don't have it)
     quantity: number;
     image: string;
     slug: string;
@@ -30,7 +33,8 @@ export interface Cart {
     items: CartItem[];
     totalItems: number;
     subtotal: number;
-    surpriseDiscount: number;
+    surpriseDiscount: number; // total of cart-level offers
+    cartOffers: AppliedOffer[];
     totalPrice: number;
     sessionId: string;
 }
@@ -48,7 +52,7 @@ export async function getCart(sessionId: string): Promise<Cart> {
             },
         });
 
-        const response = await docClient.send(queryCommand);
+        const [response, offers] = await Promise.all([docClient.send(queryCommand), getOffersSafe()]);
 
         // Use Promise.all to fetch missing slugs concurrently (legacy repair)
         const items: CartItem[] = await Promise.all((response.Items || []).map(async (item) => {
@@ -71,7 +75,9 @@ export async function getCart(sessionId: string): Promise<Cart> {
                 variantId: item.variantId || `${item.productId}01`, // Fallback for legacy items
                 productName: item.productName,
                 size: item.size,
-                price: item.price,
+                // Re-price with today's offers so scheduled offers start/stop in carts too
+                price: typeof item.basePrice === 'number' ? priceProduct(item.basePrice, item.productId, offers).price : item.price,
+                basePrice: item.basePrice,
                 quantity: item.quantity,
                 image: item.image,
                 slug: slug,
@@ -79,17 +85,16 @@ export async function getCart(sessionId: string): Promise<Cart> {
             };
         }));
 
-        const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-        const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        const surpriseDiscount = totalItems > 1 ? totalItems * 25 : 0; // ₹25 surprise discount per item if multi-item cart
-        const totalPrice = Math.max(0, subtotal - surpriseDiscount);
+        // Cart-level offers (e.g. ₹25 per bottle on 2+ bottles) come from the admin panel
+        const totals = priceCart(items, offers);
 
         return {
             items,
-            totalItems,
-            subtotal,
-            surpriseDiscount,
-            totalPrice,
+            totalItems: totals.totalItems,
+            subtotal: totals.subtotal,
+            surpriseDiscount: totals.discount,
+            cartOffers: totals.applied,
+            totalPrice: totals.total,
             sessionId,
         };
     } catch (error) {
@@ -133,6 +138,11 @@ export async function addToCart(
             throw new Error('Variant not found');
         }
 
+        // Hidden in the admin panel (whole product or this size) → can't be added
+        if (product.hidden || variant.status === false) {
+            throw new Error('Product not found');
+        }
+
         // Check stock
         if (variant.inventoryStatus !== 'IN_STOCK' && variant.inventoryStatus !== 'in_stock') {
             // Handle both cases because migration uses IN_STOCK (from string?) or boolean?
@@ -160,8 +170,9 @@ export async function addToCart(
             throw new Error('Maximum 10 items per product');
         }
 
-        // Use current product price (not the price from request), applying the global 50% discount
-        const currentPrice = variant.price * 0.5;
+        // Use current product price (not the price from request) with the live product offers
+        const offers = await getOffersSafe();
+        const currentPrice = priceProduct(variant.price, item.productId, offers).price;
 
         const putCommand = new PutCommand({
             TableName: 'cart',
@@ -174,6 +185,7 @@ export async function addToCart(
                 productName: item.productName,
                 size: item.size,
                 price: currentPrice,
+                basePrice: variant.price,
                 quantity: newQuantity,
                 image: item.image,
                 slug: item.slug,
@@ -247,6 +259,7 @@ export async function updateQuantity(
                 productName: item.productName,
                 size: item.size,
                 price: item.price,
+                basePrice: variant.price, // getCart re-prices from this with the live offers
                 quantity: quantity,
                 image: item.image,
                 slug: item.slug || product.slug, // Preserve slug

@@ -9,6 +9,17 @@ import { useCart } from "../hooks/useCart";
 import { useLocale } from "../context/LocaleContext";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import Image from "next/image";
+import { useOffers } from "../context/OffersContext";
+import { Offer } from "@/lib/offers/engine";
+
+// Top bar text, built from the first live cart offer so it always matches what the cart applies.
+function bannerFor(o: Offer): { amount: string; rest: string } {
+  const v = Number.isInteger(o.value) ? String(o.value) : o.value.toFixed(2);
+  const amount = o.kind === "percent" ? `${v}% OFF` : `₹${v} OFF`;
+  const what = o.kind === "per_item" ? "on each item" : "your order";
+  const when = (o.minItems ?? 0) > 1 ? ` when you purchase ${o.minItems} or more items` : (o.minSubtotal ?? 0) > 0 ? ` on orders above ₹${o.minSubtotal}` : "";
+  return { amount, rest: `${what}${when}!` };
+}
 
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -18,6 +29,9 @@ export function Header() {
   const { t } = useLocale();
   const cartCount = getCartItemCount();
   const pathname = usePathname();
+  const { offers } = useOffers();
+  const cartOffer = offers.filter((o) => o.level === "cart").sort((a, b) => a.sequence - b.sequence)[0];
+  const banner = cartOffer ? bannerFor(cartOffer) : null;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,11 +52,13 @@ export function Header() {
         className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 flex flex-col"
         initial={{ y: -150, opacity: 0 }}
       >
-        <div className="bg-gray-900 text-white text-xs sm:text-sm font-medium py-2 px-4 text-center tracking-wide w-full">
-          🎉 Enjoy{" "}
-          <span className="text-amber-400 font-bold ml-1">₹25 OFF</span> on each
-          item when you purchase 2 or more items!
-        </div>
+        {banner && (
+          <div className="bg-gray-900 text-white text-xs sm:text-sm font-medium py-2 px-4 text-center tracking-wide w-full">
+            🎉 Enjoy{" "}
+            <span className="text-amber-400 font-bold ml-1">{banner.amount}</span>{" "}
+            {banner.rest}
+          </div>
+        )}
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 w-full">
           <div className="flex items-center justify-between h-full">
             {/* Left - Menu */}

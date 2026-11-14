@@ -13,7 +13,7 @@ const docClient = DynamoDBDocumentClient.from(client);
 
 export async function GET() {
   try {
-    const res = await docClient.send(new ScanCommand({ TableName: "product_variants" }));
+    const res = await docClient.send(new ScanCommand({ TableName: process.env.APP_ENV === "prod" ? "product_variants" : "product_variants-stage" }));
     const keys = new Set<string>();
     res.Items?.forEach(i => Object.keys(i).forEach(k => keys.add(k)));
     

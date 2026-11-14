@@ -23,7 +23,7 @@ declare global {
 export function RazorpayPayment() {
   const context = useContext(CheckoutContext);
   const router = useRouter();
-  const { items, getTotalPrice, getSubtotal, getSurpriseDiscount, clearCart } =
+  const { items, getTotalPrice, getSubtotal, getSurpriseDiscount, clearCart, refreshCart } =
     useCart();
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -75,6 +75,14 @@ export function RazorpayPayment() {
       });
 
       if (!createOrderResponse.ok) {
+        const err = await createOrderResponse.json().catch(() => ({}));
+        if (createOrderResponse.status === 409) {
+          // An offer started/ended or a price changed: reload the cart so the shopper sees the new total
+          await refreshCart();
+          toast.error("Your total has been updated", { description: err.error || "Please review your cart and try again." });
+          setIsProcessing(false);
+          return;
+        }
         throw new Error("Failed to create order");
       }
 

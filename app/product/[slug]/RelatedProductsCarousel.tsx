@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import { motion } from "motion/react";
 import { useCart } from "../../hooks/useCart";
 import { formatPrice } from "../../utils/currency";
+import { useOffers } from "../../context/OffersContext";
 
 interface RelatedProduct {
   id: string;
@@ -21,6 +22,7 @@ interface RelatedProduct {
 export default function RelatedProductsCarousel({ products }: { products: RelatedProduct[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { addToCart } = useCart();
+  const { priceFor } = useOffers();
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
@@ -87,7 +89,8 @@ export default function RelatedProductsCarousel({ products }: { products: Relate
         >
           {products.map((product) => {
             const price = product.variants?.[0]?.price || product.basePrice || 0;
-            const discounted = price * 0.5;
+            const pr = priceFor(product.id, price);
+            const discounted = pr.price;
             const image = product.images?.[0] || "";
 
             return (
@@ -125,9 +128,13 @@ export default function RelatedProductsCarousel({ products }: { products: Relate
                   <Link href={`/product/${product.slug}`}>
                     <h3 className="font-bold text-gray-900 text-sm mb-1.5 hover:text-amber-600 transition-colors line-clamp-1">{product.name}</h3>
                   </Link>
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-[10px] text-red-600 font-extrabold bg-red-50 px-2 py-0.5 rounded-full uppercase tracking-tighter">50% OFF</span>
-                    <span className="text-xs text-gray-400 line-through">₹{formatPrice(price)}</span>
+                  <div className="flex items-center gap-2 mb-4 min-h-[20px]">
+                    {pr.savings > 0 && (
+                      <>
+                        <span className="text-[10px] text-red-600 font-extrabold bg-red-50 px-2 py-0.5 rounded-full uppercase tracking-tighter">{pr.percentOff}% OFF</span>
+                        <span className="text-xs text-gray-400 line-through">₹{formatPrice(price)}</span>
+                      </>
+                    )}
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-black text-gray-900">₹{formatPrice(discounted)}</span>
