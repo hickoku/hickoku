@@ -263,7 +263,7 @@ export async function getProductBySlug(
       isAvailable: v.stock > 0,
       shortDesc: v.shortDesc,
       desc: v.desc,
-      characterstics: Array.from(v.characterstics || v.characteristics || []),
+      characterstics: Array.from<string>(v.characterstics || v.characteristics || []),
       status: v.status !== undefined ? v.status : true,
     })).filter((v) => v.status !== false); // hidden sizes are not shown
 

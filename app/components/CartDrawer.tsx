@@ -205,14 +205,16 @@ export function CartDrawer() {
                             <p className="text-xs text-gray-500 mt-1">
                               {t("cart.sku")}: {item.sku}
                             </p>
-                            <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs font-bold text-red-700">
-                                50% OFF
-                              </span>
-                              <p className="text-sm text-gray-600 line-through">
-                                ₹{formatPrice(item.price * 2)}
-                              </p>
-                            </div>
+                            {typeof item.basePrice === "number" && item.basePrice > item.price && (
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs font-bold text-red-700">
+                                  {Math.round(((item.basePrice - item.price) / item.basePrice) * 100)}% OFF
+                                </span>
+                                <p className="text-sm text-gray-600 line-through">
+                                  ₹{formatPrice(item.basePrice)}
+                                </p>
+                              </div>
+                            )}
                             <p className="text-lg font-bold text-red-700">
                                 ₹{formatPrice(item.price)}
                               </p>

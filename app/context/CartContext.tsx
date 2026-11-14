@@ -14,7 +14,8 @@ export interface CartItem {
   productId: string;
   productName: string;
   size: string;
-  price: number;
+  price: number; // after product offers
+  basePrice?: number; // before offers (from the server cart)
   quantity: number;
   image: string;
   slug: string;
