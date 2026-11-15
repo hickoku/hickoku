@@ -20,3 +20,14 @@ export const event = (name: string, options = {}, eventId?: string) => {
     fbq("track", name, options);
   }
 };
+
+// Non-standard events (e.g. PaymentFailed). Show up under "Custom events" in Events Manager.
+export const customEvent = (name: string, options = {}, eventId?: string) => {
+  const fbq = getFbq();
+  if (!fbq) return;
+  if (eventId) {
+    fbq("trackCustom", name, options, { eventID: eventId });
+  } else {
+    fbq("trackCustom", name, options);
+  }
+};
