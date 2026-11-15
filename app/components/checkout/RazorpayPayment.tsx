@@ -14,10 +14,66 @@ import {
   getDeliveryCharge,
 } from "../../utils/currency";
 
+import * as fpixel from "@/lib/fpixel";
+import { newEventId } from "@/lib/tracking/config";
+
 declare global {
   interface Window {
     Razorpay: any;
   }
+}
+
+type TrackItem = { sku: string; productId: string; productName: string; price: number; quantity: number };
+
+/**
+ * Sends a checkout payment event to GA4 (via GTM dataLayer) and Meta.
+ * - add_payment_info / AddPaymentInfo are standard events.
+ * - payment_failed / payment_cancelled are custom: GTM needs a tag for each, Meta shows them as custom events.
+ */
+function trackPaymentEvent(
+  kind: "add_payment_info" | "payment_failed" | "payment_cancelled",
+  data: { value: number; items: TrackItem[]; orderNumber?: string; reason?: string; errorCode?: string },
+) {
+  if (typeof window === "undefined") return;
+
+  const metaName =
+    kind === "add_payment_info" ? "AddPaymentInfo" : kind === "payment_failed" ? "PaymentFailed" : "PaymentCancelled";
+  const metaData = {
+    currency: "INR",
+    value: data.value,
+    content_type: "product",
+    content_ids: data.items.map((i) => i.productId),
+    contents: data.items.map((i) => ({ id: i.productId, quantity: i.quantity, item_price: i.price })),
+    num_items: data.items.reduce((n, i) => n + (i.quantity || 0), 0),
+    ...(data.orderNumber ? { order_id: data.orderNumber } : {}),
+    ...(data.reason ? { reason: data.reason } : {}),
+    ...(data.errorCode ? { error_code: data.errorCode } : {}),
+  };
+  if (kind === "add_payment_info") {
+    fpixel.event(metaName, metaData, newEventId("api"));
+  } else {
+    fpixel.customEvent(metaName, metaData, newEventId(kind === "payment_failed" ? "pf" : "pc"));
+  }
+
+  const w = window as any;
+  w.dataLayer = w.dataLayer || [];
+  w.dataLayer.push({ ecommerce: null }); // Clear the previous ecommerce object
+  w.dataLayer.push({
+    event: kind,
+    ...(kind === "add_payment_info" ? {} : { payment_failure_reason: data.reason, payment_error_code: data.errorCode }),
+    ecommerce: {
+      currency: "INR",
+      value: data.value,
+      payment_type: "razorpay",
+      ...(data.orderNumber ? { transaction_id: data.orderNumber } : {}),
+      items: data.items.map((i) => ({
+        item_id: i.sku,
+        item_name: i.productName,
+        price: i.price,
+        quantity: i.quantity,
+      })),
+    },
+  });
 }
 
 export function RazorpayPayment() {
@@ -87,6 +143,18 @@ export function RazorpayPayment() {
       }
 
       const orderData = await createOrderResponse.json();
+
+      // Snapshot for tracking (the cart can change after the modal closes)
+      const trackValue = Number(orderData.amount) || total;
+      const trackItems: TrackItem[] = items.map((item) => ({
+        sku: item.sku,
+        productId: item.productId,
+        productName: item.productName,
+        price: item.price,
+        quantity: item.quantity,
+      }));
+      const trackBase = { value: trackValue, items: trackItems, orderNumber: orderData.orderNumber };
+      let lastFailure: { reason?: string; errorCode?: string } | null = null;
 
       // Step 2: Open Razorpay checkout
       const options = {
@@ -184,6 +252,12 @@ export function RazorpayPayment() {
         modal: {
           ondismiss: async function () {
             setIsProcessing(false);
+            // Closed the modal: either gave up after a failed attempt, or cancelled without paying
+            trackPaymentEvent("payment_cancelled", {
+              ...trackBase,
+              reason: lastFailure ? `after_failure: ${lastFailure.reason || "unknown"}` : "user_closed_modal",
+              errorCode: lastFailure?.errorCode,
+            });
             toast.error("Payment cancelled", {
               description: "You can try again when ready",
             });
@@ -202,7 +276,18 @@ export function RazorpayPayment() {
       };
 
       const razorpay = new window.Razorpay(options);
+      // Declined card / UPI failure etc. Razorpay keeps the modal open so the customer can retry,
+      // so this can fire more than once per order.
+      razorpay.on("payment.failed", function (response: any) {
+        const err = response?.error || {};
+        lastFailure = {
+          reason: err.reason || err.description,
+          errorCode: err.code,
+        };
+        trackPaymentEvent("payment_failed", { ...trackBase, ...lastFailure });
+      });
       razorpay.open();
+      trackPaymentEvent("add_payment_info", trackBase);
     } catch (error) {
       console.error("Payment error:", error);
       toast.error("Failed to initiate payment", {
