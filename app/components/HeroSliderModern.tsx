@@ -570,7 +570,7 @@ export function HeroSliderModern({ products = [] }: HeroSliderModernProps) {
                     </div>
                     <div className="px-6 shrink-0 hidden sm:block">
                       <span className="text-[10px] font-black text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-full uppercase tracking-wider">
-                        ✓ {o.level === "cart" && o.minItems ? `On ${o.minItems}+ bottles` : "Active Deal"}
+                        ✓ {o.level === "cart" && o.minItems ? `On ${o.minItems}+ perfumes` : "Active Deal"}
                       </span>
                     </div>
                   </div>

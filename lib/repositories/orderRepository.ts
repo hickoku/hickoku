@@ -33,6 +33,8 @@ export interface OrderItem {
     price: number; // in paise
     image: string;
     total: number; // price * quantity
+    gift?: boolean; // free gift added by an offer (price 0)
+    offerId?: string; // the offer that added the gift
 }
 
 export interface ShippingAddress {
@@ -78,7 +80,9 @@ export interface Order {
     items: OrderItem[];
 
     // Pricing
-    appliedOffers?: { id: string; name: string; amount: number; level?: "cart" }[]; // offers used, from the admin Offers page
+    appliedOffers?: { id: string; name: string; amount: number; level?: "product" | "cart" | "bxgy" | "gift" | "shipping" }[]; // offers used, from the admin Offers page (gift/shipping have amount 0)
+    couponCodes?: string[]; // discount codes that were applied
+    freeShipping?: { offerId: string; name: string } | null; // delivery made free by an offer
     subtotal: number; // in paise
     surpriseDiscount?: number; // in paise
     tax: number; // in paise
@@ -101,6 +105,7 @@ export interface Order {
     tracking?: OrderTrackingContext;
     // Set once the server-side Purchase event has been sent (prevents duplicates)
     purchaseTrackedAt?: string;
+    offerUsageRecordedAt?: string; // set once the order's offer use has been counted
 }
 
 export interface OrderTrackingContext {
@@ -233,6 +238,28 @@ export class OrderRepository {
                     ExpressionAttributeValues: {
                         ":now": new Date().toISOString(),
                     },
+                })
+            );
+            return true;
+        } catch (error: any) {
+            if (error?.name === "ConditionalCheckFailedException") return false;
+            throw error;
+        }
+    }
+
+    /**
+     * Atomically claims the job of counting this order's offer use (usedCount, first order,
+     * once per customer). Returns true only for the first caller, like claimPurchaseTracking.
+     */
+    async claimOfferUsage(orderId: string): Promise<boolean> {
+        try {
+            await docClient.send(
+                new UpdateCommand({
+                    TableName: TABLE_NAME,
+                    Key: { PK: `ORDER#${orderId}`, SK: "METADATA" },
+                    UpdateExpression: "SET offerUsageRecordedAt = :now",
+                    ConditionExpression: "attribute_exists(PK) AND attribute_not_exists(offerUsageRecordedAt)",
+                    ExpressionAttributeValues: { ":now": new Date().toISOString() },
                 })
             );
             return true;
