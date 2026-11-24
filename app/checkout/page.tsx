@@ -6,6 +6,9 @@ import Link from "next/link";
 import { motion } from "motion/react";
 import { CheckoutProvider, CheckoutContext } from "../context/CheckoutContext";
 import { CheckoutFlow } from "../components/checkout/CheckoutFlow";
+import { DiscountCodeBox } from "../components/checkout/DiscountCodeBox";
+import { OfferProgressBar } from "../components/OfferProgressBar";
+import { CheckoutPricingProvider, useCheckoutPricing } from "../context/CheckoutPricingContext";
 import { Header } from "../components/Header";
 import { useCart } from "../hooks/useCart";
 import { ShoppingBag, Trash2, Plus, Minus } from "lucide-react";
@@ -19,24 +22,18 @@ function CartSummary({
 }: {
   defaultExpanded?: boolean;
 }) {
-  const {
-    items,
-    getTotalPrice,
-    getSubtotal,
-    getSurpriseDiscount,
-    cartOffers,
-    removeFromCart,
-    updateQuantity,
-  } = useCart();
+  const { items, removeFromCart, updateQuantity } = useCart();
+  // Server-checked totals: automatic offers, discount codes, first-order offers, free gifts
+  const pricing = useCheckoutPricing();
   const checkoutContext = useContext(CheckoutContext);
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   if (items.length === 0) return null;
 
   const shippingCost = checkoutContext?.state.shippingCost || 0;
-  const originalSubtotal = getSubtotal(); // (a)
-  const surpriseDiscount = getSurpriseDiscount(); // (b)
-  const discountedSubtotal = getTotalPrice(); // a - b (GST-inclusive price)
+  const originalSubtotal = pricing.subtotal; // (a)
+  const surpriseDiscount = pricing.discount; // (b)
+  const discountedSubtotal = pricing.total; // a - b (GST-inclusive price)
 
   // GST-inclusive extraction: price already includes 18% GST
   const actualCost = Number((discountedSubtotal / 1.18).toFixed(2)); // (c) base cost without GST
@@ -139,7 +136,25 @@ function CartSummary({
               </motion.button>
             </motion.div>
           ))}
+          {/* Free gifts added by offers (the server adds them to the order) */}
+          {pricing.gifts.map((g) => (
+            <div key={g.offerId} className="flex gap-3 p-3 bg-orange-50 border border-dashed border-orange-300 rounded-lg">
+              <div className="w-16 h-16 relative rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0">
+                {g.image ? <Image src={g.image} alt={g.productName} fill className="object-cover" /> : <span className="absolute inset-0 flex items-center justify-center text-2xl" aria-hidden="true">🎁</span>}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-900 truncate">{g.productName}</p>
+                <p className="text-xs text-gray-600">{g.size} · Free gift</p>
+                <p className="text-sm font-bold text-green-700 mt-1">FREE</p>
+              </div>
+            </div>
+          ))}
         </div>
+
+        <div className="px-4 pt-4">
+          <OfferProgressBar lines={items.map((i) => ({ productId: i.productId, price: i.price, quantity: i.quantity }))} />
+        </div>
+        <DiscountCodeBox />
 
         {/* Price Breakdown - Toggled by Show/Hide Details */}
         <motion.div
@@ -160,7 +175,7 @@ function CartSummary({
                 </span>
               </div>
               {surpriseDiscount > 0 &&
-                (cartOffers.length > 0 ? cartOffers : [{ id: "discount", name: "Surprise Discount", amount: surpriseDiscount }]).map((o) => (
+                (pricing.offers.length > 0 ? pricing.offers : [{ id: "discount", name: "Surprise Discount", amount: surpriseDiscount }]).map((o) => (
                   <div key={o.id} className="flex justify-between text-sm font-semibold text-green-600 bg-green-50 p-2 rounded-lg -mx-2">
                     <span>🎉 {o.name}</span>
                     <span>-₹{formatPrice(o.amount)}</span>
@@ -187,7 +202,7 @@ function CartSummary({
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Delivery Fee</span>
+                <span className="text-gray-600">Delivery Fee{pricing.freeShipping ? ` · ${pricing.freeShipping.name}` : ""}</span>
                 <span className="font-medium text-green-600">
                   {checkoutContext?.state.shippingLoading ? (
                     <span className="text-gray-400">Calculating...</span>
@@ -323,7 +338,9 @@ function CheckoutPageContent() {
 export default function CheckoutPage() {
   return (
     <CheckoutProvider>
-      <CheckoutPageContent />
+      <CheckoutPricingProvider>
+        <CheckoutPageContent />
+      </CheckoutPricingProvider>
     </CheckoutProvider>
   );
 }

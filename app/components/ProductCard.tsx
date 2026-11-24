@@ -60,7 +60,12 @@ export function ProductCard({
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const { addToCart } = useCart();
-  const pr = useOffers().priceFor(id, price); // live offers from the admin panel
+  const { priceFor, offers } = useOffers();
+  const pr = priceFor(id, price); // live offers from the admin panel
+  // Badge text set on an order offer (e.g. "BUY 2 GET 1") that covers this product
+  const offerBadge = offers
+    .filter((o) => o.level !== "product" && o.badge && (o.eligibility || "everyone") === "everyone" && (!o.productIds?.length || o.productIds.includes(String(id))))
+    .sort((a, b) => a.sequence - b.sequence)[0]?.badge;
 
   return (
     <div
@@ -180,6 +185,9 @@ export function ProductCard({
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-gray-100">
           <div className="flex flex-col items-start gap-1">
+            {offerBadge && (
+              <span className="text-[10px] font-extrabold tracking-wide uppercase text-orange-800 bg-orange-50 border border-dashed border-orange-300 px-2 py-0.5 rounded">{offerBadge}</span>
+            )}
             {pr.savings > 0 && (
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded">{pr.percentOff}% OFF</span>

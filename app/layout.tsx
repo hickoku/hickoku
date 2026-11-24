@@ -6,7 +6,7 @@ import { CartDrawer } from "./components/CartDrawer";
 import { LocaleProvider } from "./context/LocaleContext";
 import { ProductProvider } from "./context/ProductContext";
 import { OffersProvider } from "./context/OffersContext";
-import { getOffersSafe } from "@/lib/offers/repository";
+import { getOffersSafe, publicOffers } from "@/lib/offers/repository";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import FacebookPixel from "./components/FacebookPixel";
@@ -66,7 +66,7 @@ export default async function RootLayout({
 }) {
   // Offers set in the admin panel. Pages built at deploy time get this snapshot; the
   // OffersProvider refreshes it in the browser.
-  const offers = await getOffersSafe();
+  const offers = publicOffers(await getOffersSafe()); // no code-only offers in the page
   return (
     <html lang="en" suppressHydrationWarning>
       <head />

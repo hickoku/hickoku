@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { useLocale } from "../context/LocaleContext";
 import { formatPrice } from "../utils/currency";
 import { useOffers } from "../context/OffersContext";
+import { OfferProgressBar } from "./OfferProgressBar";
+import { offerSteps } from "@/lib/offers/progress";
 import Image from "next/image";
 
 export function CartDrawer() {
@@ -26,9 +28,11 @@ export function CartDrawer() {
     cartOffers,
   } = useCart();
   const { t } = useLocale();
-  const { priceFor, cartTotals } = useOffers();
-  // Next cart offer the shopper can unlock (e.g. "add 1 more for ₹25 off each"), from the admin Offers page
-  const nextOffer = cartTotals(items.map((i) => ({ productId: i.productId, price: i.price, quantity: i.quantity }))).nextOffer;
+  const { priceFor, cartTotals, offers: liveOffers } = useOffers();
+  const cartLines = items.map((i) => ({ productId: i.productId, price: i.price, quantity: i.quantity }));
+  const drawerTotals = cartTotals(cartLines); // free gifts / free delivery lines
+  // An offer still needs more bottles: show "You may also like" picks
+  const nextOffer = offerSteps(cartLines, liveOffers).some((s) => !s.unlocked && s.itemsNeeded > 0);
   const router = useRouter();
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isFetchingSuggestions, setIsFetchingSuggestions] = useState(false);
@@ -109,29 +113,6 @@ export function CartDrawer() {
                 <X className="w-6 h-6" />
               </motion.button>
             </div>
-
-            {/* Nudge towards the next cart offer (set in the admin Offers page) */}
-            {nextOffer && items.length > 0 && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="mx-6 mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl flex items-center gap-3 shadow-sm"
-              >
-                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm">
-                  <span className="text-xl">🎉</span>
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-amber-900">Unlock {nextOffer.offer.name}!</p>
-                  <p className="text-xs text-amber-700">
-                    Add {nextOffer.itemsNeeded} more product{nextOffer.itemsNeeded === 1 ? "" : "s"} to get{" "}
-                    <span className="font-bold">
-                      {nextOffer.offer.kind === "percent" ? `${nextOffer.offer.value}% off` : nextOffer.offer.kind === "per_item" ? `₹${nextOffer.offer.value} off on each product` : `₹${nextOffer.offer.value} off`}
-                    </span>
-                    .
-                  </p>
-                </div>
-              </motion.div>
-            )}
 
             {/* Stock Warnings */}
             {stockWarnings && stockWarnings.length > 0 && (
@@ -270,6 +251,9 @@ export function CartDrawer() {
                     ))}
                   </div>
 
+                  {/* Progress towards the offers set in the admin Offers page */}
+                  <OfferProgressBar lines={cartLines} className="mt-6" />
+
                   {/* Suggestions Section - Show if 1 item & Flag Enabled */}
                   {nextOffer && suggestions.length > 0 && (
                     <motion.div 
@@ -341,6 +325,19 @@ export function CartDrawer() {
                         <span>-₹{formatPrice(o.amount)}</span>
                       </div>
                     ))}
+                  {/* Free gifts and free delivery from the Offers page (added to the order at checkout) */}
+                  {drawerTotals.gifts.map((g) => (
+                    <div key={g.offerId} className="flex justify-between text-sm font-semibold text-orange-700 bg-orange-50 p-2 rounded-lg -mx-2">
+                      <span>🎁 {g.name}</span>
+                      <span>FREE</span>
+                    </div>
+                  ))}
+                  {drawerTotals.freeShipping && (
+                    <div className="flex justify-between text-sm font-semibold text-green-600 bg-green-50 p-2 rounded-lg -mx-2">
+                      <span>🚚 {drawerTotals.freeShipping.name}</span>
+                      <span>Free delivery</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Total */}

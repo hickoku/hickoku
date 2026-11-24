@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckoutContext } from "../../context/CheckoutContext";
+import { useCheckoutPricing } from "../../context/CheckoutPricingContext";
 import { useCart } from "../../hooks/useCart";
 import { CreditCard, Loader } from "lucide-react";
 import { toast } from "sonner";
@@ -79,17 +80,17 @@ function trackPaymentEvent(
 export function RazorpayPayment() {
   const context = useContext(CheckoutContext);
   const router = useRouter();
-  const { items, getTotalPrice, getSubtotal, getSurpriseDiscount, clearCart, refreshCart } =
-    useCart();
+  const { items, clearCart, refreshCart } = useCart();
+  const pricing = useCheckoutPricing(); // server-checked totals incl. discount codes
   const [isProcessing, setIsProcessing] = useState(false);
 
   if (!context) return null;
 
   const { state, dispatch } = context;
 
-  const subtotal = getSubtotal();
-  const surpriseDiscount = getSurpriseDiscount();
-  const discountedSubtotal = getTotalPrice();
+  const subtotal = pricing.subtotal;
+  const surpriseDiscount = pricing.discount;
+  const discountedSubtotal = pricing.total;
   // GST-inclusive: total = discounted subtotal (GST already included in price)
   const total = discountedSubtotal;
 
@@ -127,15 +128,18 @@ export function RazorpayPayment() {
           ),
           shippingCost: state.shippingCost,
           total,
+          codes: pricing.appliedCodes,
         }),
       });
 
       if (!createOrderResponse.ok) {
         const err = await createOrderResponse.json().catch(() => ({}));
         if (createOrderResponse.status === 409) {
-          // An offer started/ended or a price changed: reload the cart so the shopper sees the new total
+          // An offer started/ended, a code stopped working or a price changed:
+          // reload the cart and the checkout price so the shopper sees the new total
           await refreshCart();
-          toast.error("Your total has been updated", { description: err.error || "Please review your cart and try again." });
+          await pricing.requote();
+          toast.error(err.code === "CODE_INVALID" ? "A discount code can't be used" : "Your total has been updated", { description: err.error || "Please review your cart and try again." });
           setIsProcessing(false);
           return;
         }
@@ -159,7 +163,7 @@ export function RazorpayPayment() {
       // Step 2: Open Razorpay checkout
       const options = {
         key: orderData.keyId,
-        amount: convertToPaiseForRazorpay(total),
+        amount: convertToPaiseForRazorpay(Number(orderData.amount) || total), // the server's total
         currency: "INR",
         name: "Hickoku",
         description: `Order ${orderData.orderNumber}`,
@@ -330,7 +334,7 @@ export function RazorpayPayment() {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={handlePayment}
-          disabled={isProcessing}
+          disabled={isProcessing || pricing.quoting}
           className="w-full p-6 border-2 border-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all text-left mb-6 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <div className="flex items-center gap-4">
@@ -372,7 +376,7 @@ export function RazorpayPayment() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handlePayment}
-            disabled={isProcessing}
+            disabled={isProcessing || pricing.quoting}
             className="ml-auto px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
           >
             {isProcessing ? (
