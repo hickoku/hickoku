@@ -1,49 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { orderRepository, OrderItem, ShippingAddress } from "@/lib/repositories/orderRepository";
 import { getTrackingContext } from "@/lib/tracking/requestContext";
-import { getProductWithVariant } from "@/app/repositories/products.repository";
-import { getOffers } from "@/lib/offers/repository";
-import { priceProduct, priceCart, type AppliedOffer } from "@/lib/offers/engine";
-
-const GST_RATE = 18; // prices are GST-inclusive
-
-class PriceError extends Error {}
-
-/**
- * Re-prices the order on the server from the product tables and the live offers, so the
- * amount charged never comes from the browser. Returns the trusted items and totals.
- */
-async function priceOrder(items: OrderItem[]) {
-    const offers = await getOffers({ fresh: true });
-    const products = new Map<string, Awaited<ReturnType<typeof getProductWithVariant>>>();
-    const priced: OrderItem[] = [];
-    const productOffers = new Map<string, AppliedOffer>();
-    for (const item of items) {
-        const qty = Math.floor(Number(item.quantity));
-        if (!Number.isFinite(qty) || qty < 1 || qty > 10) throw new PriceError(`Invalid quantity for ${item.sku}`);
-        const pid = String(item.productId);
-        if (!products.has(pid)) products.set(pid, await getProductWithVariant(pid));
-        const product = products.get(pid);
-        const variant = product?.variants.find((v) => v.sku === item.sku) || product?.variants.find((v) => String(v.id) === String(item.variantId));
-        if (!product || !variant || product.hidden || variant.status === false) throw new PriceError(`${item.productName || item.sku} is no longer available`);
-        const p = priceProduct(Number(variant.price), pid, offers);
-        for (const a of p.applied) {
-            const prev = productOffers.get(a.id);
-            productOffers.set(a.id, { id: a.id, name: a.name, amount: Math.round(((prev?.amount || 0) + a.amount * qty) * 100) / 100 });
-        }
-        priced.push({ ...item, sku: variant.sku, variantId: String(variant.id), quantity: qty, price: p.price, total: Math.round(p.price * qty * 100) / 100 });
-    }
-    const cart = priceCart(priced.map((i) => ({ productId: String(i.productId), price: i.price, quantity: i.quantity })), offers);
-    const tax = Number((cart.total - cart.total / (1 + GST_RATE / 100)).toFixed(2));
-    return {
-        items: priced,
-        subtotal: cart.subtotal,
-        cartDiscount: cart.discount,
-        total: cart.total,
-        tax,
-        appliedOffers: [...productOffers.values(), ...cart.applied.map((a) => ({ ...a, level: "cart" as const }))],
-    };
-}
+import { priceOrder, PriceError } from "@/lib/offers/pricing";
 
 // Use dynamic require for Razorpay to avoid TypeScript issues
 const Razorpay = require("razorpay");
@@ -60,6 +18,7 @@ interface CreateOrderRequest {
     tax: number;
     shippingCost: number;
     total: number;
+    codes?: string[]; // discount codes entered at checkout
 }
 
 export async function POST(request: NextRequest) {
@@ -103,10 +62,20 @@ export async function POST(request: NextRequest) {
         // started/ended or a price changed), stop and ask them to review the new total.
         let pricing: Awaited<ReturnType<typeof priceOrder>>;
         try {
-            pricing = await priceOrder(body.items);
+            pricing = await priceOrder(body.items, body.codes, { email: body.customerEmail, phone: body.customerPhone });
         } catch (e) {
             if (e instanceof PriceError) return NextResponse.json({ error: e.message, code: "ITEM_UNAVAILABLE" }, { status: 409 });
             throw e;
+        }
+        // A code that no longer works (expired, used up, already used by this customer) is an
+        // error the shopper can fix, so say which one rather than just "total changed".
+        const badCode = pricing.codes.find((c) => !c.ok);
+        if (badCode) {
+            return NextResponse.json({ error: `${badCode.code}: ${badCode.message}`, code: "CODE_INVALID", codes: pricing.codes, total: pricing.total }, { status: 409 });
+        }
+        if (pricing.total < 1) {
+            // Razorpay can't take a ₹0 payment (free orders come with the Club release).
+            return NextResponse.json({ error: "Your discounts cover the whole order. Please add another item to check out.", code: "TOTAL_TOO_LOW", total: pricing.total }, { status: 409 });
         }
         if (Math.abs(pricing.total - Number(body.total)) > 0.5) {
             console.warn("Order total mismatch", { client: body.total, server: pricing.total });
@@ -143,6 +112,8 @@ export async function POST(request: NextRequest) {
             subtotal: pricing.subtotal,
             surpriseDiscount: pricing.cartDiscount, // total of cart-level offers
             appliedOffers: pricing.appliedOffers,
+            couponCodes: pricing.codes.filter((c) => c.ok).map((c) => c.code),
+            freeShipping: pricing.freeShipping,
             tax: pricing.tax,
             shippingCost: Math.max(0, Number(body.shippingCost) || 0), // shown as FREE; not added to the total
             total: pricing.total,
