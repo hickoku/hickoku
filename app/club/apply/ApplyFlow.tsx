@@ -30,7 +30,7 @@ type Form = {
   promise: boolean;
 };
 type Address = { firstName: string; lastName: string; phone: string; street: string; city: string; state: string; zipCode: string };
-type Done = { id: string; instagram: string };
+type Done = { id: string; instagram: string; statusToken: string };
 
 const STATES = [
   "Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
@@ -234,7 +234,7 @@ export function ApplyFlow({
         } else setServerError(data.error || "Something went wrong. Please try again.");
         return;
       }
-      setDone({ id: data.id, instagram: data.instagram });
+      setDone({ id: data.id, instagram: data.instagram, statusToken: data.statusToken });
       setStage("done");
       topRef.current?.scrollIntoView({ behavior: "smooth" });
     } catch {
@@ -327,6 +327,10 @@ export function ApplyFlow({
                 </button>
               </div>
               <p className="mt-2 text-sm text-gray-600">Keep this number. Nothing to pay, and your shopping bag is untouched.</p>
+              <Link href={`/club/status/${done.statusToken}`} className="mt-4 inline-flex h-11 px-5 items-center gap-2 rounded-full bg-[#1a0f0a] text-white text-sm font-semibold">
+                Check status <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </Link>
+              <p className="mt-2 text-xs text-gray-500">Your private status page. Bookmark it, or open Hickoku Club → Check status with your WhatsApp number.</p>
             </div>
             <div className="mt-4 rounded-2xl p-6 text-left text-white" style={{ background: TERRACOTTA }}>
               <p className="text-xs font-bold tracking-[0.18em] uppercase opacity-80">Optional · faster review</p>

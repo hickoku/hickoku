@@ -16,7 +16,7 @@ import { BatchGetCommand, DynamoDBDocumentClient, TransactWriteCommand, UpdateCo
 import { getClub, isOpen, type ClubGift } from "./settings";
 import { addDays, dateWindow, todayIST } from "./dates";
 
-const docClient = DynamoDBDocumentClient.from(
+export const docClient = DynamoDBDocumentClient.from(
   new DynamoDBClient({
     region: process.env.AWS_REGION || "ap-south-1",
     credentials: { accessKeyId: process.env.AWS_ACCESS_KEY_ID || "", secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "" },
@@ -31,7 +31,7 @@ export type ClubApplication = {
   pk: string;
   id: string; // HC-1001
   statusToken: string;
-  status: "submitted"; // later: approved, rejected, shipped, posted, featured, not_posted…
+  status: "submitted" | "approving" | "approved" | "rejected"; // review (set by the admin)
   forWhom: "friend" | "self";
   recipientName: string; // whose occasion it is (the applicant's own name when "self")
   occasionId: string;
@@ -48,6 +48,26 @@ export type ClubApplication = {
   address: ClubAddress;
   createdAt: string;
   client?: { ip?: string; userAgent?: string };
+  // Set by the admin (release 5)
+  approvedAt?: string;
+  orderId?: string;
+  awb?: string;
+  rejectedAt?: string;
+  // After the party (release 6)
+  post?: ClubPost;
+  featured?: { at: string; until: string; hidden?: boolean };
+};
+
+/** The Reel proof. state: proof_sent → (admin) verified | fix_requested; or not_posted. */
+export type ClubPost = {
+  state: "proof_sent" | "fix_requested" | "verified" | "not_posted";
+  reelUrl?: string;
+  postedFrom?: string; // Instagram handle the Reel was posted from (applicant or the person celebrating)
+  storyShot?: boolean; // a Story screenshot is stored in the PROOF#<id> row
+  featureConsent?: boolean;
+  submittedAt?: string;
+  fixNote?: string; // what the admin asked them to fix
+  reviewedAt?: string;
 };
 
 export class ClubError extends Error {

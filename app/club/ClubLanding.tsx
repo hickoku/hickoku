@@ -211,6 +211,11 @@ export function ClubLanding({ open, settings, gifts }: { open: boolean; settings
             <span aria-hidden="true">·</span>
             <span>{followers}+ followers</span>
           </p>
+          <p className="mt-3 text-sm">
+            <Link href="/club/status" className="font-semibold underline underline-offset-4">
+              Already applied? Check status →
+            </Link>
+          </p>
           {!open && <p className="mt-3 text-sm text-gray-600">We&apos;re not taking new applications right now. Follow {handle} to hear when we open again.</p>}
         </div>
         <GiftBox gifts={gifts.filter((g) => g.inStock).length ? gifts.filter((g) => g.inStock) : gifts} />
