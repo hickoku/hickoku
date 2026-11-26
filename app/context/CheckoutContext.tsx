@@ -25,6 +25,11 @@ export interface CheckoutState {
   paymentMethod: "razorpay" | null;
   completedSteps: string[];
   isDelhiveryEnabled: boolean;
+  // From /api/checkout/config (admin Settings → Checkout switches)
+  isShippingCharged?: boolean; // add the delivery fee to the total (else shown as FREE)
+  isGeolocationEnabled?: boolean; // "Use Current Location" button
+  flatDeliveryFee?: number; // fee when Delhivery gives no rate
+  configLoaded?: boolean; // pay button waits for this so the total includes the right fee
 }
 
 type CheckoutAction =
@@ -40,6 +45,11 @@ type CheckoutAction =
   | { type: "MARK_STEP_COMPLETED"; payload: string }
   | { type: "SET_SHIPPING_LOADING"; payload: boolean }
   | { type: "SET_DELHIVERY_CONFIG"; payload: boolean }
+  | {
+      type: "SET_CHECKOUT_CONFIG";
+      payload: { enableDelhivery: boolean; chargeShipping: boolean; enableGeolocation: boolean; flatDeliveryFee: number };
+    }
+  | { type: "SET_SERVER_DELIVERY"; payload: { fee: number; charged: boolean } }
   | { type: "RESET_CHECKOUT" };
 
 const initialState: CheckoutState = {
@@ -48,7 +58,7 @@ const initialState: CheckoutState = {
   userEmail: "",
   address: {},
   shippingMethod: "standard", // Default to standard
-  shippingCost: 0, // Defaults to 0 to safely defer to getDeliveryCharge() dynamically
+  shippingCost: 0, // 0 = no Delhivery rate yet; deliveryFee() then uses the flat fee
   shippingLoading: false,
   paymentMethod: null,
   completedSteps: [],
@@ -94,8 +104,30 @@ const checkoutReducer = (
     case "SET_DELHIVERY_CONFIG":
       return { ...state, isDelhiveryEnabled: action.payload };
 
-    case "RESET_CHECKOUT":
-      return initialState;
+    case "SET_CHECKOUT_CONFIG":
+      return {
+        ...state,
+        isDelhiveryEnabled: action.payload.enableDelhivery,
+        isShippingCharged: action.payload.chargeShipping,
+        isGeolocationEnabled: action.payload.enableGeolocation,
+        flatDeliveryFee: action.payload.flatDeliveryFee,
+        // A Delhivery rate saved from an earlier visit no longer applies once Delhivery is off
+        shippingCost: action.payload.enableDelhivery ? state.shippingCost : 0,
+        configLoaded: true,
+      };
+
+    case "SET_SERVER_DELIVERY": // the order step told us the real fee
+      return { ...state, shippingCost: action.payload.fee, isShippingCharged: action.payload.charged };
+
+    case "RESET_CHECKOUT": // keep the switches already read from the server
+      return {
+        ...initialState,
+        isDelhiveryEnabled: state.isDelhiveryEnabled,
+        isShippingCharged: state.isShippingCharged,
+        isGeolocationEnabled: state.isGeolocationEnabled,
+        flatDeliveryFee: state.flatDeliveryFee,
+        configLoaded: state.configLoaded,
+      };
 
     default:
       return state;
@@ -133,7 +165,7 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
           console.log("Migrated shippingCost from paise to rupees:", parsedState.shippingCost);
         }
         
-        return parsedState;
+        return { ...parsedState, configLoaded: false }; // switches are re-read on every visit
       } catch (e) {
         console.error("Failed to parse saved checkout state");
       }
@@ -185,11 +217,25 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
   React.useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const res = await fetch("/api/checkout/config");
+        const res = await fetch("/api/checkout/config", { cache: "no-store" });
         const data = await res.json();
-        dispatch({ type: "SET_DELHIVERY_CONFIG", payload: data.enableDelhivery });
+        dispatch({
+          type: "SET_CHECKOUT_CONFIG",
+          payload: {
+            enableDelhivery: data.enableDelhivery === true,
+            chargeShipping: data.chargeShipping === true,
+            enableGeolocation: data.enableGeolocation === true,
+            flatDeliveryFee: Number(data.flatDeliveryFee) || 50,
+          },
+        });
       } catch (e) {
         console.error("Failed to fetch checkout config", e);
+        // Don't block payment; the server works out the real total and the order step
+        // returns the correct delivery fee if this guess is wrong.
+        dispatch({
+          type: "SET_CHECKOUT_CONFIG",
+          payload: { enableDelhivery: true, chargeShipping: false, enableGeolocation: false, flatDeliveryFee: 50 },
+        });
       }
     };
     fetchConfig();
@@ -200,4 +246,14 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
       {children}
     </CheckoutContext.Provider>
   );
+}
+
+/** Delivery fee shown at checkout: the quoted rate, else the flat fee (₹50). */
+export function deliveryFee(state: CheckoutState): number {
+  return state.shippingCost > 0 ? state.shippingCost : state.flatDeliveryFee || 50;
+}
+
+/** What the customer pays on top of the items: the fee when "Charge shipping" is on, else 0. */
+export function chargedDelivery(state: CheckoutState): number {
+  return state.isShippingCharged ? deliveryFee(state) : 0;
 }

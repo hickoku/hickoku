@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { useContext, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckoutContext } from "../../context/CheckoutContext";
+import { CheckoutContext, deliveryFee, chargedDelivery } from "../../context/CheckoutContext";
 import { useCheckoutPricing } from "../../context/CheckoutPricingContext";
 import { useCart } from "../../hooks/useCart";
 import { CreditCard, Loader } from "lucide-react";
@@ -12,7 +12,6 @@ import Script from "next/script";
 import {
   formatPrice,
   convertToPaiseForRazorpay,
-  getDeliveryCharge,
 } from "../../utils/currency";
 
 import * as fpixel from "@/lib/fpixel";
@@ -91,8 +90,11 @@ export function RazorpayPayment() {
   const subtotal = pricing.subtotal;
   const surpriseDiscount = pricing.discount;
   const discountedSubtotal = pricing.total;
-  // GST-inclusive: total = discounted subtotal (GST already included in price)
-  const total = discountedSubtotal;
+  // Items are GST-inclusive. Delivery is added only when "Charge shipping" is on (admin Settings)
+  // and no free-delivery offer applies.
+  const delivery = pricing.freeShipping ? 0 : chargedDelivery(state);
+  const total = Math.round((discountedSubtotal + delivery) * 100) / 100;
+  const ready = state.configLoaded !== false; // wait for the switches so the total is right
 
   const handlePayment = async () => {
     if (typeof window === "undefined") return;
@@ -126,7 +128,7 @@ export function RazorpayPayment() {
           tax: Number(
             (discountedSubtotal - discountedSubtotal / 1.18).toFixed(2),
           ),
-          shippingCost: state.shippingCost,
+          shippingCost: deliveryFee(state),
           total,
           codes: pricing.appliedCodes,
         }),
@@ -139,6 +141,10 @@ export function RazorpayPayment() {
           // reload the cart and the checkout price so the shopper sees the new total
           await refreshCart();
           await pricing.requote();
+          // The server sends the delivery fee it used, so the next try matches
+          if (err.delivery && typeof err.delivery.fee === "number") {
+            dispatch({ type: "SET_SERVER_DELIVERY", payload: { fee: err.delivery.fee, charged: err.delivery.charged === true } });
+          }
           toast.error(err.code === "CODE_INVALID" ? "A discount code can't be used" : "Your total has been updated", { description: err.error || "Please review your cart and try again." });
           setIsProcessing(false);
           return;
@@ -334,7 +340,7 @@ export function RazorpayPayment() {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={handlePayment}
-          disabled={isProcessing || pricing.quoting}
+          disabled={isProcessing || pricing.quoting || !ready}
           className="w-full p-6 border-2 border-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all text-left mb-6 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <div className="flex items-center gap-4">
@@ -376,7 +382,7 @@ export function RazorpayPayment() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handlePayment}
-            disabled={isProcessing || pricing.quoting}
+            disabled={isProcessing || pricing.quoting || !ready}
             className="ml-auto px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
           >
             {isProcessing ? (

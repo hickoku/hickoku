@@ -4,7 +4,7 @@ import { useEffect, useState, useContext } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { CheckoutProvider, CheckoutContext } from "../context/CheckoutContext";
+import { CheckoutProvider, CheckoutContext, deliveryFee, chargedDelivery } from "../context/CheckoutContext";
 import { CheckoutFlow } from "../components/checkout/CheckoutFlow";
 import { DiscountCodeBox } from "../components/checkout/DiscountCodeBox";
 import { OfferProgressBar } from "../components/OfferProgressBar";
@@ -30,7 +30,10 @@ function CartSummary({
 
   if (items.length === 0) return null;
 
-  const shippingCost = checkoutContext?.state.shippingCost || 0;
+  const checkoutState = checkoutContext?.state;
+  const shippingFee = checkoutState ? deliveryFee(checkoutState) : 50; // shown struck out when free
+  // Added to the total when "Charge shipping" is on (admin Settings) and no free-delivery offer applies
+  const shippingCharged = checkoutState && !pricing.freeShipping ? chargedDelivery(checkoutState) : 0;
   const originalSubtotal = pricing.subtotal; // (a)
   const surpriseDiscount = pricing.discount; // (b)
   const discountedSubtotal = pricing.total; // a - b (GST-inclusive price)
@@ -38,7 +41,9 @@ function CartSummary({
   // GST-inclusive extraction: price already includes 18% GST
   const actualCost = Number((discountedSubtotal / 1.18).toFixed(2)); // (c) base cost without GST
   const gst = Number((discountedSubtotal - actualCost).toFixed(2)); // GST component
-  const total = discountedSubtotal; // Total only includes items (GST-inclusive). Delivery is FREE but shown with scratch-out.
+  // Items are GST-inclusive. Delivery is added only when "Charge shipping" is on (admin Settings);
+  // otherwise it is shown struck out as FREE.
+  const total = Math.round((discountedSubtotal + shippingCharged) * 100) / 100;
 
   return (
     <motion.div
@@ -203,16 +208,18 @@ function CartSummary({
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Delivery Fee{pricing.freeShipping ? ` · ${pricing.freeShipping.name}` : ""}</span>
-                <span className="font-medium text-green-600">
+                <span className={`font-medium ${shippingCharged > 0 ? "text-gray-900" : "text-green-600"}`}>
                   {checkoutContext?.state.shippingLoading ? (
                     <span className="text-gray-400">Calculating...</span>
+                  ) : shippingCharged > 0 ? (
+                    <>₹{formatPrice(shippingCharged)}</>
                   ) : (
                     <>
                       <span
                         style={{ textDecoration: "line-through" }}
                         className="text-gray-400 mr-2"
                       >
-                        ₹{formatPrice(shippingCost > 0 ? shippingCost : 50.0)}
+                        ₹{formatPrice(shippingFee)}
                       </span>
                       FREE
                     </>

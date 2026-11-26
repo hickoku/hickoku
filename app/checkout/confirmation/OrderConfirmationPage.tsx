@@ -164,6 +164,9 @@ export default function OrderConfirmationPage() {
     );
   }
 
+  // GST is on the items only; a charged delivery fee is its own line
+  const itemsTotal = order.shippingCharged ? Math.max(0, order.total - (order.shippingCost || 0)) : order.total;
+
   return (
     <>
       <Header />
@@ -447,7 +450,7 @@ export default function OrderConfirmationPage() {
                 <div className="flex justify-between text-gray-600">
                   <span>Actual Cost</span>
                   <span>
-                    ₹{formatPrice(Number((order.total / 1.18).toFixed(2)))}
+                    ₹{formatPrice(Number((itemsTotal / 1.18).toFixed(2)))}
                   </span>
                 </div>
                 <div className="flex justify-between text-gray-600">
@@ -455,7 +458,7 @@ export default function OrderConfirmationPage() {
                   <span>
                     ₹
                     {formatPrice(
-                      Number((order.total - order.total / 1.18).toFixed(2)),
+                      Number((itemsTotal - itemsTotal / 1.18).toFixed(2)),
                     )}
                   </span>
                 </div>
@@ -473,6 +476,9 @@ export default function OrderConfirmationPage() {
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Delivery Fee</span>
+                  {order.shippingCharged ? (
+                    <span className="font-medium text-gray-900">₹{formatPrice(order.shippingCost)}</span>
+                  ) : (
                   <span className="text-green-600 font-medium">
                     <span
                       style={{ textDecoration: "line-through" }}
@@ -485,6 +491,7 @@ export default function OrderConfirmationPage() {
                     </span>
                     FREE
                   </span>
+                  )}
                 </div>
                 <div className="flex justify-between text-xl font-bold text-gray-900 pt-2 border-t border-gray-200">
                   <span>Total</span>
