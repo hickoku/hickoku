@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDelhiveryShippingCost } from "@/lib/services/delhiveryService";
+import { deliveryFeeFor, GRAMS_PER_BOTTLE } from "@/lib/shipping";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,12 +10,14 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`[Shipping Cost API] Request: pincode=${pincode}, weight=${weight}`);
-    const shippingCost = await getDelhiveryShippingCost(pincode, weight);
+    // Same fee the order will be charged (Delhivery rate, else ₹50)
+    const { fee: shippingCost, charged } = await deliveryFeeFor(pincode, Math.round(Number(weight) / GRAMS_PER_BOTTLE) || 1);
     console.log(`[Shipping Cost API] Result for ${pincode}: ${shippingCost}`);
 
     return NextResponse.json({ 
       success: true, 
       shippingCost,
+      charged,
       mode: "Surface"
     });
   } catch (error: any) {

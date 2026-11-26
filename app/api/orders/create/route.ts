@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { orderRepository, OrderItem, ShippingAddress } from "@/lib/repositories/orderRepository";
 import { getTrackingContext } from "@/lib/tracking/requestContext";
 import { priceOrder, PriceError } from "@/lib/offers/pricing";
+import { deliveryFeeFor } from "@/lib/shipping";
 
 // Use dynamic require for Razorpay to avoid TypeScript issues
 const Razorpay = require("razorpay");
@@ -73,14 +74,30 @@ export async function POST(request: NextRequest) {
         if (badCode) {
             return NextResponse.json({ error: `${badCode.code}: ${badCode.message}`, code: "CODE_INVALID", codes: pricing.codes, total: pricing.total }, { status: 409 });
         }
-        if (pricing.total < 1) {
-            // Razorpay can't take a ₹0 payment (free orders come with the Club release).
-            return NextResponse.json({ error: "Your discounts cover the whole order. Please add another item to check out.", code: "TOTAL_TOO_LOW", total: pricing.total }, { status: 409 });
+        // Delivery: always worked out here, never taken from the browser. Added to the total only
+        // when "Charge shipping" is on in the admin panel and no free-delivery offer applies;
+        // otherwise it is shown struck out as FREE.
+        const delivery = await deliveryFeeFor(
+            body.shippingAddress?.zipCode,
+            pricing.items.filter((i) => !i.gift).reduce((n, i) => n + i.quantity, 0),
+            { fresh: true },
+        );
+        const shippingCharged = delivery.charged && !pricing.freeShipping ? delivery.fee : 0;
+        const grandTotal = Math.round((pricing.total + shippingCharged) * 100) / 100;
+
+        if (grandTotal < 1) {
+            // Razorpay can't take a ₹0 payment.
+            return NextResponse.json({ error: "Your discounts cover the whole order. Please add another item to check out.", code: "TOTAL_TOO_LOW", total: grandTotal }, { status: 409 });
         }
-        if (Math.abs(pricing.total - Number(body.total)) > 0.5) {
-            console.warn("Order total mismatch", { client: body.total, server: pricing.total });
+        if (Math.abs(grandTotal - Number(body.total)) > 0.5) {
+            console.warn("Order total mismatch", { client: body.total, server: grandTotal });
             return NextResponse.json(
-                { error: "Prices or offers have changed. Please review your cart total and try again.", code: "PRICE_CHANGED", total: pricing.total },
+                {
+                    error: "Prices, offers or the delivery fee have changed. Please review your total and try again.",
+                    code: "PRICE_CHANGED",
+                    total: grandTotal,
+                    delivery, // { fee, charged } so the checkout can update
+                },
                 { status: 409 },
             );
         }
@@ -115,8 +132,9 @@ export async function POST(request: NextRequest) {
             couponCodes: pricing.codes.filter((c) => c.ok).map((c) => c.code),
             freeShipping: pricing.freeShipping,
             tax: pricing.tax,
-            shippingCost: Math.max(0, Number(body.shippingCost) || 0), // shown as FREE; not added to the total
-            total: pricing.total,
+            shippingCost: delivery.fee, // server-computed
+            shippingCharged: shippingCharged > 0, // true = included in total; false = shown as FREE
+            total: grandTotal,
             paymentStatus: "pending",
             status: "pending",
             tracking: getTrackingContext(request),
@@ -129,13 +147,13 @@ export async function POST(request: NextRequest) {
         console.log("Key ID:", isProd ? "PROD" : "STAGE");
         console.log("Key Secret exists:", true);
         console.log("Order details:", {
-            amount: pricing.total,
+            amount: grandTotal,
             currency: "INR",
             receipt: orderId,
         });
 
         const razorpayOrder = await razorpay.orders.create({
-            amount: Math.round(pricing.total * 100), // server-computed total, rupees → paise
+            amount: Math.round(grandTotal * 100), // server-computed total, rupees → paise
             currency: "INR",
             receipt: orderId,
             notes: {
@@ -155,7 +173,7 @@ export async function POST(request: NextRequest) {
             orderId,
             orderNumber,
             razorpayOrderId: razorpayOrder.id,
-            amount: pricing.total,
+            amount: grandTotal,
             currency: "INR",
             keyId: MUX_RAZORPAY_KEY_ID,
         });

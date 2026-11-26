@@ -87,6 +87,7 @@ export interface Order {
     surpriseDiscount?: number; // in paise
     tax: number; // in paise
     shippingCost: number; // in paise
+    shippingCharged?: boolean; // true = delivery fee is part of total (admin "Charge shipping"); missing/false = shown as FREE
     total: number; // in paise
 
     // Status

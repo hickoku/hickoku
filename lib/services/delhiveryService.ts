@@ -1,4 +1,5 @@
 import https from "https";
+import { getCheckoutSettings, isDelhiveryOn } from "@/lib/settings/checkout";
 
 /**
  * Makes a raw HTTPS POST request to Delhivery.
@@ -74,9 +75,9 @@ const getDelhiveryConfig = () => {
 };
 
 export const createDelhiveryOrder = async (order: any) => {
-  if (process.env.ENABLE_DELHIVERY !== "true") {
+  if (!(await getCheckoutSettings({ fresh: true })).delhivery) {
     console.log(
-      `[DELHIVERY DISABLED via .env] Skipped logistics sync for Order ${order.orderNumber}`,
+      `[DELHIVERY DISABLED in admin Settings / .env] Skipped logistics sync for Order ${order.orderNumber}`,
     );
     return null;
   }
@@ -175,7 +176,7 @@ export const createDelhiveryOrder = async (order: any) => {
  * Checks if a pincode is serviceable by Delhivery.
  */
 export const checkPincodeServiceability = async (pincode: string) => {
-  if (process.env.ENABLE_DELHIVERY !== "true") return true;
+  if (!(await isDelhiveryOn())) return true;
 
   const { apiKey, baseUrl } = getDelhiveryConfig();
 
@@ -214,7 +215,7 @@ export const checkPincodeServiceability = async (pincode: string) => {
  * Creates a pickup request for a location.
  */
 export const createDelhiveryPickup = async () => {
-  if (process.env.ENABLE_DELHIVERY !== "true") {
+  if (!(await isDelhiveryOn())) {
     console.log("[DELHIVERY DISABLED] Skipped pickup request");
     return { success: true, message: "Disabled via config" };
   }
@@ -263,7 +264,7 @@ export const createDelhiveryPickup = async () => {
  * Cancels a shipment by AWB.
  */
 export const cancelDelhiveryShipment = async (awb: string) => {
-  if (process.env.ENABLE_DELHIVERY !== "true" || !awb) {
+  if (!(await isDelhiveryOn()) || !awb) {
     console.log("[DELHIVERY DISABLED] Skipped cancellation for AWB:", awb);
     return { success: true, status: "Cancelled" };
   }
@@ -318,7 +319,7 @@ export const cancelDelhiveryShipment = async (awb: string) => {
  * @param weightInGrams Weight of shipment in grams
  */
 export const getDelhiveryShippingCost = async (destinationPincode: string, weightInGrams: number = 180) => {
-  if (process.env.ENABLE_DELHIVERY !== "true") return 0;
+  if (!(await isDelhiveryOn())) return 0;
 
   const { apiKey, baseUrl } = getDelhiveryConfig();
 

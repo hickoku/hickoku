@@ -42,6 +42,7 @@ export interface AdminOrderNotificationProps {
   surpriseDiscount?: number;
   tax: number;
   shippingCost: number;
+  shippingCharged?: boolean; // fee included in total (else shown as FREE)
   total: number;
   paymentId?: string;
   razorpayOrderId?: string;
@@ -72,14 +73,17 @@ export const AdminOrderNotification = ({
   surpriseDiscount = 0,
   tax = 0,
   shippingCost = 0,
+  shippingCharged = false,
   total = 0,
   paymentId = "",
   razorpayOrderId = "",
   orderDate = "",
   awb = "",
 }: AdminOrderNotificationProps) => {
-  const actualCost = Number((total / 1.18).toFixed(2));
-  const gst = Number((total - actualCost).toFixed(2));
+  // GST is on the items only; a charged delivery fee is its own line
+  const itemsTotal = shippingCharged ? Math.max(0, total - shippingCost) : total;
+  const actualCost = Number((itemsTotal / 1.18).toFixed(2));
+  const gst = Number((itemsTotal - actualCost).toFixed(2));
 
   return (
     <Html>
@@ -245,6 +249,9 @@ export const AdminOrderNotification = ({
                 <Text style={priceLabel}>Delivery Fee</Text>
               </Column>
               <Column>
+                {shippingCharged ? (
+                  <Text style={priceValue}>{formatPrice(shippingCost)}</Text>
+                ) : (
                 <Text style={freeText}>
                   <span
                     style={{
@@ -257,6 +264,7 @@ export const AdminOrderNotification = ({
                   </span>{" "}
                   FREE
                 </Text>
+                )}
               </Column>
             </Row>
             <Hr style={dottedHr} />

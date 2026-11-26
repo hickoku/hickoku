@@ -13,12 +13,7 @@ export function formatPrice(amount: number | string): string {
     return Number(num).toFixed(2);
 }
 
-export function getDeliveryCharge(): number {
-    if (process.env.ENABLE_SHIPPING === 'false') {
-        return 0;
-    }
-    return IS_DATABASE_IN_PAISE ? 5000 : 50; // ₹50
-}
+// Delivery fee: lib/shipping.ts (server) and deliveryFee() in CheckoutContext (browser).
 
 export function convertToPaiseForRazorpay(amount: number): number {
     if (IS_DATABASE_IN_PAISE) {

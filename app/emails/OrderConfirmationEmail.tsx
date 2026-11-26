@@ -32,6 +32,7 @@ export interface OrderConfirmationEmailProps {
   surpriseDiscount?: number;
   tax: number;
   shippingCost: number;
+  shippingCharged?: boolean; // fee included in total (else shown as FREE)
   total: number;
   trackingUrl: string;
   awb?: string;
@@ -50,11 +51,14 @@ export const OrderConfirmationEmail = ({
   surpriseDiscount = 0,
   tax = 0,
   shippingCost = 0,
+  shippingCharged = false,
   total = 0,
   trackingUrl = "https://www.hickoku.com/order-tracking",
   awb = "",
   cancelUrl = "",
 }: OrderConfirmationEmailProps) => {
+  // GST is on the items only; a charged delivery fee is its own line
+  const itemsTotal = shippingCharged ? Math.max(0, total - shippingCost) : total;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.hickoku.com";
 
   return (
@@ -160,7 +164,7 @@ export const OrderConfirmationEmail = ({
               </Column>
               <Column>
                 <Text style={totalValue}>
-                  {formatPrice(Number((total / 1.18).toFixed(2)))}
+                  {formatPrice(Number((itemsTotal / 1.18).toFixed(2)))}
                 </Text>
               </Column>
             </Row>
@@ -170,7 +174,7 @@ export const OrderConfirmationEmail = ({
               </Column>
               <Column>
                 <Text style={totalValue}>
-                  {formatPrice(Number((total - total / 1.18).toFixed(2)))}
+                  {formatPrice(Number((itemsTotal - itemsTotal / 1.18).toFixed(2)))}
                 </Text>
               </Column>
             </Row>
@@ -198,6 +202,9 @@ export const OrderConfirmationEmail = ({
                 <Text style={totalLabel}>Delivery Fee</Text>
               </Column>
               <Column>
+                {shippingCharged ? (
+                  <Text style={totalValue}>{formatPrice(shippingCost)}</Text>
+                ) : (
                 <Text style={freeValue}>
                   <span
                     style={{
@@ -210,6 +217,7 @@ export const OrderConfirmationEmail = ({
                   </span>{" "}
                   FREE
                 </Text>
+                )}
               </Column>
             </Row>
             <Hr style={dottedHr} />

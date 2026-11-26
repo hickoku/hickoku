@@ -211,7 +211,7 @@ export function AddressForm() {
             Please enter the address where you want your order delivered
           </p>
         </div>
-        {process.env.ENABLE_GEOLOCATION === "true" && (
+        {state.isGeolocationEnabled && ( /* admin Settings → Checkout switches */
           <button
             type="button"
             onClick={getUserLocation}
